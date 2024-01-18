@@ -6,7 +6,7 @@ import { User } from './src/user/entities/user.entity';
 const dataSource = new DataSource({
   type: 'mysql',
   host: 'localhost',
-  port: 3307,
+  port: 3306,
   username: 'newuser',
   password: '0000',
   database: 'newserver',
@@ -34,7 +34,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
   const options: TypeOrmModuleOptions = {
     type: dataSource.options.type as any,
     host: 'localhost',
-    port: 3307,
+    port: 3306,
     username: 'newuser',
     password: '0000',
     database: dataSource.options.database as string,
