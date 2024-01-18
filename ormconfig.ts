@@ -1,7 +1,6 @@
 // ormconfig.ts
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-
-const config: TypeOrmModuleOptions = {
+import { DataSource } from 'typeorm';
+const config = new DataSource({
   type: 'mysql',
   host: 'localhost',
   port: 3307,
@@ -10,12 +9,12 @@ const config: TypeOrmModuleOptions = {
   database: 'newserver',
   synchronize: false,
   migrationsTableName: 'migrations',
-  migrations: ['dist/migrations/*.js'], // 변경
-  entities: ['dist/**/*.entity.js'],
+  migrations: ['src/migrations/**/*{.ts,.js}'],
+  entities: ['src/**/**.entity{.ts,.js}'],
   extra: {
     connectionLimit: 10,
     multipleStatements: true,
   },
-};
+});
 
 export default config;
