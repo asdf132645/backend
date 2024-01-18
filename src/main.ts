@@ -6,7 +6,7 @@ import { TcpServerService } from './services/tcp-server.service';
 
 async function bootstrap() {
   const httpApp = await NestFactory.create(AppModule);
-  await httpApp.listen(3307);
+  await httpApp.listen(3308);
 
   const tcpServerApp =
     await NestFactory.createApplicationContext(TcpServerModule);
