@@ -10,6 +10,7 @@ import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ProInfoModule } from './processinfo/proInfo.module';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
+import { OrderListModule } from  './orderList/orderList.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { CombinedModule } from './combinedProtocol/combined.module';
       useFactory: createTypeOrmOptions,
     }),
     UserModule,
+    OrderListModule,
     ProInfoModule,
     CombinedModule,
   ],
