@@ -12,6 +12,6 @@ export class WBCClassification {
   @Column()
   count: number;
 
-  @Column()
+  @Column('float')
   percent: number;
 }
