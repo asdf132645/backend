@@ -11,6 +11,8 @@ import { ProInfoModule } from './processinfo/proInfo.module';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { OrderListModule } from  './orderList/orderList.module';
+import { RBCModule } from './rbcclassification/rbc.module';
+import { WBCModule } from './wbcclassification/wbc.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { OrderListModule } from  './orderList/orderList.module';
     OrderListModule,
     ProInfoModule,
     CombinedModule,
+    RBCModule,
+    WBCModule,
   ],
   controllers: [AppController],
   providers: [
