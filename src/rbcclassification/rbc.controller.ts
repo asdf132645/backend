@@ -1,7 +1,7 @@
 // rbc.controller.ts
 import { Controller, Get } from '@nestjs/common';
 import { RBCService } from './rbc.service';
-import { RBCClassification } from './entities/rbc-classification.entity';
+import { RBCClassification } from './entities/rbcclassification.entity';
 
 @Controller('rbc')
 export class RBCController {
