@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RBCClassification } from './entities/rbcclassification.entity';
+import { RBCClassification } from './entities/rbc_classification.entity';
 
 @Injectable()
 export class RBCService {
