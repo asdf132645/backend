@@ -7,7 +7,7 @@ import { RBCClassification } from './entities/rbc-classification.entity';
 export class RBCController {
   constructor(private readonly rbcService: RBCService) {}
 
-  @Get()
+  @Get('/getAllRbc')
   findAll(): Promise<RBCClassification[]> {
     return this.rbcService.findAll();
   }

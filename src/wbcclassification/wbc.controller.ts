@@ -7,7 +7,7 @@ import { WBCClassification } from './entities/wbc-classification.entity';
 export class WBCController {
   constructor(private readonly wbcService: WBCService) {}
 
-  @Get()
+  @Get('/getAllWbc')
   findAll(): Promise<WBCClassification[]> {
     return this.wbcService.findAll();
   }
