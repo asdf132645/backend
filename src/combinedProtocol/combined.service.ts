@@ -9,7 +9,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Cache } from 'cache-manager';
 
 @Injectable()
 @WebSocketGateway({
@@ -43,6 +42,7 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
+          // console.log(message);
           this.webSocketGetData(message);
         }
       } catch (e) {
@@ -74,6 +74,7 @@ export class CombinedService
 
       socket.on('data', (data) => {
         this.logger.log(`데이터 수신: ${data}`);
+        // 프론트로 다시 보내기
         this.handleTcpData(data);
       });
 
@@ -97,11 +98,40 @@ export class CombinedService
   handleTcpData(data: any): void {
     const jsonData = data.toString('utf-8');
     if (this.wss) {
-      console.log('tcp가 던짐');
       this.tcpDataGetData(jsonData);
+      // ai tcp 로 던지기
+      // this.sendDataToOtherTcpServer('localhost', 12345, jsonData);
     } else {
       this.logger.error('WebSocketService가 초기화되지 않았습니다.');
     }
+  }
+
+  sendDataToOtherTcpServer(
+    newAddress: string,
+    newPort: number,
+    data: any,
+  ): void {
+    const client = new net.Socket();
+    client.connect(newPort, newAddress, () => {
+      console.log(`다른 TCP 서버로 데이터 전송: ${data}`);
+      client.write(data);
+      client.end();
+    });
+
+    client.on('data', (receivedData) => {
+      // ai tcp 로그에 출력
+      this.logger.log(`ai tcp 데이터 수신: ${receivedData}`);
+      // 웹소켓으로 프론트에다가 던지기
+      this.sendDataToWebSocketClients(receivedData);
+    });
+
+    client.on('close', () => {
+      console.log('다른 TCP 서버와의 연결 종료');
+    });
+
+    client.on('error', (err) => {
+      console.error(`다른 TCP 서버 연결 오류: ${err.message}`);
+    });
   }
 
   webSocketGetData(message: any): void {
@@ -113,7 +143,7 @@ export class CombinedService
   }
 
   tcpDataGetData(data: any): void {
-    this.sendDataToWebSocketClients(data);
+    this.sendDataToWebSocketClients(data); // 웹소켓 실행
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
       this.setupTcpClient('localhost', 11235, data);
@@ -135,9 +165,10 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
+    // console.log('data:', data.payload);
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
-        const serializedData = JSON.stringify(data);
+        const serializedData = JSON.stringify(data.payload);
         this.connectedClient.write(serializedData);
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);

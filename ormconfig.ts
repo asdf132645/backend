@@ -12,7 +12,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
     host: 'localhost',
     port: 3306,
     username: 'root',
-    password: '0000',
+    password: 'uimd5191!',
     database: 'pb_db',
     synchronize: false,
     migrations: ['src/migrations/**/*{.ts,.js}'],
