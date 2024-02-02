@@ -95,47 +95,31 @@ export class CombinedService
     });
   }
 
-  handleTcpData(data: any): void {
-    const jsonData = data.toString('utf-8');
-    if (this.wss) {
-      const jsonArray = this.parseJsonArray(jsonData);
-      console.log(jsonArray);
-      if (Array.isArray(jsonArray)) {
-        for (const item of jsonArray) {
-          // 각 객체를 처리하는 로직
-          this.sendDataToOtherTcpServer('localhost', 11235, item);
-        }
-      } else {
-        // this.logger.error('배열이 아닌 데이터가 수신되었습니다.');
-        this.sendDataToOtherTcpServer('localhost', 11235, jsonData);
-      }
-    } else {
-      this.logger.error('WebSocketService가 초기화되지 않았습니다.');
-    }
-  }
-
   parseJsonArray(data: any): any[] {
-    let jsonArray: any[] = [];
+    const jsonArray: any[] = [];
 
     if (typeof data === 'string') {
       try {
-        // 정상적인 JSON 배열로 파싱
-        const parsedArray = data.split('}{').map((jsonString: string) => {
-          const cleanedString = jsonString.replace(/^{|}$/g, ''); // 중괄호 제거
-          return JSON.parse(`{${cleanedString}}`);
-        });
-
-        jsonArray = parsedArray;
+        const jsonData = JSON.parse(data);
+        jsonArray.push(jsonData);
       } catch (error) {
-        this.logger.error(`parseJsonArray 데이터 파싱 오류: ${error.message}`);
-        // JSON 파싱 실패 시 빈 배열 반환
-        jsonArray = [];
+        this.logger.error(`데이터 파싱 오류: ${error.message}`);
       }
     }
 
     return jsonArray;
   }
 
+  handleTcpData(data: any): void {
+    const jsonData = data.toString('utf-8');
+    if (this.wss) {
+      // this.tcpDataGetData(jsonData);
+      // ai tcp 로 던지기
+      this.sendDataToOtherTcpServer('localhost', 11235, jsonData);
+    } else {
+      this.logger.error('WebSocketService가 초기화되지 않았습니다.');
+    }
+  }
 
   sendDataToOtherTcpServer(
     newAddress: string,
@@ -144,8 +128,8 @@ export class CombinedService
   ): void {
     const client = new net.Socket();
     client.connect(newPort, newAddress, () => {
-      const jsonData = JSON.stringify(data); // 객체를 문자열로 변환
-      client.write(jsonData);
+      // console.log(`다른 TCP 서버로 데이터 전송: ${data}`);
+      client.write(data);
     });
 
     client.on('data', (receivedData) => {
@@ -218,8 +202,7 @@ export class CombinedService
       const newClient = new net.Socket();
       newClient.connect(newPort, newAddress, () => {
         this.connectedClient = newClient;
-        console.log('setupTcpClient');
-        // this.sendDataToEmbeddedServer(data);
+        this.sendDataToEmbeddedServer(data);
       });
 
       newClient.on('data', (data) => {
