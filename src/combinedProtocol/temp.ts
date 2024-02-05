@@ -42,7 +42,6 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          console.log('message', message);
           this.webSocketGetData(message);
         }
       } catch (e) {
@@ -93,21 +92,6 @@ export class CombinedService
     server.listen(port, () => {
       this.logger.log(`TCP 서버 포트 ${port}`);
     });
-  }
-
-  parseJsonArray(data: any): any[] {
-    const jsonArray: any[] = [];
-
-    if (typeof data === 'string') {
-      try {
-        const jsonData = JSON.parse(data);
-        jsonArray.push(jsonData);
-      } catch (error) {
-        this.logger.error(`데이터 파싱 오류: ${error.message}`);
-      }
-    }
-
-    return jsonArray;
   }
 
   handleTcpData(data: any): void {
@@ -163,7 +147,6 @@ export class CombinedService
 
     if (this.wss) {
       this.logger.log('프론트로 다시 보내기');
-      // console.log(data);
       const jsonData = JSON.stringify({ bufferData: data.toString() });
       this.wss.emit('chat', jsonData);
     } else {
@@ -172,14 +155,9 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    console.log(
-      '웹소켓 데이터를 TCP 웹 백엔드에게 전달한다:',
-      typeof data.payload,
-    );
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const serializedData = JSON.stringify(data.payload);
-        console.log('serializedData', serializedData);
         this.connectedClient.write(serializedData);
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
