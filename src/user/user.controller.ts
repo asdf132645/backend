@@ -1,23 +1,56 @@
-// user.controller.ts
-import { Controller, Get, Post, Body } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserDto } from './dto/create-user.dto';
+// src/users/user.controller.ts
 
-@Controller('users')
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  NotFoundException,
+  Query,
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  async findAll(): Promise<UserDto[]> {
-    const users = await this.userService.findAll();
-    return users.map((user) => new UserDto(user));
+  @Post('/register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
 
-  @Post()
-  async create(@Body() userDto: UserDto): Promise<UserDto> {
-    const createdUser = await this.userService.create(userDto);
-    return new UserDto(createdUser);
+  @Get(':userId')
+  async getUser(
+    @Param('userId') userId: string,
+    @Query('password') password: string,
+  ) {
+    try {
+      const user = await this.userService.findOne(userId, password);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      return { success: true, user };
+    } catch (error) {
+      return { success: false, error: error.message || 'Error fetching user' };
+    }
   }
 
-  // 다른 CRUD 엔드포인트들도 추가 가능
+  @Post('login')
+  async loginUser(
+    @Body() { userId, password }: { userId: string; password: string },
+  ) {
+    try {
+      const user = await this.userService.findOne(userId, password);
+      console.log(user);
+      if (!user) {
+        console.log('ss');
+        return { success: false, data: user };
+      }
+      return { user };
+    } catch (error) {
+      return { success: false, error: error.message || 'Login failed' };
+    }
+  }
 }

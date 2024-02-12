@@ -131,7 +131,7 @@ export class CombinedService
       });
 
       newClient.on('data', (data) => {
-        this.logger.log(`업데이트된 클라이언트로부터 데이터 수신: ${data}`);
+        // this.logger.log(`업데이트된 클라이언트로부터 데이터 수신: ${data}`);
         this.handleTcpData(data);
       });
 

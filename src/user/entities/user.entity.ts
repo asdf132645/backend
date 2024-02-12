@@ -1,20 +1,37 @@
-// user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+// src/users/user.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity('users')
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  username: string;
+  @Column({ unique: true })
+  userId: string;
 
   @Column()
-  email: string;
+  password: string;
 
-  // 다른 필드들도 추가 가능
+  @Column()
+  name: string;
 
-  constructor(partial: Partial<User>) {
-    Object.assign(this, partial);
-  }
+  @Column()
+  employeeNo: string;
+
+  @Column()
+  userType: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  subscriptionDate: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  latestDate: Date;
+
+  @Column({ nullable: true })
+  state?: string;
 }

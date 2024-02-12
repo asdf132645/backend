@@ -1,10 +1,10 @@
-export class UserDto {
-  id: number;
-  username: string;
-  email: string;
-  // 다른 필드들도 추가 가능
-
-  constructor(partial: Partial<UserDto>) {
-    Object.assign(this, partial);
-  }
+export class CreateUserDto {
+  userId: string;
+  password: string;
+  name: string;
+  employeeNo: string;
+  userType: string;
+  subscriptionDate: Date;
+  latestDate: Date;
+  state?: string;
 }
