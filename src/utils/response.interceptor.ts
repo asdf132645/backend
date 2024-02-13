@@ -15,9 +15,11 @@ export class ResponseInterceptor implements NestInterceptor {
         const httpResponse = context.switchToHttp().getResponse();
         const success =
           httpResponse.statusCode >= 200 && httpResponse.statusCode < 300;
+        const code = httpResponse.statusCode;
         return {
           success,
           data,
+          code,
         };
       }),
     );
