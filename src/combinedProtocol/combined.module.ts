@@ -2,10 +2,10 @@
 
 import { Module } from '@nestjs/common';
 import { CombinedService } from './combined.service';
-import { Logger } from '@nestjs/common'; // Logger 추가
+import { LoggerService } from '../logger.service';
 
 @Module({
-  providers: [CombinedService,Logger],
-  exports: [CombinedService,Logger],
+  providers: [CombinedService, LoggerService],
+  exports: [CombinedService, LoggerService],
 })
 export class CombinedModule {}

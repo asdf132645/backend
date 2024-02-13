@@ -1,11 +1,8 @@
-// src/users/user.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { compare } from 'bcrypt'; // bcrypt 모듈 추가
 
 @Injectable()
 export class UserService {
@@ -34,12 +31,41 @@ export class UserService {
       ],
     });
 
-    if (user && (await compare(password, user.password))) {
-      // Passwords match
-      return user;
+    if (!user) {
+      console.error('user 존재 안함');
+      return undefined;
     }
 
-    // No user found or password doesn't match
-    return undefined;
+    const passwordMatch = password === user.password;
+
+    if (passwordMatch) {
+      // Passwords match
+      return user;
+    } else {
+      console.error('Password 틀림');
+      return undefined;
+    }
+  }
+
+  async findOneById(userId: string): Promise<User | undefined> {
+    const user = await this.userRepository.findOne({
+      where: { userId },
+      select: [
+        'id',
+        'userId',
+        'name',
+        'employeeNo',
+        'userType',
+        'subscriptionDate',
+        'latestDate',
+      ],
+    });
+
+    if (!user) {
+      console.error('User not found');
+      return undefined;
+    }
+
+    return user;
   }
 }

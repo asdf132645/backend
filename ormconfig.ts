@@ -1,4 +1,3 @@
-
 // ormconfig.ts
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from './src/user/entities/user.entity';
@@ -16,7 +15,13 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
     database: 'pb_db',
     synchronize: false,
     migrations: ['src/migrations/**/*{.ts,.js}'],
-    entities: [User, ProcessInfo, OrderList, RBCClassification, WBCClassification],
+    entities: [
+      User,
+      ProcessInfo,
+      OrderList,
+      RBCClassification,
+      WBCClassification,
+    ],
     extra: {
       connectionLimit: 10,
       multipleStatements: true,

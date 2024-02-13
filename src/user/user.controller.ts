@@ -1,14 +1,6 @@
 // src/users/user.controller.ts
 
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Param,
-  NotFoundException,
-  Query,
-} from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -22,16 +14,14 @@ export class UserController {
   }
 
   @Get(':userId')
-  async getUser(
-    @Param('userId') userId: string,
-    @Query('password') password: string,
-  ) {
+  async getUser(@Param('userId') userId: string) {
     try {
-      const user = await this.userService.findOne(userId, password);
-      if (!user) {
-        throw new NotFoundException('User not found');
+      const user = await this.userService.findOneById(userId);
+      if (user === undefined) {
+        return { user: {}, code: 404 };
+      } else {
+        return { user, code: 200 };
       }
-      return { success: true, user };
     } catch (error) {
       return { success: false, error: error.message || 'Error fetching user' };
     }
@@ -43,11 +33,6 @@ export class UserController {
   ) {
     try {
       const user = await this.userService.findOne(userId, password);
-      console.log(user);
-      if (!user) {
-        console.log('ss');
-        return { success: false, data: user };
-      }
       return { user };
     } catch (error) {
       return { success: false, error: error.message || 'Login failed' };

@@ -1,6 +1,6 @@
 // combined.service.ts
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as net from 'net';
 import { Server, Socket } from 'socket.io';
 import {
@@ -9,6 +9,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { LoggerService } from '../logger.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -23,7 +24,8 @@ export class CombinedService
   connectedClient: net.Socket | null = null;
   private isTcpConnected: boolean = false;
   public count: number = 0; // 요청 처리 횟수를 저장하는 변수 추가
-  constructor(private readonly logger: Logger) {}
+
+  constructor(private readonly logger: LoggerService) {}
 
   afterInit(server: Server) {
     this.wss = server;
@@ -97,14 +99,9 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    // console.log(
-    //   '웹소켓 데이터를 TCP 웹 백엔드에게 전달한다:',
-    //   typeof data.payload,
-    // );
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const serializedData = JSON.stringify(data.payload);
-        // console.log('serializedData', serializedData);
         this.connectedClient.write(serializedData);
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
