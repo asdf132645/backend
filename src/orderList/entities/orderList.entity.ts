@@ -1,7 +1,11 @@
 // orderList.entity.ts
 
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
-import { IsString, IsNumber, IsDate, IsOptional } from 'class-validator';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 @Entity({ name: 'orderList' })
 export class OrderList {
   @PrimaryGeneratedColumn()
@@ -16,7 +20,11 @@ export class OrderList {
   @Column({ name: 'PATIENT_NAME', length: 255, comment: '환자 이름' })
   patientName: string;
 
-  @Column({ name: 'ORDER_DATE', type: 'datetime', comment: '주문 일자 및 시간' })
+  @Column({
+    name: 'ORDER_DATE',
+    type: 'datetime',
+    comment: '주문 일자 및 시간',
+  })
   orderDate: Date;
 
   @CreateDateColumn({ name: 'CREATED_AT', comment: '레코드 생성 시간' })

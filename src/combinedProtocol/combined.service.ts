@@ -46,9 +46,7 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          if (message.type === 'runIngComp') {
-            console.log('message', message);
-          }
+          this.logger.log(message);
           this.webSocketGetData(message);
         }
       } catch (e) {
