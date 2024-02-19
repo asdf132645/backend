@@ -47,7 +47,8 @@
     "swagger-ui-express": "^5.0.0",
     "typeorm": "^0.3.19",
     "winston-daily-rotate-file": "^4.7.1",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "yarn": "^1.22.21"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
