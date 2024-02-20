@@ -9,7 +9,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 
-@ApiTags('user') // Add this decorator to categorize your API under the 'user' tag
+@ApiTags('user')
 @Controller('/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

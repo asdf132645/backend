@@ -5,6 +5,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { createTypeOrmOptions } from '../ormconfig';
 import { UserModule } from './user/user.module';
+import { CellImgAnalyzedModule } from './settings/analysisDatabse/cellImgAnalyzed/cell.module';
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
@@ -20,6 +21,7 @@ import { LoggerService } from './logger.service';
       useFactory: createTypeOrmOptions,
     }),
     UserModule,
+    CellImgAnalyzedModule,
     OrderListModule,
     ProInfoModule,
     CombinedModule,

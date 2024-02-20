@@ -3,13 +3,16 @@ import {
   PrimaryGeneratedColumn,
   Column,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { CellImgAnalyzed } from '../../settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
 
 @Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
-  @ApiProperty({ example: 1, description: 'User ID' })
+  @ApiProperty({ example: 1, description: 'id' })
   id: number;
 
   @Column({ unique: true })
@@ -49,4 +52,8 @@ export class User {
   @Column({ nullable: true })
   @ApiProperty({ example: 'active', description: 'User state', nullable: true })
   state?: string;
+
+  @OneToOne(() => CellImgAnalyzed, (cellImgAnalyzed) => cellImgAnalyzed.user)
+  @JoinColumn({ name: 'userId' })
+  cellImgAnalyzed: CellImgAnalyzed;
 }
