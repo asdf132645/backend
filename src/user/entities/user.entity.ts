@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { CellImgAnalyzed } from '../../settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
+import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
 
 @Entity('user')
 export class User {
@@ -56,4 +57,8 @@ export class User {
   @OneToOne(() => CellImgAnalyzed, (cellImgAnalyzed) => cellImgAnalyzed.user)
   @JoinColumn({ name: 'userId' })
   cellImgAnalyzed: CellImgAnalyzed;
+
+  @OneToOne(() => RbcDegree, (RbcDegree) => RbcDegree.user)
+  @JoinColumn({ name: 'userId' })
+  rbcDegrees: RbcDegree[];
 }

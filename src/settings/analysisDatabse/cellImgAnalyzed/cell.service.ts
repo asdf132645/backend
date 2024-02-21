@@ -12,7 +12,7 @@ export class CellImgAnalyzedService {
     @InjectRepository(CellImgAnalyzed)
     private readonly cellImgAnalyzedRepository: Repository<CellImgAnalyzed>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>, // Inject the User repository
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(dto: CellImgAnalyzedDto): Promise<CellImgAnalyzed> {
@@ -72,7 +72,7 @@ export class CellImgAnalyzedService {
       where: { id },
     });
     if (!entity) {
-      throw new NotFoundException(`Entity with id ${id} not found`);
+      throw new NotFoundException(`id가 ${id}인 사용자를 찾을 수 없습니다`);
     }
     return entity;
   }

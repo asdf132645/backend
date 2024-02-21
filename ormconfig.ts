@@ -2,6 +2,8 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from './src/user/entities/user.entity';
 import { CellImgAnalyzed } from './src/settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
+import { RbcDegree } from './src/settings/analysisDatabse/rbcDegree/rbcDegree.entity';
+import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { ProcessInfo } from './src/processinfo/entities/proinfo.entity';
 import { OrderList } from './src/orderList/entities/orderList.entity';
 import { RBCClassification } from './src/rbcclassification/entities/rbc_classification.entity';
@@ -19,6 +21,8 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
     entities: [
       User,
       CellImgAnalyzed,
+      RbcDegree,
+      Category,
       ProcessInfo,
       OrderList,
       RBCClassification,

@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { createTypeOrmOptions } from '../ormconfig';
 import { UserModule } from './user/user.module';
 import { CellImgAnalyzedModule } from './settings/analysisDatabse/cellImgAnalyzed/cell.module';
+import { RbcDegreeModule } from './settings/analysisDatabse/rbcDegree/rbcDegree.module';
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
@@ -22,6 +23,7 @@ import { LoggerService } from './logger.service';
     }),
     UserModule,
     CellImgAnalyzedModule,
+    RbcDegreeModule,
     OrderListModule,
     ProInfoModule,
     CombinedModule,
