@@ -9,9 +9,13 @@ export class CategoryDto {
   category_nm: string;
   class_id: string;
   class_nm: string;
-  degree: string;
+  degree1: string;
+  degree2: string;
+  degree3: string;
 }
 
 export class UpdateRbcDegreeDto {
-  degree: string;
+  degree1: string;
+  degree2: string;
+  degree3: string;
 }

@@ -1,9 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  CategoryDto,
-  RbcDegreeDto,
-  UpdateRbcDegreeDto,
-} from './dto/rbcDegree.dto';
+import { CategoryDto, RbcDegreeDto } from './dto/rbcDegree.dto';
 import { User } from '../../../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RbcDegree } from './rbcDegree.entity';
@@ -22,9 +18,8 @@ export class RbcDegreeService {
   ) {}
 
   async create(rbcDegreeDto: RbcDegreeDto): Promise<void> {
-    await this.findUserById(rbcDegreeDto.userId);
-
     // RbcDegree 엔터티 생성 및 저장
+    console.log(rbcDegreeDto);
     const rbcDegree = this.rbcDegreeRepository.create(rbcDegreeDto);
     await this.rbcDegreeRepository.save(rbcDegree);
 
@@ -44,12 +39,14 @@ export class RbcDegreeService {
     updateRbcDegreeDto: CategoryDto[],
     userId: number,
   ): Promise<RbcDegreeDto> {
+    console.log('update');
     await this.findUserById(userId);
 
     const existingDegree = await this.rbcDegreeRepository.findOne({
       where: { userId },
       relations: ['categories'],
     });
+    // console.log('uuuuu');
 
     if (!existingDegree) {
       throw new NotFoundException(
@@ -66,7 +63,9 @@ export class RbcDegreeService {
       );
 
       if (existingCategory) {
-        existingCategory.degree = updatedCategory.degree;
+        existingCategory.degree1 = updatedCategory.degree1;
+        existingCategory.degree2 = updatedCategory.degree2;
+        existingCategory.degree3 = updatedCategory.degree3;
       }
     });
 
@@ -119,7 +118,7 @@ export class RbcDegreeService {
     try {
       // Check if user exists
       const user = await this.userRepository.findOne({ where: { id: userId } });
-
+      console.log('findUserById');
       if (!user) {
         throw new NotFoundException(
           `userId가 ${userId}인 사용자를 찾을 수 없습니다`,

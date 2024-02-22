@@ -11,7 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RbcDegreeService } from './rbcDegree.service';
-import { CategoryDto, RbcDegreeDto, UpdateRbcDegreeDto } from "./dto/rbcDegree.dto";
+import { CategoryDto, RbcDegreeDto } from './dto/rbcDegree.dto';
 
 @Controller('rbcDegree')
 export class RbcDegreeController {
@@ -28,7 +28,6 @@ export class RbcDegreeController {
       throw error;
     }
   }
-
   @Put(':userId')
   async update(
     @Param('userId') userId: number,

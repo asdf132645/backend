@@ -12,7 +12,7 @@ import { Category } from './category.entity';
 
 @Entity()
 export class RbcDegree {
-  @PrimaryGeneratedColumn() // 이 부분을 추가하면서 기본 키를 설정합니다.
+  @PrimaryGeneratedColumn()
   id: number;
 
   @OneToMany(() => Category, (category) => category.rbcDegree)
