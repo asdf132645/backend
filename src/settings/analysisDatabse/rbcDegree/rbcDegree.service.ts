@@ -19,7 +19,6 @@ export class RbcDegreeService {
 
   async create(rbcDegreeDto: RbcDegreeDto): Promise<void> {
     // RbcDegree 엔터티 생성 및 저장
-    console.log(rbcDegreeDto);
     const rbcDegree = this.rbcDegreeRepository.create(rbcDegreeDto);
     await this.rbcDegreeRepository.save(rbcDegree);
 
@@ -68,8 +67,6 @@ export class RbcDegreeService {
         existingCategory.degree3 = updatedCategory.degree3;
       }
     });
-
-    console.log(existingDegree.categories);
 
     await this.rbcDegreeRepository.save(existingDegree);
     await this.categoryRepository.save(existingDegree.categories);

@@ -9,7 +9,9 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { CellImgAnalyzed } from '../../settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
 import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
-
+import { WbcCustomClass } from '../../settings/analysisDatabse/wbcCustomClass/wbcCustomClass.entity';
+import { WbcHotKeys } from '../../settings/analysisDatabse/wbcHotKeys/wbcHotKeys.entity';
+import {NormalRange} from  '../../settings/analysisDatabse/normalRange/normalRange.entity';
 @Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
@@ -17,7 +19,7 @@ export class User {
   id: number;
 
   @Column({ unique: true })
-  @ApiProperty({ example: 'honggildong', description: 'User ID' })
+  @ApiProperty({ example: 'honggildong', description: 'User login ID' })
   userId: string;
 
   @Column()
@@ -61,4 +63,16 @@ export class User {
   @OneToOne(() => RbcDegree, (RbcDegree) => RbcDegree.user)
   @JoinColumn({ name: 'userId' })
   rbcDegrees: RbcDegree[];
+
+  @OneToOne(() => WbcCustomClass, (WbcCustomClass) => WbcCustomClass.user)
+  @JoinColumn({ name: 'userId' })
+  wbcCustomClass: WbcCustomClass;
+
+  @OneToOne(() => WbcHotKeys, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  wbcHotKeys: WbcHotKeys;
+
+  @OneToOne(() => WbcHotKeys, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  normalRange: NormalRange;
 }

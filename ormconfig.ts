@@ -3,6 +3,11 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from './src/user/entities/user.entity';
 import { CellImgAnalyzed } from './src/settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
 import { RbcDegree } from './src/settings/analysisDatabse/rbcDegree/rbcDegree.entity';
+import { WbcCustomClass } from './src/settings/analysisDatabse/wbcCustomClass/wbcCustomClass.entity';
+import { WbcHotKeys } from './src/settings/analysisDatabse/wbcHotKeys/wbcHotKeys.entity';
+import { BfHotKeys } from './src/settings/analysisDatabse/bhHotKeys/bfHotKeys.entity';
+import { NormalRange } from './src/settings/analysisDatabse/normalRange/normalRange.entity';
+
 import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { ProcessInfo } from './src/processinfo/entities/proinfo.entity';
 import { OrderList } from './src/orderList/entities/orderList.entity';
@@ -22,6 +27,10 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       User,
       CellImgAnalyzed,
       RbcDegree,
+      WbcCustomClass,
+      WbcHotKeys,
+      BfHotKeys,
+      NormalRange,
       Category,
       ProcessInfo,
       OrderList,

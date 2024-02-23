@@ -7,6 +7,10 @@ import { createTypeOrmOptions } from '../ormconfig';
 import { UserModule } from './user/user.module';
 import { CellImgAnalyzedModule } from './settings/analysisDatabse/cellImgAnalyzed/cell.module';
 import { RbcDegreeModule } from './settings/analysisDatabse/rbcDegree/rbcDegree.module';
+import { WbcCustomClassModule } from './settings/analysisDatabse/wbcCustomClass/wbcCustomClass.module';
+import { WbcHotKeysModule } from './settings/analysisDatabse/wbcHotKeys/wbcHotKeys.module';
+import { NormalRangeModule } from './settings/analysisDatabse/normalRange/normalRange.module';
+import { BfHotKeysModule } from './settings/analysisDatabse/bhHotKeys/bfHotKeys.module';
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
@@ -24,6 +28,10 @@ import { LoggerService } from './logger.service';
     UserModule,
     CellImgAnalyzedModule,
     RbcDegreeModule,
+    WbcCustomClassModule,
+    WbcHotKeysModule,
+    NormalRangeModule,
+    BfHotKeysModule,
     OrderListModule,
     ProInfoModule,
     CombinedModule,
