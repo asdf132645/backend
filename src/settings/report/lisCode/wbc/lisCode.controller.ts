@@ -1,11 +1,11 @@
 import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
-import { LisCode } from './lisCode.service';
+import { LisCodeService } from './lisCode.service';
 import { LisCodeEntity } from './lisCode.entity';
 import { CreateLisCodeDto } from './dto/lisCodeDto';
 
 @Controller('lisCode')
-export class ImagePrintController {
-  constructor(private readonly lisCode: LisCode) {}
+export class LisCodeController {
+  constructor(private readonly lisCode: LisCodeService) {}
 
   @Post('create')
   async create(

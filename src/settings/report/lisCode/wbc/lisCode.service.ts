@@ -5,7 +5,7 @@ import { LisCodeEntity } from './lisCode.entity';
 import { CreateLisCodeDto } from './dto/lisCodeDto'; // 변경된 부분
 
 @Injectable()
-export class LisCode {
+export class LisCodeService {
   // 변경된 부분
   constructor(
     @InjectRepository(LisCodeEntity)

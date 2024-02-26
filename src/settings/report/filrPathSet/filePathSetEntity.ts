@@ -3,26 +3,23 @@ import { User } from '../../../user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
-export class ImagePrintEntity {
+export class FilePathSetEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '' })
-  text: string;
-
-  @Column()
-  value: string;
+  lisHotKey: string;
 
   @Column({ default: '' })
-  code: string;
+  lisFilePath: string;
 
-  @Column({ default: false })
-  checked: boolean;
+  @Column({ default: '' })
+  cbcFilePath: string;
 
   @Column()
   @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
   userId: number;
 
-  @OneToOne(() => User, (userTable) => userTable.imagePrint)
+  @OneToOne(() => User, (userTable) => userTable.filePathSet)
   userTable: User;
 }

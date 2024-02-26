@@ -12,6 +12,13 @@ import { WbcHotKeysModule } from './settings/analysisDatabse/wbcHotKeys/wbcHotKe
 import { NormalRangeModule } from './settings/analysisDatabse/normalRange/normalRange.module';
 import { BfHotKeysModule } from './settings/analysisDatabse/bhHotKeys/bfHotKeys.module';
 import { ImagePrintModule } from './settings/report/imagePrint/imagePrint.module';
+import { LisCodeModule } from './settings/report/lisCode/wbc/lisCode.module';
+import { LisCodeRbcModule } from './settings/report/lisCode/rbc/lisCodeRbc.module';
+import { CbcCodeModule } from './settings/report/cbcCode/cbcCode.module';
+import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModule';
+import { WbcRunCountModule } from './settings/report/runInfoCount/wbcRunCount.module';
+import { MinCountModule } from './settings/report/minCount/minCount.module';
+
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
@@ -34,6 +41,12 @@ import { LoggerService } from './logger.service';
     NormalRangeModule,
     BfHotKeysModule,
     ImagePrintModule,
+    LisCodeModule,
+    LisCodeRbcModule,
+    CbcCodeModule,
+    FilePathSetModule,
+    WbcRunCountModule,
+    MinCountModule,
     OrderListModule,
     ProInfoModule,
     CombinedModule,

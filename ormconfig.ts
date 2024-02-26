@@ -8,7 +8,12 @@ import { WbcHotKeys } from './src/settings/analysisDatabse/wbcHotKeys/wbcHotKeys
 import { BfHotKeys } from './src/settings/analysisDatabse/bhHotKeys/bfHotKeys.entity';
 import { NormalRange } from './src/settings/analysisDatabse/normalRange/normalRange.entity';
 import { ImagePrintEntity } from './src/settings/report/imagePrint/imagePrint.entity';
-
+import { LisCodeEntity } from './src/settings/report/lisCode/wbc/lisCode.entity';
+import { LisCodeRbcEntity } from './src/settings/report/lisCode/rbc/lisCodeRbc.entity';
+import { CbcCodeEntity } from './src/settings/report/cbcCode/cbcCode.entity';
+import { FilePathSetEntity } from './src/settings/report/filrPathSet/filePathSetEntity';
+import { WbcRunCountEntity } from './src/settings/report/runInfoCount/wbcRunCount.entity';
+import { MinCountEntity } from './src/settings/report/minCount/minCount.entity';
 import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { ProcessInfo } from './src/processinfo/entities/proinfo.entity';
 import { OrderList } from './src/orderList/entities/orderList.entity';
@@ -33,6 +38,12 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       BfHotKeys,
       NormalRange,
       ImagePrintEntity,
+      LisCodeEntity,
+      LisCodeRbcEntity,
+      CbcCodeEntity,
+      FilePathSetEntity,
+      WbcRunCountEntity,
+      MinCountEntity,
       Category,
       ProcessInfo,
       OrderList,

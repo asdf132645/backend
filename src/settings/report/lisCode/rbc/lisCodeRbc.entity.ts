@@ -1,28 +1,32 @@
+// LisCodeRbcEntity 수정
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
-import { User } from '../../../user/entities/user.entity';
+import { User } from '../../../../user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
-export class ImagePrintEntity {
+export class LisCodeRbcEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '' })
-  text: string;
-
-  @Column()
-  value: string;
+  categoryId: string;
 
   @Column({ default: '' })
-  code: string;
+  categoryNm: string;
 
-  @Column({ default: false })
-  checked: boolean;
+  @Column({ default: '' })
+  classId: string;
+
+  @Column({ default: '' })
+  classNm: string;
+
+  @Column({ default: '0' })
+  code: string;
 
   @Column()
   @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
   userId: number;
 
-  @OneToOne(() => User, (userTable) => userTable.imagePrint)
+  @OneToOne(() => User, (user) => user.lisCodeRbc)
   userTable: User;
 }

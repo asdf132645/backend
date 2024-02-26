@@ -3,29 +3,26 @@ import { User } from '../../../user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
-export class LisCodeEntity {
-  @PrimaryGeneratedColumn('uuid')
+export class CbcCodeEntity {
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '' })
-  categoryId: string;
+  cd: string;
+
+  @Column()
+  testCd: string;
 
   @Column({ default: '' })
-  categoryNm: string;
+  testNm: string;
 
-  @Column({ default: '' })
-  classId: string;
-
-  @Column({ default: '' })
-  classNm: string;
-
-  @Column({ default: '' })
-  code: string;
+  @Column({ default: false })
+  isSelected: boolean;
 
   @Column()
   @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
   userId: number;
 
-  @OneToOne(() => User, (userTable) => userTable.lisCode)
+  @OneToOne(() => User, (userTable) => userTable.cbcCode)
   userTable: User;
 }

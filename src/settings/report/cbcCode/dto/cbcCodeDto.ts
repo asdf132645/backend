@@ -4,36 +4,34 @@ import {
   IsOptional,
   IsArray,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateLisCodeDto {
+export class CreateCbcCodeDto {
   @IsInt()
   @IsOptional()
   userId?: number;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ListCodeDto)
-  lisCodeItems: ListCodeDto[];
+  @Type(() => CbcCodeItems)
+  cbcCodeItems: CbcCodeItems[];
 }
 
-export class ListCodeDto {
+export class CbcCodeItems {
   @IsInt()
   id: number;
 
   @IsString()
-  categoryId: string;
+  cd: string;
 
   @IsString()
-  categoryNm: string;
+  testCd: string;
 
   @IsString()
-  classId: string;
+  testNm: string;
 
-  @IsString()
-  classNm: string;
-
-  @IsString()
-  code: string;
+  @IsBoolean()
+  isSelected: boolean;
 }

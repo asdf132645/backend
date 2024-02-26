@@ -1,3 +1,4 @@
+// User 엔터티 수정
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -13,7 +14,11 @@ import { WbcCustomClass } from '../../settings/analysisDatabse/wbcCustomClass/wb
 import { WbcHotKeys } from '../../settings/analysisDatabse/wbcHotKeys/wbcHotKeys.entity';
 import { NormalRange } from '../../settings/analysisDatabse/normalRange/normalRange.entity';
 import { ImagePrintEntity } from '../../settings/report/imagePrint/imagePrint.entity';
-import { LisCodeEntity } from "../../settings/report/lisCode/lisCode.entity";
+import { LisCodeEntity } from '../../settings/report/lisCode/wbc/lisCode.entity';
+import { LisCodeRbcEntity } from '../../settings/report/lisCode/rbc/lisCodeRbc.entity';
+import { CbcCodeEntity } from '../../settings/report/cbcCode/cbcCode.entity';
+import { FilePathSetEntity } from '../../settings/report/filrPathSet/filePathSetEntity';
+
 @Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
@@ -85,4 +90,16 @@ export class User {
   @OneToOne(() => LisCodeEntity, { cascade: true })
   @JoinColumn({ name: 'userId' })
   lisCode: LisCodeEntity;
+
+  @OneToOne(() => LisCodeRbcEntity, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  lisCodeRbc: LisCodeRbcEntity;
+
+  @OneToOne(() => CbcCodeEntity, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  cbcCode: CbcCodeEntity;
+
+  @OneToOne(() => FilePathSetEntity, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  filePathSet: FilePathSetEntity;
 }
