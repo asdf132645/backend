@@ -11,7 +11,9 @@ import { CellImgAnalyzed } from '../../settings/analysisDatabse/cellImgAnalyzed/
 import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
 import { WbcCustomClass } from '../../settings/analysisDatabse/wbcCustomClass/wbcCustomClass.entity';
 import { WbcHotKeys } from '../../settings/analysisDatabse/wbcHotKeys/wbcHotKeys.entity';
-import {NormalRange} from  '../../settings/analysisDatabse/normalRange/normalRange.entity';
+import { NormalRange } from '../../settings/analysisDatabse/normalRange/normalRange.entity';
+import { ImagePrintEntity } from '../../settings/report/imagePrint/imagePrint.entity';
+import { LisCodeEntity } from "../../settings/report/lisCode/lisCode.entity";
 @Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
@@ -72,7 +74,15 @@ export class User {
   @JoinColumn({ name: 'userId' })
   wbcHotKeys: WbcHotKeys;
 
-  @OneToOne(() => WbcHotKeys, { cascade: true })
+  @OneToOne(() => NormalRange, { cascade: true })
   @JoinColumn({ name: 'userId' })
   normalRange: NormalRange;
+
+  @OneToOne(() => ImagePrintEntity, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  imagePrint: ImagePrintEntity;
+
+  @OneToOne(() => LisCodeEntity, { cascade: true })
+  @JoinColumn({ name: 'userId' })
+  lisCode: LisCodeEntity;
 }

@@ -45,13 +45,13 @@ export class WbcHotKeysService {
 
   private async updateItem(userId: number, item: any): Promise<WbcHotKeys> {
     const existingWbcHotKeys = await this.wbcHotKeysRepository.findOne({
-      where: { userId, order: item.order },
+      where: { userId, id: item.id },
     });
 
     if (existingWbcHotKeys) {
       await this.wbcHotKeysRepository.update(existingWbcHotKeys.id, item);
       return await this.wbcHotKeysRepository.findOne({
-        where: { userId, order: item.order },
+        where: { userId, id: item.id },
       });
     }
 

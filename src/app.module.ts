@@ -11,6 +11,7 @@ import { WbcCustomClassModule } from './settings/analysisDatabse/wbcCustomClass/
 import { WbcHotKeysModule } from './settings/analysisDatabse/wbcHotKeys/wbcHotKeys.module';
 import { NormalRangeModule } from './settings/analysisDatabse/normalRange/normalRange.module';
 import { BfHotKeysModule } from './settings/analysisDatabse/bhHotKeys/bfHotKeys.module';
+import { ImagePrintModule } from './settings/report/imagePrint/imagePrint.module';
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
@@ -32,6 +33,7 @@ import { LoggerService } from './logger.service';
     WbcHotKeysModule,
     NormalRangeModule,
     BfHotKeysModule,
+    ImagePrintModule,
     OrderListModule,
     ProInfoModule,
     CombinedModule,

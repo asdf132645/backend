@@ -43,13 +43,13 @@ export class NormalRangeService {
 
   private async updateItem(userId: number, item: any): Promise<NormalRange> {
     const existingNormalRange = await this.normalRangeRepository.findOne({
-      where: { userId },
+      where: { userId, num: item.num },
     });
 
     if (existingNormalRange) {
       await this.normalRangeRepository.update(existingNormalRange.userId, item);
       return await this.normalRangeRepository.findOne({
-        where: { userId },
+        where: { userId, num: item.num },
       });
     }
 

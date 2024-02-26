@@ -53,7 +53,7 @@ export class WbcCustomClassService {
 
       // userId와 customNum이 모두 일치하는 엔터티를 찾기 위해 where 옵션을 추가
       await this.wbcCustomClassRepository.update(
-        { userId, customNum: classItem.customNum },
+        { userId, id: classItem.customNum },
         wbcCustomClass,
       );
 

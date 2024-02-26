@@ -7,6 +7,7 @@ import { WbcCustomClass } from './src/settings/analysisDatabse/wbcCustomClass/wb
 import { WbcHotKeys } from './src/settings/analysisDatabse/wbcHotKeys/wbcHotKeys.entity';
 import { BfHotKeys } from './src/settings/analysisDatabse/bhHotKeys/bfHotKeys.entity';
 import { NormalRange } from './src/settings/analysisDatabse/normalRange/normalRange.entity';
+import { ImagePrintEntity } from './src/settings/report/imagePrint/imagePrint.entity';
 
 import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { ProcessInfo } from './src/processinfo/entities/proinfo.entity';
@@ -31,6 +32,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       WbcHotKeys,
       BfHotKeys,
       NormalRange,
+      ImagePrintEntity,
       Category,
       ProcessInfo,
       OrderList,

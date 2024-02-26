@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -46,13 +45,13 @@ export class BfHotKeysService {
 
   private async updateItem(userId: number, item: any): Promise<BfHotKeys> {
     const existingBfHotKeys = await this.bfHotKeysRepository.findOne({
-      where: { userId, order: item.order },
+      where: { userId, id: item.id },
     });
 
     if (existingBfHotKeys) {
       await this.bfHotKeysRepository.update(existingBfHotKeys.id, item);
       return await this.bfHotKeysRepository.findOne({
-        where: { userId, order: item.order },
+        where: { userId, id: item.id },
       });
     }
 
