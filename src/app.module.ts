@@ -24,8 +24,6 @@ import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { OrderListModule } from './orderList/orderList.module';
 import { ProInfoModule } from './processinfo/proInfo.module';
-import { RBCModule } from './rbcclassification/rbc.module';
-import { WBCModule } from './wbcclassification/wbc.module';
 import { LoggerService } from './logger.service';
 
 @Module({
@@ -50,8 +48,6 @@ import { LoggerService } from './logger.service';
     OrderListModule,
     ProInfoModule,
     CombinedModule,
-    RBCModule,
-    WBCModule,
   ],
   controllers: [AppController],
   providers: [

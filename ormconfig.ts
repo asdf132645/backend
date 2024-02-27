@@ -17,8 +17,6 @@ import { MinCountEntity } from './src/settings/report/minCount/minCount.entity';
 import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { ProcessInfo } from './src/processinfo/entities/proinfo.entity';
 import { OrderList } from './src/orderList/entities/orderList.entity';
-import { RBCClassification } from './src/rbcclassification/entities/rbc_classification.entity';
-import { WBCClassification } from './src/wbcclassification/entities/wbc-classification.entity';
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
   const options: TypeOrmModuleOptions = {
     type: 'mysql',
@@ -47,8 +45,6 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       Category,
       ProcessInfo,
       OrderList,
-      RBCClassification,
-      WBCClassification,
     ],
     extra: {
       connectionLimit: 10,

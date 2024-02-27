@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // CORS 에러 이슈로 프론트 8080 허용
   const corsOptions: CorsOptions = {
-    origin: 'http://localhost:8080', // 허용할 도메인
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   };
