@@ -41,13 +41,13 @@ export class RuningInfoEntity {
   slotId: string;
 
   @Column()
-  orderDttm: string;
+  orderDttm: Date;
 
   @Column()
   testType: string;
 
   @Column()
-  analyzedDttm: string;
+  analyzedDttm: Date;
 
   @Column()
   pltCount: string;

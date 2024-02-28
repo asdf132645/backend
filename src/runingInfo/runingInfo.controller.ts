@@ -35,12 +35,26 @@ export class RuningInfoController {
     return this.runingInfoService.update(userId, updateDto);
   }
 
-  @Get('get/:userId')
-  async findByUserId(
-    @Param('userId') userId: number,
-    @Query('page', ParseIntPipe) page: number = 1,
-    @Query('pageSize', ParseIntPipe) pageSize: number = 10,
-  ): Promise<{ data: RuningInfoEntity[]; total: number }> {
-    return this.runingInfoService.findByUserId(userId, page, pageSize);
+  @Get('getAll')
+  async findAllWithPagingAndFilter(
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 10,
+    @Query('startDay') startDay?: Date,
+    @Query('endDay') endDay?: Date,
+    @Query('barcodeNo') barcodeNo?: string,
+    @Query('patientId') patientId?: string,
+    @Query('patientNm') patientNm?: string,
+  ): Promise<{ data: RuningInfoEntity[]; total: number; page: number }> {
+    const result = await this.runingInfoService.findAllWithPagingAndFilter(
+      page,
+      pageSize,
+      startDay,
+      endDay,
+      barcodeNo,
+      patientId,
+      patientNm,
+    );
+
+    return { data: result.data, total: result.total, page };
   }
 }

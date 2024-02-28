@@ -19,9 +19,9 @@ export class RuningInfoDtoItems {
   birthDay: string;
   wbcCount: string;
   slotId: string;
-  orderDttm: string;
+  orderDttm: Date;
   testType: string;
-  analyzedDttm: string;
+  analyzedDttm: Date;
   pltCount: string;
   malariaCount: string;
   maxRbcCount: string;

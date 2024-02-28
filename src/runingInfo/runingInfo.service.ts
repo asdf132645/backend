@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import {
   WbcInfoDto,
@@ -91,18 +91,54 @@ export class RuningInfoService {
     return updatedItems;
   }
 
-  async findByUserId(
-    userId: number,
+  async findAllWithPagingAndFilter(
     page: number,
     pageSize: number,
+    startDay?: Date,
+    endDay?: Date,
+    barcodeNo?: string,
+    patientId?: string,
+    patientNm?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number }> {
+    const whereClause: any = {};
+    if (startDay && endDay) {
+      whereClause.analyzedDttm = Between(startDay, endDay);
+    }
+
+    if (barcodeNo) {
+      whereClause.barcodeNo = barcodeNo;
+    }
+
+    if (patientId) {
+      whereClause.patientId = patientId;
+    }
+
+    if (patientNm) {
+      whereClause.patientNm = patientNm;
+    }
+
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
-      where: { userId },
+      where: whereClause,
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
 
-    return { data, total };
+    const formattedData = data.map((item: any) => ({
+      ...item,
+      orderDttm: this.formatDate(item.orderDttm),
+      analyzedDttm: this.formatDate(item.analyzedDttm),
+    }));
+
+    return { data: formattedData, total };
+  }
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
   private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
