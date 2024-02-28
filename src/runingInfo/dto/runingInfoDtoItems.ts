@@ -1,6 +1,16 @@
 // runing-info.dto.ts
 
-export class RuningInfoDto {
+import { IsArray, IsInt, IsOptional, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+
+
+export class RuningInfoDtoItems {
+  @IsInt()
+  id: number;
+  state?: boolean;
+  submit?: string;
+  submitDate?: string;
   slotNo: string;
   barcodeNo: string;
   patientId: string;
@@ -37,7 +47,6 @@ export class WbcInfoDto {
 }
 
 export class RbcInfoDto {
-  id: string;
   title: string;
   name: string;
   count: string;
@@ -61,9 +70,30 @@ export class ProcessInfoDto {
 }
 
 export class OrderDto {
+  id: string;
   barcodeId: string;
   patientName: string;
   orderDate: string;
   analyzedDttm: string;
   state: string;
+}
+export class CreateRuningInfoDto {
+  @IsInt()
+  @IsOptional()
+  userId?: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RuningInfoDtoItems)
+  runingInfoDtoItems: RuningInfoDtoItems;
+}
+
+export class UpdateRuningInfoDto {
+  @IsInt()
+  userId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RuningInfoDtoItems)
+  runingInfoDtoItems: RuningInfoDtoItems[];
 }

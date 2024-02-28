@@ -15,8 +15,7 @@ import { FilePathSetEntity } from './src/settings/report/filrPathSet/filePathSet
 import { WbcRunCountEntity } from './src/settings/report/runInfoCount/wbcRunCount.entity';
 import { MinCountEntity } from './src/settings/report/minCount/minCount.entity';
 import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
-import { ProcessInfo } from './src/processinfo/entities/proinfo.entity';
-import { OrderList } from './src/orderList/entities/orderList.entity';
+import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
   const options: TypeOrmModuleOptions = {
     type: 'mysql',
@@ -43,8 +42,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       WbcRunCountEntity,
       MinCountEntity,
       Category,
-      ProcessInfo,
-      OrderList,
+      RuningInfoEntity,
     ],
     extra: {
       connectionLimit: 10,

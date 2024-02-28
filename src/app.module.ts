@@ -18,12 +18,11 @@ import { CbcCodeModule } from './settings/report/cbcCode/cbcCode.module';
 import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModule';
 import { WbcRunCountModule } from './settings/report/runInfoCount/wbcRunCount.module';
 import { MinCountModule } from './settings/report/minCount/minCount.module';
+import { RuningInfoModule } from './runingInfo/runingInfo.module';
 
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
-import { OrderListModule } from './orderList/orderList.module';
-import { ProInfoModule } from './processinfo/proInfo.module';
 import { LoggerService } from './logger.service';
 
 @Module({
@@ -45,8 +44,7 @@ import { LoggerService } from './logger.service';
     FilePathSetModule,
     WbcRunCountModule,
     MinCountModule,
-    OrderListModule,
-    ProInfoModule,
+    RuningInfoModule,
     CombinedModule,
   ],
   controllers: [AppController],
