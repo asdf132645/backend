@@ -110,4 +110,18 @@ export class RuningInfoEntity {
     analyzedDttm: string;
     state: string;
   }[];
+  @Column()
+  signedState?: string;
+
+  @Column()
+  signedOfDate?: Date;
+
+  @Column()
+  signedUserId?: string;
+
+  @Column('json')
+  classificationResult?: any[];
+
+  @Column()
+  isNsNbIntegration?: string;
 }

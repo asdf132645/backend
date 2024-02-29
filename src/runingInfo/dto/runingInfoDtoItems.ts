@@ -3,8 +3,6 @@
 import { IsArray, IsInt, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-
-
 export class RuningInfoDtoItems {
   @IsInt()
   id: number;
@@ -38,6 +36,11 @@ export class RuningInfoDtoItems {
   isNormal: string;
   processInfo: ProcessInfoDto;
   orderList: OrderDto[];
+  signedState?: string;
+  signedOfDate?: Date;
+  signedUserId?: string;
+  classificationResult?: any[];
+  isNsNbIntegration?: string;
 }
 
 export class WbcInfoDto {

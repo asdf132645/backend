@@ -82,6 +82,12 @@ export class RuningInfoService {
         // OrderDto 매핑
         existingEntity.orderList = this.mapOrderList(item.orderList);
 
+        existingEntity.signedState = item.signedState;
+        existingEntity.signedOfDate = item.signedOfDate;
+        existingEntity.signedUserId = item.signedUserId;
+        existingEntity.classificationResult = this.mapClassificationResult(
+          item.classificationResult,
+        );
         // 엔터티를 업데이트하고 업데이트된 엔터티를 배열에 추가
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
@@ -116,13 +122,13 @@ export class RuningInfoService {
     if (patientNm) {
       whereClause.patientNm = patientNm;
     }
-
+    console.log(this.runingInfoEntityRepository);
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-
+    console.log(data);
     const formattedData = data.map((item: any) => ({
       ...item,
       orderDttm: this.formatDate(item.orderDttm),
@@ -185,6 +191,16 @@ export class RuningInfoService {
       orderDate: order.orderDate,
       analyzedDttm: order.analyzedDttm,
       state: order.state,
+    }));
+  }
+
+  private mapClassificationResult(classificationResult: any[]): any[] {
+    return classificationResult.map((classItem) => ({
+      count: classItem.count,
+      dirName: classItem.dirName,
+      title: classItem.title,
+      analyzedDttm: classItem.analyzedDttm,
+      percent: classItem.percent,
     }));
   }
 }
