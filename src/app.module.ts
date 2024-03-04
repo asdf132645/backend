@@ -19,11 +19,13 @@ import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModu
 import { WbcRunCountModule } from './settings/report/runInfoCount/wbcRunCount.module';
 import { MinCountModule } from './settings/report/minCount/minCount.module';
 import { RuningInfoModule } from './runingInfo/runingInfo.module';
+import { ImagesController } from './images/images.controller';
 
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { LoggerService } from './logger.service';
+import { FolderController } from './folder/folder.controller';
 
 @Module({
   imports: [
@@ -47,7 +49,7 @@ import { LoggerService } from './logger.service';
     RuningInfoModule,
     CombinedModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, FolderController, ImagesController],
   providers: [
     LoggerService,
     AppService,

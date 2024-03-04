@@ -9,6 +9,7 @@ export class RuningInfoDtoItems {
   state?: boolean;
   submit?: string;
   submitDate?: string;
+  traySlot?: string;
   slotNo: string;
   barcodeNo: string;
   patientId: string;

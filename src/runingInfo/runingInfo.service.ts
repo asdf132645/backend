@@ -122,13 +122,11 @@ export class RuningInfoService {
     if (patientNm) {
       whereClause.patientNm = patientNm;
     }
-    console.log(this.runingInfoEntityRepository);
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    console.log(data);
     const formattedData = data.map((item: any) => ({
       ...item,
       orderDttm: this.formatDate(item.orderDttm),

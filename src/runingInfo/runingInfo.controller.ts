@@ -1,14 +1,6 @@
 // runing-info.controller.ts
 
-import {
-  Controller,
-  Post,
-  Body,
-  Param,
-  Get,
-  ParseIntPipe,
-  Query,
-} from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Query } from '@nestjs/common';
 import { RuningInfoService } from './runingInfo.service';
 import {
   CreateRuningInfoDto,

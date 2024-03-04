@@ -14,6 +14,9 @@ export class RuningInfoEntity {
   submit?: string;
 
   @Column()
+  traySlot?: string;
+
+  @Column()
   submitDate?: string;
 
   @Column()
