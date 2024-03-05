@@ -89,7 +89,13 @@ export class CombinedService
     if (this.wss) {
       // this.logger.log('프론트로 다시 보내기');
       // console.log(data);
-      const jsonData = JSON.stringify({ bufferData: data.toString() });
+      let jsonData = '';
+
+      if (data?.err) {
+        jsonData = JSON.stringify({ bufferData: 'err' });
+      } else {
+        jsonData = JSON.stringify({ bufferData: data.toString() });
+      }
       this.wss.emit('chat', jsonData);
     } else {
       this.logger.warn('웹소켓 전송 실패..');
@@ -132,11 +138,13 @@ export class CombinedService
 
       newClient.on('end', () => {
         this.logger.log('TCP 클라이언트 연결 종료');
+        this.sendDataToWebSocketClients({ err: true });
         this.connectedClient = null;
       });
 
       newClient.on('error', (err) => {
         this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
+        this.sendDataToWebSocketClients({ err: true });
       });
     } else {
       this.logger.warn('이미 클라이언트 연결이 활성화되어 있습니다.');
