@@ -29,7 +29,8 @@ export class RuningInfoDtoItems {
   maxWbcCount: string;
   lowPowerPath: any[];
   runningPath: any[];
-  wbcInfo: WbcInfoDto[];
+  wbcInfo: any[];
+  wbcInfoAfter?: any[];
   rbcInfo: RbcInfoDto[];
   bminfo: any[];
   userId: number;
@@ -45,9 +46,10 @@ export class RuningInfoDtoItems {
 }
 
 export class WbcInfoDto {
-  categoryId: string;
-  categoryNm: string;
-  classInfo: ClassInfoDto[];
+  title: string;
+  name: string;
+  count: string;
+  images: any[];
 }
 
 export class RbcInfoDto {

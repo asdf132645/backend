@@ -32,28 +32,6 @@ export class CellImgAnalyzedService {
     return await this.cellImgAnalyzedRepository.save(entity);
   }
 
-  async update(id: any, dto?: CellImgAnalyzedDto): Promise<CellImgAnalyzed> {
-    const entity = await this.findById(id); // Check if entity exists
-
-    if (dto) {
-      // If user ID is provided, find the user and assign it to the entity's user property
-      if (dto.userId) {
-        const user = await this.findUserById(Number(dto.userId));
-        if (!user) {
-          throw new NotFoundException(
-            `User with userId ${dto.userId} not found`,
-          );
-        }
-        entity.user = user;
-      }
-
-      // Update other fields of the entity
-      Object.assign(entity, dto);
-    }
-
-    return await this.cellImgAnalyzedRepository.save(entity);
-  }
-
   async findByUserId(userId: string): Promise<CellImgAnalyzed | undefined> {
     try {
       const queryBuilder = this.cellImgAnalyzedRepository
@@ -65,6 +43,35 @@ export class CellImgAnalyzedService {
       console.error('Error:', error);
       throw error;
     }
+  }
+
+  async update(id: string, dto: CellImgAnalyzedDto): Promise<CellImgAnalyzed> {
+    const { userId, ...rest } = dto;
+
+    // Check if the user with the provided ID exists
+    const user = await this.findUserById(Number(userId));
+    if (!user) {
+      throw new NotFoundException(
+        `userId ${userId}를 가진 사용자를 찾을 수 없습니다.`,
+      );
+    }
+
+    // Check if the entity with the provided ID exists
+    const existingEntity = await this.findById(id);
+    if (!existingEntity) {
+      throw new NotFoundException(
+        `id가 ${id}인 세포 이미지 분석을 찾을 수 없습니다.`,
+      );
+    }
+
+    // Update the entity with the new data
+    this.cellImgAnalyzedRepository.merge(existingEntity, {
+      ...rest,
+      user, // Use the user object directly in the merge
+    });
+
+    // Save the updated entity
+    return await this.cellImgAnalyzedRepository.save(existingEntity);
   }
 
   private async findById(id: any): Promise<CellImgAnalyzed> {

@@ -1,5 +1,6 @@
 // create-cellImg.dto.ts
 export class CellImgAnalyzedDto {
+  id?: number;
   analysisType: string;
   cellAnalyzingCount: string;
   wbcPositionMargin: string;

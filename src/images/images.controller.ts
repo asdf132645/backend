@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, HttpStatus, Post } from "@nestjs/common";
+import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -29,7 +29,7 @@ export class ImagesController {
     }
   }
 
-  @Post('move')
+  @Get('move')
   moveImage(
     @Query('sourceFolder') sourceFolder: string,
     @Query('destinationFolder') destinationFolder: string,

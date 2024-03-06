@@ -32,19 +32,17 @@ export class RuningInfoService {
     return await this.runingInfoEntityRepository.save(entity);
   }
 
-  async update(
-    userId: number,
-    updateDto: UpdateRuningInfoDto,
-  ): Promise<RuningInfoEntity[]> {
+  async update(updateDto: UpdateRuningInfoDto): Promise<RuningInfoEntity[]> {
     const { runingInfoDtoItems } = updateDto;
 
     const updatedItems: RuningInfoEntity[] = [];
-
+    console.log('runingInfoDtoItems', runingInfoDtoItems);
     for (const item of runingInfoDtoItems) {
       const existingEntity = await this.runingInfoEntityRepository.findOne({
-        where: { userId, id: item.id },
+        where: { id: item.id },
       });
-
+      console.log('item.id', item.id);
+      console.log('existingEntity', existingEntity);
       if (existingEntity) {
         // 엔터티의 속성 업데이트
         existingEntity.slotNo = item.slotNo;
@@ -71,7 +69,10 @@ export class RuningInfoService {
         existingEntity.isNormal = item.isNormal;
 
         // WbcInfoDto 매핑
-        existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
+        // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
+
+        // wbcInfoAfter 매핑
+        existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
 
         // RbcInfoDto 매핑
         existingEntity.rbcInfo = this.mapRbcInfo(item.rbcInfo);
@@ -145,11 +146,23 @@ export class RuningInfoService {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
-  private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
-    return wbcInfo.map((item) => ({
-      categoryId: item.categoryId,
-      categoryNm: item.categoryNm,
-      classInfo: this.mapClassInfo(item.classInfo),
+  // private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
+  //   console.log(wbcInfo);
+  //   return wbcInfo.map((item) => ({
+  //     categoryId: item.categoryId,
+  //     categoryNm: item.categoryNm,
+  //     classInfo: this.mapClassInfo(item.classInfo),
+  //   }));
+  // }
+
+  private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
+    console.log(wbcInfoAfter);
+    return wbcInfoAfter.map((item) => ({
+      id: item.id,
+      name: item.name,
+      count: item.count,
+      title: item.title,
+      images: item.images || [], // images가 없을 경우 빈 배열로 기본값 설정
     }));
   }
 

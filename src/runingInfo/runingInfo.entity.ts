@@ -92,6 +92,9 @@ export class RuningInfoEntity {
   wbcInfo: any[];
 
   @Column('json')
+  wbcInfoAfter: any[];
+
+  @Column('json')
   rbcInfo: any[];
 
   @Column('json')
