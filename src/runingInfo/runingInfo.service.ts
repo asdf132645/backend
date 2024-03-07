@@ -41,8 +41,7 @@ export class RuningInfoService {
       const existingEntity = await this.runingInfoEntityRepository.findOne({
         where: { id: item.id },
       });
-      console.log('item.id', item.id);
-      console.log('existingEntity', existingEntity);
+
       if (existingEntity) {
         // 엔터티의 속성 업데이트
         existingEntity.slotNo = item.slotNo;
