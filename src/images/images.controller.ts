@@ -28,4 +28,31 @@ export class ImagesController {
         .send('File not found or permission issue');
     }
   }
+
+  @Get('move')
+  moveImage(
+    @Query('sourceFolder') sourceFolder: string,
+    @Query('destinationFolder') destinationFolder: string,
+    @Query('imageName') imageName: string,
+    @Res() res: Response,
+  ) {
+    if (!sourceFolder || !destinationFolder || !imageName) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
+    }
+
+    // 원본 이미지 경로와 대상 이미지 경로를 받아와서 절대 경로로 조합
+    const absoluteSourcePath = path.join(sourceFolder, imageName);
+    const absoluteDestinationPath = path.join(destinationFolder, imageName);
+
+    try {
+      fs.accessSync(absoluteSourcePath, fs.constants.R_OK);
+      fs.renameSync(absoluteSourcePath, absoluteDestinationPath); // 이미지 이동
+
+      res.status(HttpStatus.OK).send('Image moved successfully');
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Error moving the image');
+    }
+  }
 }

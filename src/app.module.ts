@@ -26,6 +26,7 @@ import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { LoggerService } from './logger.service';
 import { FolderController } from './folder/folder.controller';
+import { JsonReaderModule } from './jsonReader/jsonReader.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { FolderController } from './folder/folder.controller';
     MinCountModule,
     RuningInfoModule,
     CombinedModule,
+    JsonReaderModule,
   ],
   controllers: [AppController, FolderController, ImagesController],
   providers: [

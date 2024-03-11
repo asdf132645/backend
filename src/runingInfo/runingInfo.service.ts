@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import {
-  WbcInfoDto,
   RbcInfoDto,
   ProcessInfoDto,
   OrderDto,
@@ -32,17 +31,13 @@ export class RuningInfoService {
     return await this.runingInfoEntityRepository.save(entity);
   }
 
-  async update(
-    userId: number,
-    updateDto: UpdateRuningInfoDto,
-  ): Promise<RuningInfoEntity[]> {
+  async update(updateDto: UpdateRuningInfoDto): Promise<RuningInfoEntity[]> {
     const { runingInfoDtoItems } = updateDto;
 
     const updatedItems: RuningInfoEntity[] = [];
-
     for (const item of runingInfoDtoItems) {
       const existingEntity = await this.runingInfoEntityRepository.findOne({
-        where: { userId, id: item.id },
+        where: { id: item.id },
       });
 
       if (existingEntity) {
@@ -69,9 +64,13 @@ export class RuningInfoService {
         existingEntity.bminfo = item.bminfo;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
+        existingEntity.submit = item.submit;
 
         // WbcInfoDto 매핑
-        existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
+        // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
+
+        // wbcInfoAfter 매핑
+        existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
 
         // RbcInfoDto 매핑
         existingEntity.rbcInfo = this.mapRbcInfo(item.rbcInfo);
@@ -145,11 +144,21 @@ export class RuningInfoService {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
-  private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
-    return wbcInfo.map((item) => ({
-      categoryId: item.categoryId,
-      categoryNm: item.categoryNm,
-      classInfo: this.mapClassInfo(item.classInfo),
+  // private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
+  //   console.log(wbcInfo);
+  //   return wbcInfo.map((item) => ({
+  //     categoryId: item.categoryId,
+  //     categoryNm: item.categoryNm,
+  //     classInfo: this.mapClassInfo(item.classInfo),
+  //   }));
+  // }
+
+  private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
+    return wbcInfoAfter.map((item) => ({
+      name: item.name,
+      count: item.count,
+      title: item.title,
+      images: item.images || [], // images가 없을 경우 빈 배열로 기본값 설정
     }));
   }
 

@@ -46,7 +46,7 @@ export class CellImgAnalyzedController {
     }
   }
 
-  @Put(':id')
+  @Put('update/:id')
   @ApiOperation({
     summary: '기존 세포 이미지 분석 갱신',
     description: '기존의 세포 이미지 분석을 ID로 갱신합니다.',
@@ -57,18 +57,21 @@ export class CellImgAnalyzedController {
     status: 200,
     description: '성공적으로 세포 이미지 분석이 갱신되었습니다.',
   })
-  async update(@Param('id') id: number, @Body() dto: CellImgAnalyzedDto) {
+  async update(@Param('id') id: string, @Body() dto: CellImgAnalyzedDto) {
     const userId = dto.userId;
 
     try {
-      const user = await this.cellImgAnalyzedService.findUserById(id);
-
+      // 유저가 존재하지 않으면 NotFoundException을 던집니다.
+      const user = await this.cellImgAnalyzedService.findUserById(
+        Number(userId),
+      );
       if (!user) {
         throw new NotFoundException(
           `userId ${userId}를 가진 사용자를 찾을 수 없습니다.`,
         );
       }
 
+      // 업데이트 메서드를 호출하여 업데이트를 수행합니다.
       return await this.cellImgAnalyzedService.update(id, dto);
     } catch (error) {
       if (error instanceof NotFoundException) {

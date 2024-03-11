@@ -1,6 +1,6 @@
 // runing-info.controller.ts
 
-import { Controller, Post, Body, Param, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Put } from "@nestjs/common";
 import { RuningInfoService } from './runingInfo.service';
 import {
   CreateRuningInfoDto,
@@ -19,12 +19,11 @@ export class RuningInfoController {
     return this.runingInfoService.create(createDto);
   }
 
-  @Post('update/:userId')
+  @Put('update')
   async update(
-    @Param('userId') userId: number,
     @Body() updateDto: UpdateRuningInfoDto,
   ): Promise<RuningInfoEntity[]> {
-    return this.runingInfoService.update(userId, updateDto);
+    return this.runingInfoService.update(updateDto);
   }
 
   @Get('getAll')
