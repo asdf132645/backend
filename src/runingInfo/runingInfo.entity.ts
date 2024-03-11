@@ -130,4 +130,7 @@ export class RuningInfoEntity {
 
   @Column()
   isNsNbIntegration?: string;
+
+  @Column()
+  memo?: string;
 }

@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import {
-  WbcInfoDto,
   RbcInfoDto,
   ProcessInfoDto,
   OrderDto,
@@ -36,7 +35,6 @@ export class RuningInfoService {
     const { runingInfoDtoItems } = updateDto;
 
     const updatedItems: RuningInfoEntity[] = [];
-    console.log('runingInfoDtoItems', runingInfoDtoItems);
     for (const item of runingInfoDtoItems) {
       const existingEntity = await this.runingInfoEntityRepository.findOne({
         where: { id: item.id },
@@ -66,6 +64,7 @@ export class RuningInfoService {
         existingEntity.bminfo = item.bminfo;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
+        existingEntity.submit = item.submit;
 
         // WbcInfoDto 매핑
         // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
@@ -155,9 +154,7 @@ export class RuningInfoService {
   // }
 
   private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
-    console.log(wbcInfoAfter);
     return wbcInfoAfter.map((item) => ({
-      id: item.id,
       name: item.name,
       count: item.count,
       title: item.title,
