@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+// import { TypeOrmModule } from '@nestjs/typeorm';
+// import { createLisTypeOrmOptions } from '../ormconfig';
 
 async function bootstrap() {
   // 먼저 HTTP 서버를 생성합니다.
@@ -30,9 +32,13 @@ async function bootstrap() {
 
   await httpApp.listen(3002);
 
-  // const protocolApp =
-  //   await NestFactory.createApplicationContext(CombinedModule);
-  // const combinedService = protocolApp.get(CombinedService);
+  // const lisApp = await NestFactory.create(AppModule);
+  //
+  // const lisDatabaseOptions = await createLisTypeOrmOptions();
+  // await lisApp.use(TypeOrmModule.forRoot(lisDatabaseOptions));
+  //
+  // // lisApp를 3003 포트로 열기
+  // await lisApp.listen(3003);
 }
 
 bootstrap();

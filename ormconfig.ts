@@ -52,3 +52,24 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
 
   return options;
 };
+
+// export const createLisTypeOrmOptions =
+//   async (): Promise<TypeOrmModuleOptions> => {
+//     const lisOptions: TypeOrmModuleOptions = {
+//       type: 'mysql',
+//       host: 'localhost',
+//       port: 3307,
+//       username: 'SMLHEMA',
+//       password: 'HEMASML@#$',
+//       database: 'SLOJLIB',
+//       synchronize: false,
+//       migrations: ['src/migrations/**/*{.ts,.js}'],
+//       entities: [],
+//       extra: {
+//         connectionLimit: 10,
+//         multipleStatements: true,
+//       },
+//     };
+//
+//     return lisOptions;
+//   };

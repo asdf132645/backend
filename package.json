@@ -44,6 +44,7 @@
     "lodash": "^4.17.21",
     "mysql2": "^3.7.1",
     "nest-winston": "^1.9.4",
+    "odbc": "^2.4.8",
     "reflect-metadata": "^0.1.13",
     "socket.io": "^4.7.4",
     "swagger-ui-express": "^5.0.0",

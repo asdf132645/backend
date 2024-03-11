@@ -65,7 +65,7 @@ export class RuningInfoService {
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
         existingEntity.submit = item.submit;
-
+        existingEntity.memo = item.memo;
         // WbcInfoDto 매핑
         // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
 
@@ -154,7 +154,13 @@ export class RuningInfoService {
   // }
 
   private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
+    // wbcInfoAfter가 null이면 빈 배열을 반환
+    if (!wbcInfoAfter) {
+      return [];
+    }
+
     return wbcInfoAfter.map((item) => ({
+      id: item.id,
       name: item.name,
       count: item.count,
       title: item.title,

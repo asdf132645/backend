@@ -26,13 +26,15 @@ import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { LoggerService } from './logger.service';
 import { FolderController } from './folder/folder.controller';
-import { JsonReaderModule } from './jsonReader/jsonReader.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: createTypeOrmOptions,
     }),
+    // TypeOrmModule.forRootAsync({
+    //   useFactory: createLisTypeOrmOptions,
+    // }),
     UserModule,
     CellImgAnalyzedModule,
     RbcDegreeModule,
@@ -49,7 +51,6 @@ import { JsonReaderModule } from './jsonReader/jsonReader.module';
     MinCountModule,
     RuningInfoModule,
     CombinedModule,
-    JsonReaderModule,
   ],
   controllers: [AppController, FolderController, ImagesController],
   providers: [

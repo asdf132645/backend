@@ -43,6 +43,7 @@ export class RuningInfoDtoItems {
   signedUserId?: string;
   classificationResult?: any[];
   isNsNbIntegration?: string;
+  memo?: string;
 }
 
 export class WbcInfoDto {
