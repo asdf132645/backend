@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, Like, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import {
   RbcInfoDto,
@@ -15,6 +15,9 @@ import {
 
 @Injectable()
 export class RuningInfoService {
+  private _nrCount: string;
+  private _titles: string[];
+
   constructor(
     @InjectRepository(RuningInfoEntity)
     private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
@@ -104,7 +107,13 @@ export class RuningInfoService {
     barcodeNo?: string,
     patientId?: string,
     patientNm?: string,
+    nrCount?: string,
+    titles?: string[],
+    testType?: string,
+    wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number }> {
+    this._nrCount = nrCount;
+    this._titles = titles;
     const whereClause: any = {};
     if (startDay && endDay) {
       whereClause.analyzedDttm = Between(startDay, endDay);
@@ -121,10 +130,33 @@ export class RuningInfoService {
     if (patientNm) {
       whereClause.patientNm = patientNm;
     }
+
+    if (testType) {
+      whereClause.testType = testType;
+    }
+
+    if (nrCount !== '0') {
+      console.log(typeof nrCount);
+      whereClause.wbcCount = Like(`%{"title": "NR", "count": "${nrCount}" }%`);
+    }
+
+    if (titles && titles.length > 0) {
+      const titleFilters = titles.map((title) => ({
+        wbcInfo: Like(`%{"title": "${title}" }%`),
+      }));
+      Object.assign(whereClause, ...titleFilters);
+    }
+
+    const order: any = {};
+    if (wbcCountOrder) {
+      order.wbcCount = wbcCountOrder; // wbcCountOrder가 존재하는 경우 wbcCount를 기준으로 정렬
+    }
+
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
       skip: (page - 1) * pageSize,
       take: pageSize,
+      order,
     });
     const formattedData = data.map((item: any) => ({
       ...item,
@@ -134,6 +166,7 @@ export class RuningInfoService {
 
     return { data: formattedData, total };
   }
+
   private formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');

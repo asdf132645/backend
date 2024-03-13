@@ -22,10 +22,9 @@ export class OrderService {
         )
       `);
 
-      // SP_IF01Q1에서 반환된 데이터를 이용해 OrderEntity를 생성하거나 다른 로직을 수행할 수 있습니다.
-      // 아래는 반환된 데이터를 기반으로 생성하는 예제입니다.
+      // SP_IF01Q1에서 반환된 데이터를 이용해 OrderEntity를 생성
       const createdOrder = new OrderEntity();
-      createdOrder.barcodeNo = result[0].barcodeNo; // 변경해야 할 필드에 따라 수정하세요.
+      createdOrder.barcodeNo = result[0].barcodeNo;
       // 다른 필드 설정...
 
       // 주문을 저장합니다.
