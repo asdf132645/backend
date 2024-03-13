@@ -17,6 +17,7 @@ import { LisCodeRbcModule } from './settings/report/lisCode/rbc/lisCodeRbc.modul
 import { CbcCodeModule } from './settings/report/cbcCode/cbcCode.module';
 import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModule';
 import { WbcRunCountModule } from './settings/report/runInfoCount/wbcRunCount.module';
+import { JsonReaderModule } from './jsonReader/jsonReader.module';
 import { MinCountModule } from './settings/report/minCount/minCount.module';
 import { RuningInfoModule } from './runingInfo/runingInfo.module';
 import { ImagesController } from './images/images.controller';
@@ -48,6 +49,7 @@ import { FolderController } from './folder/folder.controller';
     CbcCodeModule,
     FilePathSetModule,
     WbcRunCountModule,
+    JsonReaderModule,
     MinCountModule,
     RuningInfoModule,
     CombinedModule,
