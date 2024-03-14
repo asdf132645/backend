@@ -41,6 +41,26 @@ export class UserController {
     }
   }
 
+  @Get('/getUsers/:userId')
+  @ApiOperation({summary: 'Get all users'})
+  @ApiParam({name: 'userId', description: 'User ID'})
+  @ApiResponse({status: 200, description: 'All users found', type: UserResponse})
+  @ApiResponse({status: 404, description: 'Users not found'})
+  async getALLUsers(@Param('userId') userId:string) {
+    try {
+      const users = await this.userService.findAll(userId);
+
+      if (users === undefined) {
+        return {users: [], code: 404};
+      } else {
+        return {users, code: 200};
+      }
+      
+    } catch (error) {
+      return { success: false, error: error.message || 'Error Fetching User'}
+    }
+  }
+
   @Post('/login')
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ description: 'User login credentials', type: LoginDto })

@@ -68,4 +68,25 @@ export class UserService {
 
     return user;
   }
+
+  async findAll(userId: string): Promise<User[] | undefined> {
+    const users = await this.userRepository.find({
+      select: [
+        'id',
+        'userId',
+        'name',
+        'employeeNo',
+        'userType',
+        'password',
+        'subscriptionDate',
+        'latestDate',
+      ],
+    });
+
+    if (!users || users.length === 0) {
+      console.error('Users not found');
+      return undefined;
+    }
+    return users;
+  }
 }
