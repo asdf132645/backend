@@ -1,5 +1,3 @@
-// combined.service.ts
-
 import { Injectable } from '@nestjs/common';
 import * as net from 'net';
 import { Server, Socket } from 'socket.io';
@@ -10,6 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { LoggerService } from '../logger.service';
+import { Queue } from 'queue-typescript';
 
 @Injectable()
 @WebSocketGateway({
@@ -22,15 +21,17 @@ export class CombinedService
   @WebSocketServer()
   wss: Server;
   connectedClient: net.Socket | null = null;
-  private isTcpConnected: boolean = false;
   public count: number = 0; // 요청 처리 횟수를 저장하는 변수 추가
+  private requestQueue: Queue<any>;
 
-  constructor(private readonly logger: LoggerService) {}
+  constructor(private readonly logger: LoggerService) {
+    this.requestQueue = new Queue();
+  }
 
   afterInit(server: Server) {
     this.wss = server;
     // this.startTcpServer(11235);
-    this.setupTcpClient('localhost', 11235);
+    // this.setupTcpClient('localhost', 11235);
   }
 
   handleDisconnect(client: Socket) {
@@ -77,6 +78,7 @@ export class CombinedService
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
+      this.requestQueue.enqueue(message); // TCP 연결이 없는 경우 큐에 요청 추가
       this.setupTcpClient('localhost', 11235);
     }
   }
@@ -87,8 +89,6 @@ export class CombinedService
     }
 
     if (this.wss) {
-      // this.logger.log('프론트로 다시 보내기');
-      // console.log(data);
       let jsonData = '';
 
       if (data?.err) {
@@ -106,14 +106,31 @@ export class CombinedService
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const serializedData = JSON.stringify(data.payload);
-        this.connectedClient.write(serializedData);
+        this.connectedClient.write(serializedData, (error) => {
+          if (error) {
+            this.logger.error(`데이터 전송 중 오류 발생: ${error.message}`);
+          } else {
+            // 전송이 완료된 후 다음 데이터를 처리
+            this.processNextQueueItem();
+          }
+        });
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
       }
     } else {
       this.logger.warn(
-        '활성화된 TCP 클라이언트 연결 없음. 데이터 전송되지 않았습니다.???',
+        '활성화된 TCP 클라이언트 연결 없음. 데이터 전송 대기 중...',
       );
+
+      // TCP 클라이언트가 비활성화된 경우 요청을 큐에 추가
+      this.requestQueue?.enqueue(data);
+    }
+  }
+
+  processNextQueueItem(): void {
+    if (this.requestQueue?.length > 0) {
+      const nextItem = this.requestQueue.dequeue();
+      this.sendDataToEmbeddedServer(nextItem);
     }
   }
 
@@ -129,10 +146,15 @@ export class CombinedService
       newClient.connect(newPort, newAddress, () => {
         this.connectedClient = newClient;
         console.log('setupTcpClient');
+
+        // TCP 연결이 활성화된 경우 대기열의 모든 요청 처리
+        while (this.requestQueue?.length > 0) {
+          const request = this.requestQueue.dequeue();
+          this.sendDataToEmbeddedServer(request);
+        }
       });
 
       newClient.on('data', (data) => {
-        // this.logger.log(`업데이트된 클라이언트로부터 데이터 수신: ${data}`);
         this.handleTcpData(data);
       });
 

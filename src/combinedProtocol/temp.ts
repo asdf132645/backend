@@ -1,6 +1,6 @@
 // combined.service.ts
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as net from 'net';
 import { Server, Socket } from 'socket.io';
 import {
@@ -9,6 +9,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { LoggerService } from '../logger.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -21,13 +22,14 @@ export class CombinedService
   @WebSocketServer()
   wss: Server;
   connectedClient: net.Socket | null = null;
-  private isTcpConnected: boolean = false;
   public count: number = 0; // 요청 처리 횟수를 저장하는 변수 추가
-  constructor(private readonly logger: Logger) {}
+
+  constructor(private readonly logger: LoggerService) {}
 
   afterInit(server: Server) {
     this.wss = server;
-    this.startTcpServer(11237);
+    // this.startTcpServer(11235);
+    // this.setupTcpClient('localhost', 11235);
   }
 
   handleDisconnect(client: Socket) {
@@ -43,9 +45,7 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          if (message.type === 'runIngComp') {
-            console.log('message', message);
-          }
+          // this.logger.log(message);
           this.webSocketGetData(message);
         }
       } catch (e) {
@@ -62,139 +62,21 @@ export class CombinedService
     });
   }
 
-  // tcp 통신
-  startTcpServer(port: number): void {
-    const server = new net.Server();
-
-    server.on('connection', (socket) => {
-      if (this.connectedClient) {
-        this.connectedClient.destroy();
-      }
-      this.connectedClient = socket;
-      this.logger.log(
-        `새로운 연결: ${socket.remoteAddress}:${socket.remotePort}`,
-      );
-
-      socket.on('data', (data) => {
-        // this.logger.log(`웹 백엔드가 데이터 받는다: ${data}`);
-        // 프론트로 다시 보내기
-        this.handleTcpData(data);
-      });
-
-      socket.on('end', () => {
-        this.logger.log(
-          `연결 종료: ${socket.remoteAddress}:${socket.remotePort}`,
-        );
-        this.connectedClient = null;
-      });
-
-      socket.on('error', (err) => {
-        this.logger.error(`소켓 오류: ${err.message}`);
-      });
-    });
-
-    server.listen(port, () => {
-      this.logger.log(`TCP 서버 포트 ${port}`);
-    });
-  }
-
   // handleTcpData 메서드 수정
   handleTcpData(data: any): void {
     const jsonData = data.toString('utf-8');
     if (this.wss) {
-      const jsonArray = this.parseJsonArray(jsonData);
-
-      if (Array.isArray(jsonArray)) {
-        console.log('Array');
-
-        // 모든 메시지를 순차적으로 처리하도록 Promise 체인 사용
-        jsonArray.reduce((promise, item) => {
-          return promise.then(() => {
-            return this.sendDataToOtherTcpServer('localhost', 11235, item)
-              .then((receivedData) => {
-                this.sendDataToWebSocketClients(receivedData);
-              })
-              .catch((error) => {
-                this.logger.error(
-                  `sendDataToOtherTcpServer 오류: ${error.message}`,
-                );
-              });
-          });
-        }, Promise.resolve());
-      } else {
-        console.log('noArray');
-        this.sendDataToOtherTcpServer('localhost', 11235, jsonData)
-          .then((receivedData) => {
-            this.sendDataToWebSocketClients(receivedData);
-          })
-          .catch((error) => {
-            this.logger.error(
-              `sendDataToOtherTcpServer 오류: ${error.message}`,
-            );
-          });
-      }
+      this.sendDataToWebSocketClients(jsonData);
     } else {
       this.logger.error('WebSocketService가 초기화되지 않았습니다.');
     }
-  }
-
-  parseJsonArray(data: any): any[] {
-    let jsonArray: any[] = [];
-
-    if (typeof data === 'string') {
-      try {
-        // 정상적인 JSON 배열로 파싱
-        const parsedArray = data.split('}{').map((jsonString: string) => {
-          const cleanedString = jsonString.replace(/^{|}$/g, ''); // 중괄호 제거
-          return JSON.parse(`{${cleanedString}}`);
-        });
-
-        jsonArray = parsedArray;
-      } catch (error) {
-        this.logger.error(`parseJsonArray 데이터 파싱 오류: ${error.message}`);
-        // JSON 파싱 실패 시 빈 배열 반환
-        jsonArray = [];
-      }
-    }
-
-    return jsonArray;
-  }
-  sendDataToOtherTcpServer(
-    newAddress: string,
-    newPort: number,
-    data: any,
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const client = new net.Socket();
-      client.connect(newPort, newAddress, () => {
-        const jsonData = JSON.stringify(data);
-        console.log(jsonData);
-        client.write(jsonData);
-        this.isTcpConnected = true;
-      });
-
-      client.on('data', (receivedData) => {
-        console.log('receivedData-> ai 응답값', receivedData);
-        this.count++;
-        console.log(`Processing request #${this.count}`);
-        resolve(receivedData);
-      });
-
-      client.on('close', () => {
-        console.log('다른 TCP 서버와의 연결 종료');
-      });
-
-      client.on('error', (err) => {
-        reject(err); // Promise를 reject하고 오류를 처리
-      });
-    });
   }
 
   webSocketGetData(message: any): void {
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
-      this.setupTcpClient('localhost', 11237);
+      this.setupTcpClient('localhost', 11235);
     }
   }
 
@@ -204,9 +86,15 @@ export class CombinedService
     }
 
     if (this.wss) {
-      this.logger.log('프론트로 다시 보내기');
+      // this.logger.log('프론트로 다시 보내기');
       // console.log(data);
-      const jsonData = JSON.stringify({ bufferData: data.toString() });
+      let jsonData = '';
+
+      if (data?.err) {
+        jsonData = JSON.stringify({ bufferData: 'err' });
+      } else {
+        jsonData = JSON.stringify({ bufferData: data.toString() });
+      }
       this.wss.emit('chat', jsonData);
     } else {
       this.logger.warn('웹소켓 전송 실패..');
@@ -214,14 +102,9 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    // console.log(
-    //   '웹소켓 데이터를 TCP 웹 백엔드에게 전달한다:',
-    //   typeof data.payload,
-    // );
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const serializedData = JSON.stringify(data.payload);
-        // console.log('serializedData', serializedData);
         this.connectedClient.write(serializedData);
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
@@ -245,20 +128,22 @@ export class CombinedService
       newClient.connect(newPort, newAddress, () => {
         this.connectedClient = newClient;
         console.log('setupTcpClient');
-        // this.sendDataToEmbeddedServer(data);
       });
 
       newClient.on('data', (data) => {
-        this.logger.log(`업데이트된 클라이언트로부터 데이터 수신: ${data}`);
+        // this.logger.log(`업데이트된 클라이언트로부터 데이터 수신: ${data}`);
+        this.handleTcpData(data);
       });
 
       newClient.on('end', () => {
         this.logger.log('TCP 클라이언트 연결 종료');
+        this.sendDataToWebSocketClients({ err: true });
         this.connectedClient = null;
       });
 
       newClient.on('error', (err) => {
         this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
+        this.sendDataToWebSocketClients({ err: true });
       });
     } else {
       this.logger.warn('이미 클라이언트 연결이 활성화되어 있습니다.');
