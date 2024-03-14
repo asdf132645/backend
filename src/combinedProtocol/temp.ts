@@ -41,6 +41,7 @@ export class CombinedService
   // 웹소켓 통신
   handleConnection(client: Socket) {
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
+    this.setupTcpClient('localhost', 11235);
 
     client.on('message', (message) => {
       try {
