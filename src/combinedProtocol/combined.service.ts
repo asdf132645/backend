@@ -104,8 +104,12 @@ export class CombinedService
   sendDataToEmbeddedServer(data: any): void {
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
-        const serializedData = JSON.stringify(data.payload);
-        this.connectedClient.write(serializedData);
+        const seData = [data.payload];
+        for (const seDataKey in seData) {
+          const serializedData = JSON.stringify(seData[seDataKey]);
+          // console.log(serializedData);
+          this.connectedClient.write(serializedData);
+        }
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
       }

@@ -23,7 +23,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
     port: 3306,
     username: 'root',
     password: 'uimd5191!',
-    database: 'pb_db2',
+    database: 'pb_db',
     synchronize: false,
     migrations: ['src/migrations/**/*{.ts,.js}'],
     entities: [
