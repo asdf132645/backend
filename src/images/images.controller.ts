@@ -7,7 +7,7 @@ import * as fs from 'fs';
 export class ImagesController {
   @Get()
   getImage(
-    @Query('folder') folder: string,
+    @Query('drivesFolder') folder: string,
     @Query('imageName') imageName: string,
     @Res() res: Response,
   ) {

@@ -26,7 +26,8 @@ import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { LoggerService } from './logger.service';
-import { FolderController } from './folder/folder.controller';
+import { DrivesFolderController } from './drivesFolder/drivesFolderController';
+import { FoldersController } from './images/folders.controller';
 
 @Module({
   imports: [
@@ -54,7 +55,12 @@ import { FolderController } from './folder/folder.controller';
     RuningInfoModule,
     CombinedModule,
   ],
-  controllers: [AppController, FolderController, ImagesController],
+  controllers: [
+    AppController,
+    DrivesFolderController,
+    ImagesController,
+    FoldersController,
+  ],
   providers: [
     LoggerService,
     AppService,
