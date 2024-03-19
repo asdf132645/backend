@@ -19,18 +19,20 @@ export class FoldersController {
       const hasDziOrJpg = files.some(
         (file) => file.includes('dzi') || file.includes('jpg'),
       );
-      const folderPathUrl = new URL(folderPath).searchParams.get('folderPath');
-
-      const extractedPath = folderPathUrl.substring(
-        0,
-        folderPathUrl.lastIndexOf('/') + 1,
-      );
-      const lastSlashIndex = folderPath.lastIndexOf('/');
-      const imageName = folderPath.substring(lastSlashIndex + 1);
-      console.log(imageName);
-      console.log(extractedPath);
-      const absoluteImagePath = path.join(extractedPath, imageName);
       if (hasDziOrJpg) {
+        const folderPathUrl = new URL(folderPath).searchParams.get(
+          'folderPath',
+        );
+
+        const extractedPath = folderPathUrl.substring(
+          0,
+          folderPathUrl.lastIndexOf('/') + 1,
+        );
+        const lastSlashIndex = folderPath.lastIndexOf('/');
+        const imageName = folderPath.substring(lastSlashIndex + 1);
+        console.log(imageName);
+        console.log(extractedPath);
+        const absoluteImagePath = path.join(extractedPath, imageName);
         //있는경우
         fs.accessSync(absoluteImagePath, fs.constants.R_OK);
         const fileStream = fs.createReadStream(absoluteImagePath);
