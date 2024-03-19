@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import * as fs from 'fs';
-import path from 'path';
+import * as path from 'path';
 
 @Controller('folders')
 export class FoldersController {
@@ -14,34 +14,33 @@ export class FoldersController {
       return res.status(HttpStatus.BAD_REQUEST).send('폴더 못찾음');
     }
 
-    try {
-      const files = fs.readdirSync(folderPath);
-      const hasDziOrJpg = files.some(
-        (file) => file.includes('dzi') || file.includes('jpg'),
-      );
-      if (hasDziOrJpg) {
-        const folderPathUrl = new URL(folderPath).searchParams.get(
-          'folderPath',
-        );
+    const lastSeparatorIndex = Math.max(
+      folderPath.lastIndexOf('\\'),
+      folderPath.lastIndexOf('/'),
+    );
+    const imageName = folderPath.substring(lastSeparatorIndex + 1);
+    const folderPathValue = folderPath.substring(0, lastSeparatorIndex + 1);
 
-        const extractedPath = folderPathUrl.substring(
-          0,
-          folderPathUrl.lastIndexOf('/') + 1,
-        );
-        const lastSlashIndex = folderPath.lastIndexOf('/');
-        const imageName = folderPath.substring(lastSlashIndex + 1);
-        console.log(imageName);
-        console.log(extractedPath);
-        const absoluteImagePath = path.join(extractedPath, imageName);
-        //있는경우
+    if (imageName) {
+      const absoluteImagePath = path.join(folderPathValue, imageName);
+      try {
         fs.accessSync(absoluteImagePath, fs.constants.R_OK);
         const fileStream = fs.createReadStream(absoluteImagePath);
         fileStream.pipe(res);
-      } else {
-        res.status(HttpStatus.OK).json(files);
+      } catch (error) {
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .send('File not found or permission issue');
       }
-    } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('폴더 못읽음');
+    } else {
+      try {
+        const files = fs.readdirSync(folderPath);
+        res.status(HttpStatus.OK).json(files);
+      } catch (error) {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send('폴더를 읽을 수 없습니다.');
+      }
     }
   }
 }
