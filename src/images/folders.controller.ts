@@ -14,33 +14,24 @@ export class FoldersController {
       return res.status(HttpStatus.BAD_REQUEST).send('폴더 못찾음');
     }
 
-    const lastSeparatorIndex = Math.max(
-      folderPath.lastIndexOf('\\'),
-      folderPath.lastIndexOf('/'),
-    );
-    const imageName = folderPath.substring(lastSeparatorIndex + 1);
-    const folderPathValue = folderPath.substring(0, lastSeparatorIndex + 1);
-
-    if (imageName) {
-      const absoluteImagePath = path.join(folderPathValue, imageName);
-      try {
-        fs.accessSync(absoluteImagePath, fs.constants.R_OK);
-        const fileStream = fs.createReadStream(absoluteImagePath);
-        fileStream.pipe(res);
-      } catch (error) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .send('File not found or permission issue');
-      }
-    } else {
-      try {
+    try {
+      const stats = fs.statSync(folderPath); // 파일 또는 폴더의 정보를 가져옴
+      if (stats.isDirectory()) {
+        // 폴더인 경우 폴더 내 파일 목록을 반환
         const files = fs.readdirSync(folderPath);
         res.status(HttpStatus.OK).json(files);
-      } catch (error) {
-        res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .send('폴더를 읽을 수 없습니다.');
+      } else if (stats.isFile()) {
+        // 파일인 경우 해당 파일을 스트리밍
+        const fileStream = fs.createReadStream(folderPath);
+        fileStream.pipe(res);
+      } else {
+        // 파일도 폴더도 아닌 경우 에러 반환
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('잘못된 경로입니다.');
       }
+    } catch (error) {
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .send('파일 또는 폴더를 찾을 수 없습니다.');
     }
   }
 }
