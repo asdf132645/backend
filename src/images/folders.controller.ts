@@ -14,9 +14,18 @@ export class FoldersController {
     }
 
     try {
-      // 폴더 내의 파일 목록을 읽어옵니다.
       const files = fs.readdirSync(folderPath);
-      res.status(HttpStatus.OK).json(files);
+      const hasDziOrJpg = files.some(
+        (file) => file.includes('dzi') || file.includes('jpg'),
+      );
+      if (hasDziOrJpg) {
+        //있는경우
+        fs.accessSync(folderPath, fs.constants.R_OK);
+        const fileStream = fs.createReadStream(folderPath);
+        fileStream.pipe(res);
+      } else {
+        res.status(HttpStatus.OK).json(files);
+      }
     } catch (error) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('폴더 못읽음');
     }

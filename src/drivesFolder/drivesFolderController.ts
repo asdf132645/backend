@@ -1,11 +1,11 @@
-// src/drivesFolder/drivesFolder.controller.ts
+// src/folder/folder.controller.ts
 
 import { Controller, Get } from '@nestjs/common';
 import { execSync } from 'child_process';
 import * as os from 'os';
 
-@Controller('drivesFolder')
-export class DrivesFolderController {
+@Controller('folder')
+export class FolderController {
   @Get('drives')
   getDrives(): string[] {
     try {

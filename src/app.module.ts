@@ -26,8 +26,9 @@ import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
 import { CombinedModule } from './combinedProtocol/combined.module';
 import { LoggerService } from './logger.service';
-import { DrivesFolderController } from './drivesFolder/drivesFolderController';
+import { FolderController } from './drivesFolder/drivesFolderController';
 import { FoldersController } from './images/folders.controller';
+import { PdfController } from './pdfDown/pdf.controller';
 
 @Module({
   imports: [
@@ -57,9 +58,10 @@ import { FoldersController } from './images/folders.controller';
   ],
   controllers: [
     AppController,
-    DrivesFolderController,
+    FolderController,
     ImagesController,
     FoldersController,
+    PdfController,
   ],
   providers: [
     LoggerService,
