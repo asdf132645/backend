@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import * as fs from 'fs';
+import path from 'path';
 
 @Controller('folders')
 export class FoldersController {
@@ -18,10 +19,21 @@ export class FoldersController {
       const hasDziOrJpg = files.some(
         (file) => file.includes('dzi') || file.includes('jpg'),
       );
+      const folderPathUrl = new URL(folderPath).searchParams.get('folderPath');
+
+      const extractedPath = folderPathUrl.substring(
+        0,
+        folderPathUrl.lastIndexOf('/') + 1,
+      );
+      const lastSlashIndex = folderPath.lastIndexOf('/');
+      const imageName = folderPath.substring(lastSlashIndex + 1);
+      console.log(imageName);
+      console.log(extractedPath);
+      const absoluteImagePath = path.join(extractedPath, imageName);
       if (hasDziOrJpg) {
         //있는경우
-        fs.accessSync(folderPath, fs.constants.R_OK);
-        const fileStream = fs.createReadStream(folderPath);
+        fs.accessSync(absoluteImagePath, fs.constants.R_OK);
+        const fileStream = fs.createReadStream(absoluteImagePath);
         fileStream.pipe(res);
       } else {
         res.status(HttpStatus.OK).json(files);
