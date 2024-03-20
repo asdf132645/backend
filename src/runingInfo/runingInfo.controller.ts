@@ -1,6 +1,15 @@
 // runing-info.controller.ts
 
-import { Controller, Post, Body, Get, Query, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Put,
+  Delete,
+  Param,
+} from '@nestjs/common';
 import { RuningInfoService } from './runingInfo.service';
 import {
   CreateRuningInfoDto,
@@ -17,6 +26,12 @@ export class RuningInfoController {
     @Body() createDto: CreateRuningInfoDto,
   ): Promise<RuningInfoEntity> {
     return this.runingInfoService.create(createDto);
+  }
+  @Delete('delete')
+  async deleteMultiple(@Body() ids: string[]): Promise<{ success: boolean }> {
+    console.log(ids);
+    const result = await this.runingInfoService.delete(ids);
+    return { success: result };
   }
 
   @Put('update')

@@ -45,7 +45,7 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          // this.logger.log(message);
+          this.logger.log(message);
           this.webSocketGetData(message);
         }
       } catch (e) {

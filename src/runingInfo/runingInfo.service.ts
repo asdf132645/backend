@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Like, Repository } from 'typeorm';
+import { Between, In, Like, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import {
   RbcInfoDto,
@@ -97,6 +97,20 @@ export class RuningInfoService {
     }
 
     return updatedItems;
+  }
+
+  async delete(ids: string[]): Promise<boolean> {
+    try {
+      // 해당하는 엔티티를 삭제하기 위한 조건을 명시
+      console.log(ids);
+      const result = await this.runingInfoEntityRepository.delete({
+        id: In(ids),
+      });
+      return result.affected > 0; // affected가 0보다 크면 성공
+    } catch (error) {
+      console.error('Error while deleting entities:', error);
+      return false; // 삭제 실패
+    }
   }
 
   async findAllWithPagingAndFilter(
