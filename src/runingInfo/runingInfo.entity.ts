@@ -133,4 +133,7 @@ export class RuningInfoEntity {
 
   @Column()
   memo?: string;
+
+  @Column()
+  rbcMemo?: string;
 }

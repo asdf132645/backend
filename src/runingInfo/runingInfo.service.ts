@@ -69,6 +69,7 @@ export class RuningInfoService {
         existingEntity.isNormal = item.isNormal;
         existingEntity.submit = item.submit;
         existingEntity.memo = item.memo;
+        existingEntity.rbcMemo = item.rbcMemo;
         // WbcInfoDto 매핑
         // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
 

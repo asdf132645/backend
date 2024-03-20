@@ -44,6 +44,7 @@ export class RuningInfoDtoItems {
   classificationResult?: any[];
   isNsNbIntegration?: string;
   memo?: string;
+  rbcMemo?: string;
 }
 
 export class WbcInfoDto {
