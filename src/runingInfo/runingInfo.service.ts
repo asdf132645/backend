@@ -77,7 +77,7 @@ export class RuningInfoService {
         existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
 
         // RbcInfoDto 매핑
-        existingEntity.rbcInfo = this.mapRbcInfo(item.rbcInfo);
+        // existingEntity.rbcInfo = this.mapRbcInfo(item.rbcInfo);
 
         // ProcessInfoDto 매핑
         existingEntity.processInfo = this.mapProcessInfo(item.processInfo);

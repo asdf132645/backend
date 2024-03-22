@@ -29,6 +29,8 @@ import { LoggerService } from './logger.service';
 import { FolderController } from './drivesFolder/drivesFolderController';
 import { FoldersController } from './images/folders.controller';
 import { PdfController } from './pdfDown/pdf.controller';
+import { FileSystemController } from './fileSys/file-system.controller';
+import { FileSystemService } from "./fileSys/file-system.service";
 
 @Module({
   imports: [
@@ -62,10 +64,12 @@ import { PdfController } from './pdfDown/pdf.controller';
     ImagesController,
     FoldersController,
     PdfController,
+    FileSystemController,
   ],
   providers: [
     LoggerService,
     AppService,
+    FileSystemService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,

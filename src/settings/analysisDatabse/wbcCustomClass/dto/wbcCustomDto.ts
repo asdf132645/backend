@@ -10,6 +10,7 @@ export class classArr {
   customNum: number;
   abbreviation: string;
   className: string;
+  id: any;
 }
 
 export class UpdateWbcCustomClassDto {

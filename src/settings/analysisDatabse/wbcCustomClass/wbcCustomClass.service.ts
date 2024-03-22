@@ -41,7 +41,6 @@ export class WbcCustomClassService {
     updateDto: UpdateWbcCustomClassDto,
   ): Promise<WbcCustomClass[]> {
     const { classArr } = updateDto;
-
     const updatedClasses: WbcCustomClass[] = [];
 
     for (const classItem of classArr) {
@@ -53,12 +52,12 @@ export class WbcCustomClassService {
 
       // userId와 customNum이 모두 일치하는 엔터티를 찾기 위해 where 옵션을 추가
       await this.wbcCustomClassRepository.update(
-        { userId, id: classItem.customNum },
+        { userId, id: classItem?.id },
         wbcCustomClass,
       );
 
       const updatedClass = await this.wbcCustomClassRepository.findOne({
-        where: { userId, customNum: classItem.customNum },
+        where: { userId, customNum: classItem?.id },
       });
 
       updatedClasses.push(updatedClass);
