@@ -107,7 +107,7 @@ export class CombinedService
         const seData = [data.payload];
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
-          // console.log(serializedData);
+          console.log(serializedData);
           this.connectedClient.write(serializedData);
         }
       } catch (error) {
