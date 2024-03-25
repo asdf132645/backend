@@ -1,4 +1,3 @@
-// ormconfig.ts
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from './src/user/entities/user.entity';
 import { CellImgAnalyzed } from './src/settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
@@ -16,14 +15,17 @@ import { WbcRunCountEntity } from './src/settings/report/runInfoCount/wbcRunCoun
 import { MinCountEntity } from './src/settings/report/minCount/minCount.entity';
 import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
+import * as dotenv from 'dotenv';
+dotenv.config(); // dotenv 설정 추가
+
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
   const options: TypeOrmModuleOptions = {
     type: 'mysql',
-    host: 'localhost',
-    port: 3306,
-    username: 'root',
-    password: 'uimd5191!',
-    database: 'pb_db',
+    host: process.env.DB_HOST, // 환경 변수 사용
+    port: parseInt(process.env.DB_PORT), // 환경 변수 사용
+    username: process.env.DB_USERNAME, // 환경 변수 사용
+    password: process.env.DB_PASSWORD, // 환경 변수 사용
+    database: process.env.DB_DATABASE, // 환경 변수 사용
     synchronize: false,
     migrations: ['src/migrations/**/*{.ts,.js}'],
     entities: [
@@ -52,24 +54,3 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
 
   return options;
 };
-
-// export const createLisTypeOrmOptions =
-//   async (): Promise<TypeOrmModuleOptions> => {
-//     const lisOptions: TypeOrmModuleOptions = {
-//       type: 'mysql',
-//       host: 'localhost',
-//       port: 3307,
-//       username: 'SMLHEMA',
-//       password: 'HEMASML@#$',
-//       database: 'SLOJLIB',
-//       synchronize: false,
-//       migrations: ['src/migrations/**/*{.ts,.js}'],
-//       entities: [],
-//       extra: {
-//         connectionLimit: 10,
-//         multipleStatements: true,
-//       },
-//     };
-//
-//     return lisOptions;
-//   };

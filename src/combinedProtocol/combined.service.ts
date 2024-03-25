@@ -45,7 +45,7 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          this.logger.log(message);
+          // this.logger.log(message);
           this.webSocketGetData(message);
         }
       } catch (e) {
@@ -73,6 +73,9 @@ export class CombinedService
   }
 
   webSocketGetData(message: any): void {
+    this.logger.log('-------------------');
+    this.logger.log(message);
+    this.logger.log('-------------------');
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
@@ -107,7 +110,7 @@ export class CombinedService
         const seData = [data.payload];
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
-          console.log(serializedData);
+          // console.log(serializedData);
           this.connectedClient.write(serializedData);
         }
       } catch (error) {
