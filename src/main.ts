@@ -7,12 +7,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // import { createLisTypeOrmOptions } from '../ormconfig';
 
 async function bootstrap() {
-  // 먼저 HTTP 서버를 생성합니다.
   const httpApp = await NestFactory.create(AppModule);
 
   // CORS 에러 이슈로 프론트 8080 허용
   const corsOptions: CorsOptions = {
-    origin: ['http://localhost:8080', 'http://192.168.0.131:8080'],
+    origin: process.env.CORS_ORIGIN.split(','),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   };
