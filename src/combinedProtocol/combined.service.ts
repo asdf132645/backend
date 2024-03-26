@@ -10,6 +10,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { LoggerService } from '../logger.service';
+import * as dotenv from 'dotenv';
+
+dotenv.config(); // dotenv 설정 추가
 
 @Injectable()
 @WebSocketGateway({
@@ -38,14 +41,32 @@ export class CombinedService
     );
   }
 
+  extractIPAddress(inputString: string | string[]): string | null {
+    if (Array.isArray(inputString)) {
+      // inputString이 배열인 경우
+      return null; // 또는 다른 처리
+    }
+    const ipAddressRegex = /\d+\.\d+\.\d+\.\d+/;
+    const ipAddressMatch = inputString.match(ipAddressRegex);
+    return ipAddressMatch ? ipAddressMatch[0] : null;
+  }
+
   // 웹소켓 통신
   handleConnection(client: Socket) {
+    const clientIpAddress =
+      client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
+    const ipAddress = this.extractIPAddress(clientIpAddress);
+
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
 
     client.on('message', (message) => {
       try {
         if (this.wss) {
           // this.logger.log(message);
+          if (ipAddress !== process.env.DB_HOST) {
+            return;
+          }
+          console.log(clientIpAddress);
           this.webSocketGetData(message);
         }
       } catch (e) {
@@ -73,9 +94,6 @@ export class CombinedService
   }
 
   webSocketGetData(message: any): void {
-    this.logger.log('-------------------');
-    this.logger.log(message);
-    this.logger.log('-------------------');
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
@@ -108,9 +126,10 @@ export class CombinedService
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const seData = [data.payload];
+        console.log(data.payload);
+        console.log(typeof data.payload);
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
-          // console.log(serializedData);
           this.connectedClient.write(serializedData);
         }
       } catch (error) {
