@@ -26,13 +26,18 @@ export class CombinedService
   wss: Server;
   connectedClient: net.Socket | null = null;
   public count: number = 0; // 요청 처리 횟수를 저장하는 변수 추가
+  public reqArr: any = [];
+  public prevReqDttm: string | null = null; // 직전 요청의 reqDttm 저장
 
   constructor(private readonly logger: LoggerService) {}
 
+  // 이전 reqDttm 값을 갱신하는 함수
+  updatePrevReqDttm(reqDttm: string) {
+    this.prevReqDttm = reqDttm;
+  }
+
   afterInit(server: Server) {
     this.wss = server;
-    // this.startTcpServer(11235);
-    // this.setupTcpClient('localhost', 11235);
   }
 
   handleDisconnect(client: Socket) {
@@ -57,7 +62,7 @@ export class CombinedService
       client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
     const ipAddress = this.extractIPAddress(clientIpAddress);
 
-    this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
+    // this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
 
     client.on('message', (message) => {
       try {
@@ -66,7 +71,7 @@ export class CombinedService
           if (ipAddress !== process.env.DB_HOST) {
             return;
           }
-          console.log(clientIpAddress);
+          // console.log(clientIpAddress);
           this.webSocketGetData(message);
         }
       } catch (e) {
@@ -83,7 +88,6 @@ export class CombinedService
     });
   }
 
-  // handleTcpData 메서드 수정
   handleTcpData(data: any): void {
     const jsonData = data.toString('utf-8');
     if (this.wss) {
@@ -107,10 +111,7 @@ export class CombinedService
     }
 
     if (this.wss) {
-      // this.logger.log('프론트로 다시 보내기');
-      // console.log(data);
       let jsonData = '';
-
       if (data?.err) {
         jsonData = JSON.stringify({ bufferData: 'err' });
       } else {
@@ -126,8 +127,6 @@ export class CombinedService
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const seData = [data.payload];
-        console.log(data.payload);
-        console.log(typeof data.payload);
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
           this.connectedClient.write(serializedData);
