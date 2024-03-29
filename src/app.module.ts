@@ -30,7 +30,8 @@ import { FolderController } from './drivesFolder/drivesFolderController';
 import { FoldersController } from './images/folders.controller';
 import { PdfController } from './pdfDown/pdf.controller';
 import { FileSystemController } from './fileSys/file-system.controller';
-import { FileSystemService } from "./fileSys/file-system.service";
+import { FileSystemService } from './fileSys/file-system.service';
+import { CanvasController } from './canvas/canvasController';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { FileSystemService } from "./fileSys/file-system.service";
     FoldersController,
     PdfController,
     FileSystemController,
+    CanvasController,
   ],
   providers: [
     LoggerService,

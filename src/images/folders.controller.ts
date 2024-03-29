@@ -1,7 +1,6 @@
 import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import * as fs from 'fs';
-import * as path from 'path';
 
 @Controller('folders')
 export class FoldersController {

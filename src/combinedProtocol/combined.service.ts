@@ -126,6 +126,7 @@ export class CombinedService
   sendDataToEmbeddedServer(data: any): void {
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
+        console.log(data.payload);
         const seData = [data.payload];
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
