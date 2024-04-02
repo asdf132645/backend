@@ -115,7 +115,7 @@ export class CombinedService
       if (data?.err) {
         jsonData = JSON.stringify({ bufferData: 'err' });
       } else {
-        jsonData = JSON.stringify({ bufferData: data.toString() });
+        jsonData = JSON.stringify({ bufferData: data.toString('utf-8') });
       }
       this.wss.emit('chat', jsonData);
     } else {
