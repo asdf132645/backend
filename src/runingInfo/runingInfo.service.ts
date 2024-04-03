@@ -64,7 +64,7 @@ export class RuningInfoService {
         existingEntity.maxWbcCount = item.maxWbcCount;
         existingEntity.lowPowerPath = item.lowPowerPath;
         existingEntity.runningPath = item.runningPath;
-        existingEntity.bminfo = item.bminfo;
+        // existingEntity.bminfo = item.bminfo;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
         existingEntity.submit = item.submit;
@@ -75,6 +75,7 @@ export class RuningInfoService {
 
         // wbcInfoAfter 매핑
         existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
+        existingEntity.bmInfoAfter = this.mapWbcInfoAfter(item.bmInfoAfter);
 
         // RbcInfoDto 매핑
         // existingEntity.rbcInfo = this.mapRbcInfo(item.rbcInfo);

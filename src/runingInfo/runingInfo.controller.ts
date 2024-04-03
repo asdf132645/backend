@@ -8,7 +8,6 @@ import {
   Query,
   Put,
   Delete,
-  Param,
 } from '@nestjs/common';
 import { RuningInfoService } from './runingInfo.service';
 import {

@@ -12,11 +12,12 @@ import { Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { exec } from 'child_process';
 
 @Controller('images')
 export class ImagesController {
   @Get()
-  getImage(
+  async getImage(
     @Query('folder') folder: string,
     @Query('imageName') imageName: string,
     @Res() res: Response,
@@ -30,8 +31,29 @@ export class ImagesController {
 
     try {
       fs.accessSync(absoluteImagePath, fs.constants.R_OK);
-      const fileStream = fs.createReadStream(absoluteImagePath);
-      fileStream.pipe(res);
+
+      // 이미지 최적화
+      exec(
+        `npx imagemin "${absoluteImagePath}" --out-dir="${folder}"`,
+        (error) => {
+          if (error) {
+            res
+              .status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .send('Error optimizing the image');
+            return;
+          }
+
+          // 최적화된 이미지 파일 경로
+          const optimizedImagePath = path.join(
+            folder,
+            path.basename(absoluteImagePath),
+          );
+
+          // 최적화된 이미지를 클라이언트에 전송
+          const fileStream = fs.createReadStream(optimizedImagePath);
+          fileStream.pipe(res);
+        },
+      );
     } catch (error) {
       res
         .status(HttpStatus.NOT_FOUND)
