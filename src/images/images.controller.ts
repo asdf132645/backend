@@ -17,7 +17,31 @@ import { exec } from 'child_process';
 @Controller('images')
 export class ImagesController {
   @Get()
-  async getImage(
+  getImage(
+    @Query('folder') folder: string,
+    @Query('imageName') imageName: string,
+    @Res() res: Response,
+  ) {
+    if (!folder || !imageName) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
+    }
+
+    // 이미지 경로를 받아와서 절대 경로로 조합
+    const absoluteImagePath = path.join(folder, imageName);
+
+    try {
+      fs.accessSync(absoluteImagePath, fs.constants.R_OK);
+      const fileStream = fs.createReadStream(absoluteImagePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .send('File not found or permission issue');
+    }
+  }
+
+  @Get('bm')
+  async getBmImage(
     @Query('folder') folder: string,
     @Query('imageName') imageName: string,
     @Res() res: Response,
