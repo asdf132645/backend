@@ -58,10 +58,13 @@ export class ImagesController {
     try {
       fs.accessSync(absoluteImagePath, fs.constants.R_OK);
 
+      // 이미지 캐싱
+      res.set('Cache-Control', 'public, max-age=31536000'); // 캐시 유효 시간 1년
+
       // 이미지 최적화
       exec(
         `npx imagemin "${absoluteImagePath}" --out-dir="${folder}"`,
-        (error) => {
+        async (error) => {
           if (error) {
             res
               .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -75,9 +78,23 @@ export class ImagesController {
             path.basename(absoluteImagePath),
           );
 
-          // 최적화된 이미지를 클라이언트에 전송
-          const fileStream = fs.createReadStream(optimizedImagePath);
-          fileStream.pipe(res);
+          // 이미지 포맷 변환 (예: WebP)
+          const convertedImagePath = `${optimizedImagePath}.webp`;
+          exec(
+            `npx cwebp -q 80 "${optimizedImagePath}" -o "${convertedImagePath}"`,
+            async (error) => {
+              if (error) {
+                res
+                  .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                  .send('Error converting image format');
+                return;
+              }
+
+              // 최적화된 이미지를 클라이언트에 전송
+              const fileStream = fs.createReadStream(convertedImagePath);
+              fileStream.pipe(res);
+            },
+          );
         },
       );
     } catch (error) {
