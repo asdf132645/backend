@@ -42,68 +42,6 @@ export class ImagesController {
     }
   }
 
-  @Get('bm')
-  async getBmImage(
-    @Query('folder') folder: string,
-    @Query('imageName') imageName: string,
-    @Res() res: Response,
-  ) {
-    if (!folder || !imageName) {
-      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
-    }
-
-    // 이미지 경로를 받아와서 절대 경로로 조합
-    const absoluteImagePath = path.join(folder, imageName);
-
-    try {
-      fs.accessSync(absoluteImagePath, fs.constants.R_OK);
-
-      // 이미지 캐싱
-      res.set('Cache-Control', 'public, max-age=31536000'); // 캐시 유효 시간 1년
-
-      // 이미지 최적화
-      exec(
-        `npx imagemin "${absoluteImagePath}" --out-dir="${folder}"`,
-        async (error) => {
-          if (error) {
-            res
-              .status(HttpStatus.INTERNAL_SERVER_ERROR)
-              .send('Error optimizing the image');
-            return;
-          }
-
-          // 최적화된 이미지 파일 경로
-          const optimizedImagePath = path.join(
-            folder,
-            path.basename(absoluteImagePath),
-          );
-
-          // 이미지 포맷 변환 (예: WebP)
-          const convertedImagePath = `${optimizedImagePath}.webp`;
-          exec(
-            `npx cwebp -q 80 "${optimizedImagePath}" -o "${convertedImagePath}"`,
-            async (error) => {
-              if (error) {
-                res
-                  .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                  .send('Error converting image format');
-                return;
-              }
-
-              // 최적화된 이미지를 클라이언트에 전송
-              const fileStream = fs.createReadStream(convertedImagePath);
-              fileStream.pipe(res);
-            },
-          );
-        },
-      );
-    } catch (error) {
-      res
-        .status(HttpStatus.NOT_FOUND)
-        .send('File not found or permission issue');
-    }
-  }
-
   @Get('move')
   moveImage(
     @Query('sourceFolder') sourceFolder: string,
