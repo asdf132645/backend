@@ -14,10 +14,8 @@ export class FoldersController {
       return res.status(HttpStatus.BAD_REQUEST).send('폴더 못찾음');
     }
 
-    const basePath = '/your/base/path'; // 기본 경로 설정
-
     try {
-      const fullPath = path.join(basePath, folderPath); // 전체 경로 생성
+      const fullPath = path.join(folderPath); // 전체 경로 생성
       const stats = fs.statSync(fullPath);
       if (stats.isDirectory()) {
         const files = fs.readdirSync(fullPath);
