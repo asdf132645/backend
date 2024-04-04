@@ -14,17 +14,14 @@ export class FoldersController {
     }
 
     try {
-      const stats = fs.statSync(folderPath); // 파일 또는 폴더의 정보를 가져옴
+      const stats = fs.statSync(folderPath);
       if (stats.isDirectory()) {
-        // 폴더인 경우 폴더 내 파일 목록을 반환
         const files = fs.readdirSync(folderPath);
         res.status(HttpStatus.OK).json(files);
       } else if (stats.isFile()) {
-        // 파일인 경우 해당 파일을 스트리밍
         const fileStream = fs.createReadStream(folderPath);
         fileStream.pipe(res);
       } else {
-        // 파일도 폴더도 아닌 경우 에러 반환
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('잘못된 경로입니다.');
       }
     } catch (error) {

@@ -7,12 +7,14 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
+  Body,
 } from '@nestjs/common';
 import { Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { exec } from 'child_process';
+import * as sharp from 'sharp';
 
 @Controller('images')
 export class ImagesController {
@@ -128,5 +130,29 @@ export class ImagesController {
 
     // 저장된 파일 경로를 반환
     return { imagePath: filePath };
+  }
+
+  @Post('crop-image')
+  async cropImage(@Body() requestBody: any, @Res() res: Response) {
+    try {
+      // 요청 바디로부터 좌표와 이미지 경로 가져오기
+      const { startX, startY, endX, endY, originalImagePath, newImagePath } =
+        requestBody;
+
+      // 이미지 자르기
+      await sharp(originalImagePath)
+        .extract({
+          left: startX,
+          top: startY,
+          width: endX - startX,
+          height: endY - startY,
+        })
+        .toFile(newImagePath);
+
+      // 저장한 새 이미지 경로 반환
+      return res.status(200).send(newImagePath);
+    } catch (error) {
+      return res.status(500).send(error.message);
+    }
   }
 }
