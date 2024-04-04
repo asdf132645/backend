@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import * as fs from 'fs';
+import * as path from 'path';
+import * as fs from 'fs'; // path 모듈 추가
 
 @Controller('folders')
 export class FoldersController {
@@ -13,13 +14,16 @@ export class FoldersController {
       return res.status(HttpStatus.BAD_REQUEST).send('폴더 못찾음');
     }
 
+    const basePath = '/your/base/path'; // 기본 경로 설정
+
     try {
-      const stats = fs.statSync(folderPath);
+      const fullPath = path.join(basePath, folderPath); // 전체 경로 생성
+      const stats = fs.statSync(fullPath);
       if (stats.isDirectory()) {
-        const files = fs.readdirSync(folderPath);
+        const files = fs.readdirSync(fullPath);
         res.status(HttpStatus.OK).json(files);
       } else if (stats.isFile()) {
-        const fileStream = fs.createReadStream(folderPath);
+        const fileStream = fs.createReadStream(fullPath);
         fileStream.pipe(res);
       } else {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('잘못된 경로입니다.');
