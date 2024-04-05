@@ -127,7 +127,6 @@ export class CombinedService
   sendDataToEmbeddedServer(data: any): void {
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
-        console.log(data.payload);
         const seData = [data.payload];
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
@@ -157,9 +156,27 @@ export class CombinedService
         console.log('setupTcpClient');
       });
 
-      newClient.on('data', (data) => {
-        // this.logger.log(`업데이트된 클라이언트로부터 데이터 수신: ${data}`);
-        this.handleTcpData(data);
+      const partialData: Buffer[] = []; // 부분적인 데이터를 저장할 배열
+
+      newClient.on('data', (chunk) => {
+        console.log(chunk);
+        partialData.push(chunk);
+
+        // 데이터가 JSON 형식으로 완전히 전송되었는지 확인
+        let jsonData: string | null = null;
+        for (let i = 0; i < partialData.length; i++) {
+          const buffer = partialData[i];
+          if (buffer.toString().includes('}')) {
+            jsonData = Buffer.concat(partialData).toString('utf-8');
+            break;
+          }
+        }
+
+        // 완전한 JSON이 수신되었을 경우 처리
+        if (jsonData !== null) {
+          this.handleTcpData(jsonData);
+          partialData.length = 0; // 버퍼 초기화
+        }
       });
 
       newClient.on('end', () => {
