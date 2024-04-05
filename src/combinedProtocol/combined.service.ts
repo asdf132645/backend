@@ -11,6 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
+// import { Readable } from 'stream';
 
 dotenv.config(); // dotenv 설정 추가
 
@@ -113,9 +114,9 @@ export class CombinedService
     if (this.wss) {
       let jsonData = '';
       if (data?.err) {
-        jsonData = JSON.stringify({ bufferData: 'err' });
+        jsonData = `{ bufferData: 'err' }`;
       } else {
-        jsonData = JSON.stringify({ bufferData: data.toString('utf-8') });
+        jsonData = `{ bufferData: ${data} }`;
       }
       this.wss.emit('chat', jsonData);
     } else {
