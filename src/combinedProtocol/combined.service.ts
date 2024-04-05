@@ -114,9 +114,9 @@ export class CombinedService
     if (this.wss) {
       let jsonData = '';
       if (data?.err) {
-        jsonData = `{ bufferData: 'err' }`;
+        jsonData = `{ "bufferData": 'err' }`;
       } else {
-        jsonData = `{ bufferData: ${data} }`;
+        jsonData = `{ "bufferData": ${data} }`;
       }
       this.wss.emit('chat', jsonData);
     } else {
