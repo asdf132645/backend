@@ -45,7 +45,6 @@ export class RuningInfoDtoItems {
   isNsNbIntegration?: string;
   memo?: string;
   rbcMemo?: string;
-  bmInfo?: any[];
   bmInfoAfter?: any[];
 }
 
