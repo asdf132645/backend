@@ -80,6 +80,17 @@ export class CombinedService
       }
     });
 
+    client.on('state', (state: any) => {
+      try {
+        if (this.wss) {
+          //
+          console.log(state);
+        }
+      } catch (e) {
+        this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
+      }
+    });
+
     client.on('disconnect', () => {
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });
@@ -89,14 +100,15 @@ export class CombinedService
     });
   }
 
-  handleTcpData(data: any): void {
-    const jsonData = data.toString('utf-8');
-    if (this.wss) {
-      this.sendDataToWebSocketClients(jsonData);
-    } else {
-      this.logger.error('WebSocketService가 초기화되지 않았습니다.');
-    }
-  }
+  // handleTcpData(data: any): void {
+  //   // const jsonData = data.toString('utf-8');
+  //   const jsonData = data;
+  //   if (this.wss) {
+  //     this.sendDataToWebSocketClients(jsonData);
+  //   } else {
+  //     this.logger.error('WebSocketService가 초기화되지 않았습니다.');
+  //   }
+  // }
 
   webSocketGetData(message: any): void {
     this.sendDataToEmbeddedServer(message);
@@ -116,7 +128,7 @@ export class CombinedService
       if (data?.err) {
         jsonData = `{ "bufferData": 'err' }`;
       } else {
-        jsonData = `{ "bufferData": ${data} }`;
+        jsonData = data;
       }
       this.wss.emit('chat', jsonData);
     } else {
@@ -163,19 +175,25 @@ export class CombinedService
         partialData.push(chunk);
 
         // 데이터가 JSON 형식으로 완전히 전송되었는지 확인
-        let jsonData: string | null = null;
-        for (let i = 0; i < partialData.length; i++) {
-          const buffer = partialData[i];
-          if (buffer.toString().includes('}')) {
-            jsonData = Buffer.concat(partialData).toString('utf-8');
-            break;
-          }
-        }
+        // let jsonData: string | null = null;
+        // for (let i = 0; i < partialData.length; i++) {
+        //   const buffer = partialData[i];
+        //   if (buffer.toString().includes('}')) {
+        //     jsonData = Buffer.concat(partialData).toString('utf-8');
+        //     break;
+        //   }
+        // }
 
         // 완전한 JSON이 수신되었을 경우 처리
-        if (jsonData !== null) {
-          this.handleTcpData(jsonData);
-          partialData.length = 0; // 버퍼 초기화
+        // if (chunk !== null) {
+        //   this.handleTcpData(chunk);
+        //   partialData.length = 0; // 버퍼 초기화
+        // }
+
+        if (this.wss) {
+          this.sendDataToWebSocketClients(chunk);
+        } else {
+          this.logger.error('WebSocketService가 초기화되지 않았습니다.');
         }
       });
 
