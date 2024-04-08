@@ -159,7 +159,7 @@ export class CombinedService
       const partialData: Buffer[] = []; // 부분적인 데이터를 저장할 배열
 
       newClient.on('data', (chunk) => {
-        console.log(chunk);
+        // console.log(chunk);
         partialData.push(chunk);
 
         // 데이터가 JSON 형식으로 완전히 전송되었는지 확인
