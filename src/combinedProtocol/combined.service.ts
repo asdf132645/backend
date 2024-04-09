@@ -85,6 +85,7 @@ export class CombinedService
         if (this.wss) {
           //
           console.log(state);
+          this.wss.emit('stateVal', state);
         }
       } catch (e) {
         this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
