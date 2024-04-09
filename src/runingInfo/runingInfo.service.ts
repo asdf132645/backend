@@ -70,6 +70,8 @@ export class RuningInfoService {
         existingEntity.submit = item.submit;
         existingEntity.memo = item.memo;
         existingEntity.rbcMemo = item.rbcMemo;
+        existingEntity.state = item.state;
+        existingEntity.pcIp = item.pcIp;
         // WbcInfoDto 매핑
         // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
 
@@ -264,5 +266,34 @@ export class RuningInfoService {
       analyzedDttm: classItem.analyzedDttm,
       percent: classItem.percent,
     }));
+  }
+
+  async clearPcIpAndSetStateFalse(pcIp: string): Promise<void> {
+    try {
+      console.log(pcIp);
+      // PC IP가 주어진 값인 엔터티를 선택
+      const entityWithPcIp = await this.runingInfoEntityRepository.findOne({
+        where: { pcIp },
+      });
+
+      if (!entityWithPcIp) {
+        console.error(`Entity with PC IP ${pcIp} not found`);
+        return;
+      }
+
+      // PC IP를 빈 문자열로 변경
+      entityWithPcIp.pcIp = '';
+
+      // 상태를 false로 변경
+      entityWithPcIp.state = false;
+
+      // 변경된 엔터티를 저장
+      await this.runingInfoEntityRepository.save(entityWithPcIp);
+    } catch (error) {
+      console.error(
+        'Error while clearing PC IP and setting state to false:',
+        error,
+      );
+    }
   }
 }

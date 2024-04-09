@@ -63,6 +63,22 @@ export class User {
   @ApiProperty({ example: 'active', description: 'User state', nullable: true })
   state?: string;
 
+  @Column({ nullable: true })
+  @ApiProperty({
+    example: '192.65.131.55',
+    description: 'User ip',
+    nullable: true,
+  })
+  pcIp?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty({
+    example: '',
+    description: 'viewerCheck',
+    nullable: true,
+  })
+  viewerCheck?: string;
+
   @OneToOne(() => CellImgAnalyzed, (cellImgAnalyzed) => cellImgAnalyzed.user)
   @JoinColumn({ name: 'userId' })
   cellImgAnalyzed: CellImgAnalyzed;

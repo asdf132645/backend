@@ -46,6 +46,7 @@ export class RuningInfoDtoItems {
   memo?: string;
   rbcMemo?: string;
   bmInfoAfter?: any[];
+  pcIp: string;
 }
 
 export class WbcInfoDto {

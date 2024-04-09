@@ -58,6 +58,7 @@ export class UserService {
         'userType',
         'subscriptionDate',
         'latestDate',
+        'pcIp',
       ],
     });
 
@@ -88,5 +89,29 @@ export class UserService {
       return undefined;
     }
     return users;
+  }
+
+  async update(
+    userId: string,
+    { pcIp, viewerCheck }: Partial<CreateUserDto>,
+  ): Promise<User | undefined> {
+    try {
+      const user = await this.userRepository.findOne({ where: { userId } });
+
+      if (!user) {
+        console.error('User not found');
+        return undefined;
+      }
+
+      await this.userRepository.update(user.id, { pcIp, viewerCheck });
+      const updatedUser = await this.userRepository.findOne({
+        where: { userId },
+      });
+
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return undefined;
+    }
   }
 }

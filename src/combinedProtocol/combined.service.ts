@@ -11,6 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
+import { RuningInfoService } from '../runingInfo/runingInfo.service';
 // import { Readable } from 'stream';
 
 dotenv.config(); // dotenv 설정 추가
@@ -29,8 +30,12 @@ export class CombinedService
   public count: number = 0; // 요청 처리 횟수를 저장하는 변수 추가
   public reqArr: any = [];
   public prevReqDttm: string | null = null; // 직전 요청의 reqDttm 저장
+  clients: Socket[] = [];
 
-  constructor(private readonly logger: LoggerService) {}
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly runingInfoService: RuningInfoService,
+  ) {}
 
   // 이전 reqDttm 값을 갱신하는 함수
   updatePrevReqDttm(reqDttm: string) {
@@ -41,10 +46,25 @@ export class CombinedService
     this.wss = server;
   }
 
-  handleDisconnect(client: Socket) {
-    this.logger.log(
-      `WebSocket 클라이언트 연결 끊김: ${client.conn.remoteAddress}`,
-    );
+  async handleDisconnect(client: Socket) {
+    const clientIpAddress =
+      client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
+    const ipAddress = this.extractIPAddress(clientIpAddress);
+    // PC IP 확인 후 처리
+    if (ipAddress) {
+      await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
+    }
+    const clientIndex = this.clients.findIndex((c) => c.id === client.id);
+    if (clientIndex !== -1) {
+      this.clients.splice(clientIndex, 1);
+      await this.broadcastDisconnectedClient();
+    }
+  }
+
+  async broadcastDisconnectedClient() {
+    this.clients.forEach((client) => {
+      client.emit('stateVal', '');
+    });
   }
 
   extractIPAddress(inputString: string | string[]): string | null {
@@ -62,18 +82,16 @@ export class CombinedService
     const clientIpAddress =
       client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
     const ipAddress = this.extractIPAddress(clientIpAddress);
-
-    // this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
+    this.clients.push(client);
+    this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
 
     client.on('message', (message) => {
       try {
         if (this.wss) {
           // this.logger.log(message);
-          if (ipAddress !== process.env.DB_HOST) {
-            return;
+          if (ipAddress === process.env.DB_HOST) {
+            this.webSocketGetData(message);
           }
-          // console.log(clientIpAddress);
-          this.webSocketGetData(message);
         }
       } catch (e) {
         this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
@@ -83,8 +101,6 @@ export class CombinedService
     client.on('state', (state: any) => {
       try {
         if (this.wss) {
-          //
-          console.log(state);
           this.wss.emit('stateVal', state);
         }
       } catch (e) {
@@ -92,7 +108,24 @@ export class CombinedService
       }
     });
 
-    client.on('disconnect', () => {
+    client.on('viewerCheck', () => {
+      try {
+        if (this.wss) {
+          if (process.env.DB_HOST === ipAddress) {
+            this.wss.emit('viewerCheck', ipAddress);
+          }
+        }
+      } catch (e) {
+        this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
+      }
+    });
+
+    client.on('disconnect', async () => {
+      if (!this.connectedClient || this.connectedClient.destroyed) {
+        if (process.env.DB_HOST === ipAddress) {
+          this.webSocketGetData({ jobCmd: 'clientExit' });
+        }
+      }
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });
 
@@ -100,16 +133,6 @@ export class CombinedService
       this.logger.error(`WebSocket 클라이언트 오류: ${error.message}`);
     });
   }
-
-  // handleTcpData(data: any): void {
-  //   // const jsonData = data.toString('utf-8');
-  //   const jsonData = data;
-  //   if (this.wss) {
-  //     this.sendDataToWebSocketClients(jsonData);
-  //   } else {
-  //     this.logger.error('WebSocketService가 초기화되지 않았습니다.');
-  //   }
-  // }
 
   webSocketGetData(message: any): void {
     this.sendDataToEmbeddedServer(message);

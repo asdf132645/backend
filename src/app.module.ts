@@ -31,7 +31,7 @@ import { FoldersController } from './images/folders.controller';
 import { PdfController } from './pdfDown/pdf.controller';
 import { FileSystemController } from './fileSys/file-system.controller';
 import { FileSystemService } from './fileSys/file-system.service';
-
+import { IpModule } from './ipService/ipService.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -57,6 +57,7 @@ import { FileSystemService } from './fileSys/file-system.service';
     MinCountModule,
     RuningInfoModule,
     CombinedModule,
+    IpModule,
   ],
   controllers: [
     AppController,

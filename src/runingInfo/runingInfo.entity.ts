@@ -139,4 +139,7 @@ export class RuningInfoEntity {
 
   @Column()
   rbcMemo?: string;
+
+  @Column()
+  pcIp?: string;
 }
