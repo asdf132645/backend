@@ -6,23 +6,24 @@ import { ClassOrderService } from './classOrder.service';
 export class ClassOrderController {
   constructor(private readonly classOrderService: ClassOrderService) {}
 
-  @Get('get')
-  async getAllClassOrders(): Promise<ClassOrderDto[]> {
-    return this.classOrderService.getAllClassOrders();
+  @Get('get/:userName')
+  async getClassOrdersByUserName(
+    @Param('userName') userName: string,
+  ): Promise<ClassOrderDto[]> {
+    return this.classOrderService.getClassOrdersByUserName(Number(userName));
   }
 
   @Post('create')
-  async createClassOrder(
-    @Body() createDto: ClassOrderDto,
-  ): Promise<ClassOrderDto> {
-    return this.classOrderService.createClassOrder(createDto);
+  async createClassOrders(
+    @Body() createDtos: ClassOrderDto[],
+  ): Promise<ClassOrderDto[]> {
+    return this.classOrderService.createClassOrder(createDtos);
   }
 
-  @Put('update/:id')
-  async updateClassOrder(
-    @Param('id') id: number,
-    @Body() updateDto: ClassOrderDto,
-  ): Promise<ClassOrderDto | null> {
-    return this.classOrderService.updateClassOrder(id, updateDto);
+  @Put('update/:userName')
+  async updateAllClassOrders(
+    @Body() newData: ClassOrderDto[],
+  ): Promise<ClassOrderDto[]> {
+    return this.classOrderService.updateAllClassOrders(newData);
   }
 }

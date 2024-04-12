@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
-export class ClassOrderEntity {
+@Entity({ name: 'class_order' })
+export class ClassOrder {
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @Column()
   classId: string;
@@ -25,4 +25,7 @@ export class ClassOrderEntity {
 
   @Column()
   orderText: string;
+
+  @Column()
+  userName: number;
 }
