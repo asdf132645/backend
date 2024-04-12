@@ -32,6 +32,7 @@ import { PdfController } from './pdfDown/pdf.controller';
 import { FileSystemController } from './fileSys/file-system.controller';
 import { FileSystemService } from './fileSys/file-system.service';
 import { IpModule } from './ipService/ipService.module';
+import { ClassOrderModule } from './classOrder/classOrder.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -58,6 +59,7 @@ import { IpModule } from './ipService/ipService.module';
     RuningInfoModule,
     CombinedModule,
     IpModule,
+    ClassOrderModule,
   ],
   controllers: [
     AppController,
