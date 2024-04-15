@@ -21,27 +21,39 @@ export class ClassOrderService {
   async createClassOrder(
     createDtos: ClassOrderDto[],
   ): Promise<ClassOrderDto[]> {
-    // DTO 배열을 엔터티 배열로 변환
-    const classOrderEntities = createDtos.map((dto) => {
-      const classOrderEntity = new ClassOrder();
-      classOrderEntity.id = Number(dto.id);
-      classOrderEntity.title = dto.title;
-      classOrderEntity.name = dto.name;
-      classOrderEntity.count = dto.count;
-      classOrderEntity.percentText = dto.percentText;
-      classOrderEntity.keyText = dto.keyText;
-      classOrderEntity.orderText = dto.orderText;
-      classOrderEntity.userName = dto.userName;
-      classOrderEntity.classId = dto.classId;
-      return classOrderEntity;
-    });
+    // 새로운 주문을 저장할 배열
+    const newClassOrders: ClassOrder[] = [];
 
-    // 엔터티 배열을 한꺼번에 저장
+    for (const dto of createDtos) {
+      // 이미 존재하는 주문인지 확인
+      const existingOrder = await this.classOrderRepository.findOne({
+        where: { userName: Number(dto.userName) },
+      });
+
+      if (!existingOrder) {
+        // 존재하지 않는 경우 새로운 주문 생성
+        const classOrderEntity = new ClassOrder();
+        classOrderEntity.id = Number(dto.id);
+        classOrderEntity.title = dto.title;
+        classOrderEntity.name = dto.name;
+        classOrderEntity.count = dto.count;
+        classOrderEntity.percentText = dto.percentText;
+        classOrderEntity.keyText = dto.keyText;
+        classOrderEntity.orderText = dto.orderText;
+        classOrderEntity.userName = dto.userName;
+        classOrderEntity.classId = dto.classId;
+
+        newClassOrders.push(classOrderEntity);
+      }
+    }
+
+    // 새로운 주문을 데이터베이스에 저장
     const savedClassOrders =
-      await this.classOrderRepository.save(classOrderEntities);
+      await this.classOrderRepository.save(newClassOrders);
 
-    // 저장된 엔터티 배열을 DTO 배열로 변환하여 반환
+    // 저장된 주문을 DTO 배열로 변환하여 반환
     return savedClassOrders.map((savedOrder) => ({
+      idx: savedOrder.idx,
       id: savedOrder.id.toString(),
       title: savedOrder.title,
       name: savedOrder.name,
@@ -85,6 +97,7 @@ export class ClassOrderService {
 
   private entityToDto(classOrder: ClassOrder): ClassOrderDto {
     const {
+      idx,
       id,
       title,
       name,
@@ -96,6 +109,7 @@ export class ClassOrderService {
       classId,
     } = classOrder;
     return {
+      idx: idx,
       id: id.toString(),
       title,
       name,

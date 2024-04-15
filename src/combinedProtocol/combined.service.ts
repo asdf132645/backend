@@ -54,10 +54,22 @@ export class CombinedService
     if (ipAddress) {
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
+    if (process.env.DB_HOST === ipAddress) {
+      console.log('ss?');
+
+      this.webSocketGetData({
+        type: 'SEND_DATA',
+        payload: {
+          jobCmd: 'clientExit',
+          reqUserId: '',
+          reqDttm: '',
+        },
+      });
+    }
     const clientIndex = this.clients.findIndex((c) => c.id === client.id);
     if (clientIndex !== -1) {
-      this.clients.splice(clientIndex, 1);
       await this.broadcastDisconnectedClient();
+      this.clients.splice(clientIndex, 1);
     }
   }
 
@@ -121,11 +133,11 @@ export class CombinedService
     });
 
     client.on('disconnect', async () => {
-      if (!this.connectedClient || this.connectedClient.destroyed) {
-        if (process.env.DB_HOST === ipAddress) {
-          this.webSocketGetData({ jobCmd: 'clientExit' });
-        }
-      }
+      // if (!this.connectedClient || this.connectedClient.destroyed) {
+      //   if (process.env.DB_HOST === ipAddress) {
+      //     this.webSocketGetData({ jobCmd: 'clientExit' });
+      //   }
+      // }
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });
 

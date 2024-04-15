@@ -1,4 +1,5 @@
 export class ClassOrderDto {
+  idx?: number;
   id?: string;
   title: string;
   name: string;
