@@ -14,9 +14,7 @@ export class ClassOrderController {
   }
 
   @Post('create')
-  async createClassOrders(
-    @Body() createDtos: ClassOrderDto[],
-  ): Promise<ClassOrderDto[]> {
+  async createClassOrders(@Body() createDtos: any[]): Promise<any[]> {
     return this.classOrderService.createClassOrder(createDtos);
   }
 
@@ -24,6 +22,6 @@ export class ClassOrderController {
   async updateAllClassOrders(
     @Body() newData: ClassOrderDto[],
   ): Promise<ClassOrderDto[]> {
-    return this.classOrderService.updateAllClassOrders(newData);
+    return this.classOrderService.updateClassOrders(newData);
   }
 }

@@ -54,37 +54,29 @@ export class ClassOrderService {
     }));
   }
 
-  async updateClassOrder(
-    id: number,
-    updateDto: ClassOrderDto,
-  ): Promise<ClassOrderDto | null> {
-    const classOrder = await this.classOrderRepository.findOne({
-      where: { id },
-    });
-    if (!classOrder) return null;
-
-    classOrder.count = updateDto.count;
-    classOrder.percentText = updateDto.percentText;
-
-    await this.classOrderRepository.save(classOrder);
-    return this.entityToDto(classOrder);
-  }
-
-  async updateAllClassOrders(
-    newData: ClassOrderDto[],
-  ): Promise<ClassOrderDto[]> {
+  async updateClassOrders(newData: ClassOrderDto[]): Promise<ClassOrderDto[]> {
     const updatedData: ClassOrderDto[] = [];
 
     // 새로운 데이터를 하나씩 처리하여 업데이트 또는 생성
     for (const dto of newData) {
-      // userName으로 해당 레코드를 찾음
+      // userName과 id를 이용하여 기존 레코드를 찾음
       const existingRecord = await this.classOrderRepository.findOne({
-        where: { userName: dto.userName },
+        where: { userName: Number(dto.userName), id: Number(dto.id) },
       });
 
-      const updatedRecord = await this.updateClassOrder(existingRecord.id, dto);
-      if (updatedRecord) {
-        updatedData.push(updatedRecord);
+      if (existingRecord) {
+        // 레코드가 존재하면 업데이트
+        existingRecord.count = dto.count;
+        existingRecord.percentText = dto.percentText;
+        existingRecord.orderText = dto.orderText;
+        await this.classOrderRepository.save(existingRecord);
+        updatedData.push(this.entityToDto(existingRecord));
+      } else {
+        // 레코드가 존재하지 않으면 생성
+        const createdRecord = await this.createClassOrder([dto]);
+        if (createdRecord && createdRecord.length > 0) {
+          updatedData.push(createdRecord[0]);
+        }
       }
     }
 
