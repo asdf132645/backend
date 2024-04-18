@@ -53,6 +53,9 @@ export class RuningInfoEntity {
   analyzedDttm: Date;
 
   @Column()
+  createDate: string;
+
+  @Column()
   pltCount: string;
 
   @Column()

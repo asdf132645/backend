@@ -21,6 +21,7 @@ export class RuningInfoDtoItems {
   orderDttm: Date;
   testType: string;
   analyzedDttm: Date;
+  createDate: string;
   pltCount: string;
   malariaCount: string;
   maxRbcCount: string;

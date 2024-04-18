@@ -25,7 +25,6 @@ export class RuningInfoService {
 
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
     const { userId, runingInfoDtoItems } = createDto;
-
     const entity = this.runingInfoEntityRepository.create({
       userId,
       ...runingInfoDtoItems,
@@ -55,7 +54,7 @@ export class RuningInfoService {
         existingEntity.slotId = item.slotId;
         existingEntity.orderDttm = item.orderDttm;
         existingEntity.testType = item.testType;
-        existingEntity.analyzedDttm = item.analyzedDttm;
+        // existingEntity.analyzedDttm = item.analyzedDttm;
         existingEntity.pltCount = item.pltCount;
         existingEntity.malariaCount = item.malariaCount;
         existingEntity.maxRbcCount = item.maxRbcCount;
