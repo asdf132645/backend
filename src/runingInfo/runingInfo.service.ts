@@ -25,6 +25,22 @@ export class RuningInfoService {
 
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
     const { userId, runingInfoDtoItems } = createDto;
+
+    // 동일한 slotId가 존재하는지 확인
+    const existingEntity = await this.runingInfoEntityRepository.findOne({
+      where: {
+        userId: userId,
+        slotId: runingInfoDtoItems.slotId,
+      },
+    });
+
+    // 동일한 slotId가 존재하는 경우 아무 조치도 하지 않고 메서드를 종료
+    if (existingEntity) {
+      console.log('동일 슬롯아이디 존재 저장 x');
+      return null; // 혹은 return undefined;로 메서드 종료
+    }
+
+    // 동일한 slotId가 존재하지 않는 경우 엔티티를 생성
     const entity = this.runingInfoEntityRepository.create({
       userId,
       ...runingInfoDtoItems,
