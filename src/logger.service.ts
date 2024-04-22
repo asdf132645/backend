@@ -7,12 +7,12 @@ import * as path from 'path';
 @Injectable()
 export class LoggerService extends Logger {
   private readonly logFileName = 'logs.txt';
-  private readonly logFilePath = path.join('src', 'logs', this.logFileName);
+  private readonly logDir = path.join('src', 'logs');
+  private readonly logFilePath = path.join(this.logDir, this.logFileName);
 
   constructor() {
     super();
-
-    // 파일이 두 일 전보다 오래되었으면 로그 파일을 삭제합니다.
+    this.ensureLogDirectoryExists();
     this.deleteLogFileIfOlderThanTwoDays();
   }
 
@@ -54,6 +54,13 @@ export class LoggerService extends Logger {
       this.logFilePath,
       `${new Date().toISOString()} - DEBUG: ${message}\n`,
     );
+  }
+
+  private ensureLogDirectoryExists() {
+    if (!fs.existsSync(this.logDir)) {
+      fs.mkdirSync(this.logDir, { recursive: true });
+      console.log('로그 디렉토리가 존재하지 않아서 생성되었습니다.');
+    }
   }
 
   private deleteLogFileIfOlderThanTwoDays() {

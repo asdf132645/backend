@@ -13,7 +13,6 @@ import { Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { exec } from 'child_process';
 import * as sharp from 'sharp';
 
 @Controller('images')

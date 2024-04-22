@@ -55,7 +55,6 @@ export class CombinedService
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
     if (process.env.DB_HOST === ipAddress) {
-      console.log('ss?');
 
       this.webSocketGetData({
         type: 'SEND_DATA',

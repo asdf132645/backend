@@ -99,9 +99,15 @@ export class RuningInfoService {
 
         // ProcessInfoDto 매핑
         existingEntity.processInfo = this.mapProcessInfo(item.processInfo);
-
+        // console.log(item.orderList);
         // OrderDto 매핑
-        existingEntity.orderList = this.mapOrderList(item.orderList);
+        if (Array.isArray(item.orderList)) {
+          // `item.orderList`가 배열인 경우 `mapOrderList`를 사용하여 `existingEntity.orderList`를 업데이트합니다.
+          existingEntity.orderList = this.mapOrderList(item.orderList);
+        } else if (item.orderList && typeof item.orderList === 'object') {
+          // `item.orderList`가 객체인 경우, `existingEntity.orderList`를 배열로 변환하여 업데이트합니다.
+          existingEntity.orderList = this.mapOrderList([item.orderList]);
+        }
 
         existingEntity.signedState = item.signedState;
         existingEntity.signedOfDate = item.signedOfDate;
