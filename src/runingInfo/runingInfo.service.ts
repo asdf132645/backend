@@ -94,8 +94,6 @@ export class RuningInfoService {
         existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
         existingEntity.bmInfoAfter = this.mapWbcInfoAfter(item.bmInfoAfter);
 
-
-
         // ProcessInfoDto 매핑
         existingEntity.processInfo = this.mapProcessInfo(item.processInfo);
         if (Array.isArray(item.orderList)) {
@@ -181,7 +179,10 @@ export class RuningInfoService {
       Object.assign(whereClause, ...titleFilters);
     }
 
-    const order: any = {};
+    const order: any = {
+      createDate: 'DESC', // createDate 기준으로 최신 날짜가 위로 나오게 정렬
+    };
+
     if (wbcCountOrder) {
       order.wbcCount = wbcCountOrder; // wbcCountOrder가 존재하는 경우 wbcCount를 기준으로 정렬
     }
@@ -192,6 +193,7 @@ export class RuningInfoService {
       take: pageSize,
       order,
     });
+
     const formattedData = data.map((item: any) => ({
       ...item,
       orderDttm: this.formatDate(item.orderDttm),
