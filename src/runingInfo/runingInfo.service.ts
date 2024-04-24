@@ -182,11 +182,11 @@ export class RuningInfoService {
     const order: any = {};
     if (wbcCountOrder) {
       order.wbcCount = wbcCountOrder;
-    } else {
-      // wbcCountOrder가 없는 경우 createDate 기준으로 내림차순 정렬
-      console.log('???')
-      order.createDate = 'DESC';
     }
+    // else {
+    //   // wbcCountOrder가 없는 경우 createDate 기준으로 내림차순 정렬
+    //   order.createDate = 'DESC';
+    // }
 
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
@@ -194,7 +194,6 @@ export class RuningInfoService {
       take: pageSize,
       order, // 위에서 설정한 정렬 조건 사용
     });
-
 
     function parseCreateDateString(createDateString: string): Date {
       const year = parseInt(createDateString.substring(0, 4), 10);
