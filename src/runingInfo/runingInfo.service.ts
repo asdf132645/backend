@@ -232,6 +232,7 @@ export class RuningInfoService {
       count: item.count,
       title: item.title,
       images: item.images || [], // images가 없을 경우 빈 배열로 기본값 설정
+      percent: item.percent,
     }));
   }
 
