@@ -94,8 +94,6 @@ export class RuningInfoService {
         existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
         existingEntity.bmInfoAfter = this.mapWbcInfoAfter(item.bmInfoAfter);
 
-
-
         // ProcessInfoDto 매핑
         existingEntity.processInfo = this.mapProcessInfo(item.processInfo);
         if (Array.isArray(item.orderList)) {
@@ -183,17 +181,43 @@ export class RuningInfoService {
 
     const order: any = {};
     if (wbcCountOrder) {
-      order.wbcCount = wbcCountOrder; // wbcCountOrder가 존재하는 경우 wbcCount를 기준으로 정렬
+      order.wbcCount = wbcCountOrder;
+    } else {
+      // wbcCountOrder가 없는 경우 createDate 기준으로 내림차순 정렬
+      console.log('???')
+      order.createDate = 'DESC';
     }
 
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
       skip: (page - 1) * pageSize,
       take: pageSize,
-      order,
+      order, // 위에서 설정한 정렬 조건 사용
     });
+
+
+    function parseCreateDateString(createDateString: string): Date {
+      const year = parseInt(createDateString.substring(0, 4), 10);
+      const month = parseInt(createDateString.substring(4, 6), 10) - 1; // 월은 0부터 시작하므로 -1 해줌
+      const day = parseInt(createDateString.substring(6, 8), 10);
+      const hours = parseInt(createDateString.substring(8, 10), 10);
+      const minutes = parseInt(createDateString.substring(10, 12), 10);
+      const seconds = parseInt(createDateString.substring(12, 14), 10);
+      const milliseconds = parseInt(createDateString.substring(14), 10);
+
+      // Date 객체로 변환
+      return new Date(year, month, day, hours, minutes, seconds, milliseconds);
+    }
+    // 내림차순 정렬
+    data.sort((a, b) => {
+      const dateA = parseCreateDateString(a.createDate);
+      const dateB = parseCreateDateString(b.createDate);
+      return dateB.getTime() - dateA.getTime();
+    });
+
     const formattedData = data.map((item: any) => ({
       ...item,
+      createDate: parseCreateDateString(item.createDate), // createDate를 Date 객체로 변환
       orderDttm: this.formatDate(item.orderDttm),
       analyzedDttm: this.formatDate(item.analyzedDttm),
     }));
