@@ -21,16 +21,14 @@ export class PdfController {
           const gunzip = zlib.createGunzip();
           let decompressed = '';
 
-          // 요청 본문을 압축 해제된 스트림으로 파이핑
           req
             .pipe(gunzip)
             .on('data', (chunk: Buffer) => {
               decompressed += chunk.toString();
             })
             .on('end', () => {
-              // 압축 해제된 데이터에서 htmlContent 추출
-              const parsedBody = JSON.parse(decompressed);
-              resolve(parsedBody.htmlContent);
+              // 압축 해제된 데이터를 HTML로 사용
+              resolve(decompressed);
             })
             .on('error', reject);
         });
@@ -55,7 +53,9 @@ export class PdfController {
       res.send(pdfBuffer);
     } catch (error) {
       console.error('Error while converting HTML to PDF:', error);
-      res.status(500).send('Error while converting HTML to PDF');
+      res
+        .status(500)
+        .send(`Error while converting HTML to PDF: ${error.message}`);
     }
   }
 }
