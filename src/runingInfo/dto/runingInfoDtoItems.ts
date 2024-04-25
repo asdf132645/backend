@@ -18,7 +18,7 @@ export class RuningInfoDtoItems {
   birthDay: string;
   wbcCount: string;
   slotId: string;
-  orderDttm: Date;
+  orderDttm: string;
   testType: string;
   analyzedDttm: Date;
   createDate: string;

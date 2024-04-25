@@ -4,6 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, In, Like, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
+import * as moment from 'moment-timezone';
+
 import {
   RbcInfoDto,
   ProcessInfoDto,
@@ -144,8 +146,6 @@ export class RuningInfoService {
     testType?: string,
     wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number }> {
-    this._nrCount = nrCount;
-    this._titles = titles;
     const whereClause: any = {};
     if (startDay && endDay) {
       whereClause.analyzedDttm = Between(startDay, endDay);
@@ -168,72 +168,37 @@ export class RuningInfoService {
     }
 
     if (nrCount !== '0') {
-      console.log(typeof nrCount);
       whereClause.wbcCount = Like(`%{"title": "NR", "count": "${nrCount}" }%`);
     }
 
     if (titles && titles.length > 0) {
-      const titleFilters = titles.map((title) => ({
-        wbcInfo: Like(`%{"title": "${title}" }%`),
-      }));
-      Object.assign(whereClause, ...titleFilters);
+      const titleClauses = titles.map((title) => `%{"title": "${title}"%`);
+      whereClause.wbcCount = titleClauses;
     }
 
-    const order: any = {};
+    // 정렬 옵션을 추가합니다.
+    const orderClause: any = {};
     if (wbcCountOrder) {
-      order.wbcCount = wbcCountOrder;
+      orderClause.wbcCount = wbcCountOrder.toUpperCase();
     }
-    // else {
-    //   // wbcCountOrder가 없는 경우 createDate 기준으로 내림차순 정렬
-    //   order.createDate = 'DESC';
-    // }
 
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
-      skip: (page - 1) * pageSize,
+      order: orderClause, // 정렬 옵션 추가
       take: pageSize,
-      order, // 위에서 설정한 정렬 조건 사용
+      skip: (page - 1) * pageSize,
     });
-
-    function parseCreateDateString(createDateString: string): Date {
-      const year = parseInt(createDateString.substring(0, 4), 10);
-      const month = parseInt(createDateString.substring(4, 6), 10) - 1; // 월은 0부터 시작하므로 -1 해줌
-      const day = parseInt(createDateString.substring(6, 8), 10);
-      const hours = parseInt(createDateString.substring(8, 10), 10);
-      const minutes = parseInt(createDateString.substring(10, 12), 10);
-      const seconds = parseInt(createDateString.substring(12, 14), 10);
-      const milliseconds = parseInt(createDateString.substring(14), 10);
-
-      // Date 객체로 변환
-      return new Date(year, month, day, hours, minutes, seconds, milliseconds);
-    }
-    // 내림차순 정렬
     data.sort((a, b) => {
       const dateA = parseCreateDateString(a.createDate);
       const dateB = parseCreateDateString(b.createDate);
-      return dateB.getTime() - dateA.getTime();
+      return dateB.valueOf() - dateA.valueOf();
     });
+    function parseCreateDateString(createDateString: string): moment.Moment {
+      return moment(createDateString, 'YYYYMMDDHHmmssSSS');
+    }
 
-    const formattedData = data.map((item: any) => ({
-      ...item,
-      createDate: parseCreateDateString(item.createDate), // createDate를 Date 객체로 변환
-      orderDttm: this.formatDate(item.orderDttm),
-      analyzedDttm: this.formatDate(item.analyzedDttm),
-    }));
-
-    return { data: formattedData, total };
+    return { data, total };
   }
-
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  }
-
   // private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
   //   console.log(wbcInfo);
   //   return wbcInfo.map((item) => ({

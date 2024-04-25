@@ -1,5 +1,3 @@
-// runing-info.controller.ts
-
 import {
   Controller,
   Post,
@@ -15,6 +13,7 @@ import {
   UpdateRuningInfoDto,
 } from './dto/runingInfoDtoItems';
 import { RuningInfoEntity } from './runingInfo.entity';
+import * as moment from 'moment';
 
 @Controller('runningInfo')
 export class RuningInfoController {
@@ -26,6 +25,7 @@ export class RuningInfoController {
   ): Promise<RuningInfoEntity> {
     return this.runingInfoService.create(createDto);
   }
+
   @Delete('delete')
   async deleteMultiple(@Body() ids: string[]): Promise<{ success: boolean }> {
     console.log(ids);
@@ -44,8 +44,8 @@ export class RuningInfoController {
   async findAllWithPagingAndFilter(
     @Query('page') page: number = 1,
     @Query('pageSize') pageSize: number = 10,
-    @Query('startDay') startDay?: Date,
-    @Query('endDay') endDay?: Date,
+    @Query('startDay') startDay?: string,
+    @Query('endDay') endDay?: string,
     @Query('barcodeNo') barcodeNo?: string,
     @Query('patientId') patientId?: string,
     @Query('patientNm') patientNm?: string,
@@ -54,15 +54,22 @@ export class RuningInfoController {
     @Query('testType') testType?: string,
     @Query('wbcCountOrder') wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number; page: number }> {
+    // 입력된 날짜 문자열을 Date 객체로 변환
+    const startDate = startDay ? moment(startDay).toDate() : undefined;
+    const endDate = endDay ? moment(endDay).toDate() : undefined;
+
+    // titles 문자열을 쉼표로 분리하여 배열로 변환
     let titlesArray: string[] | undefined;
     if (titles) {
       titlesArray = titles.split(',');
     }
+
+    // RuningInfoService를 호출하여 결과를 가져옵니다.
     const result = await this.runingInfoService.findAllWithPagingAndFilter(
       page,
       pageSize,
-      startDay,
-      endDay,
+      startDate,
+      endDate,
       barcodeNo,
       patientId,
       patientNm,

@@ -44,7 +44,7 @@ export class RuningInfoEntity {
   slotId: string;
 
   @Column()
-  orderDttm: Date;
+  orderDttm: string;
 
   @Column()
   testType: string;
