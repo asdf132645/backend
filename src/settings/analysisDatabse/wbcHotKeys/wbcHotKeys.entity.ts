@@ -20,7 +20,7 @@ export class WbcHotKeys {
   @Column({ default: 0 })
   percent: number;
 
-  @Column()
+  @Column({ default: '' })
   key: string;
 
   @Column()
