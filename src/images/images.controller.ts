@@ -43,9 +43,65 @@ export class ImagesController {
 
   @Get('move')
   async moveImage(
-    @Query('sourceFolders') sourceFolders: string, // 여러 원본 폴더를 콤마로 구분된 문자열로 받습니다.
-    @Query('destinationFolders') destinationFolders: string, // 여러 대상 폴더를 콤마로 구분된 문자열로 받습니다.
-    @Query('imageNames') imageNames: string, // 여러 이미지 이름을 콤마로 구분된 문자열로 받습니다.
+    @Query('sourceFolders') sourceFolders: string,
+    @Query('destinationFolders') destinationFolders: string,
+    @Query('imageNames') imageNames: string,
+    @Res() res: Response,
+  ) {
+    // 콤마로 구분된 문자열을 배열로 변환합니다.
+    const sourceFoldersArray = sourceFolders ? sourceFolders.split(',') : [];
+    const destinationFoldersArray = destinationFolders
+      ? destinationFolders.split(',')
+      : [];
+    console.log(imageNames);
+    const imageNamesArray = imageNames ? imageNames.split(',') : [];
+
+    // 매개변수 길이가 일치하는지 확인합니다.
+    if (
+      sourceFoldersArray.length !== destinationFoldersArray.length ||
+      sourceFoldersArray.length !== imageNamesArray.length
+    ) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Invalid parameters' });
+    }
+
+    // 이미지 이동 처리 결과를 저장할 객체
+    const moveResults = {
+      success: [],
+      failed: [],
+    };
+    console.log(imageNamesArray);
+    for (let i = 0; i < imageNamesArray.length; i++) {
+      const imageName = imageNamesArray[i];
+      const absoluteSourcePath = path.join(sourceFoldersArray[i], imageName);
+      const absoluteDestinationPath = path.join(
+        destinationFoldersArray[i],
+        imageName,
+      );
+      console.log(absoluteSourcePath);
+      try {
+        // 파일 이동
+        fs.accessSync(absoluteSourcePath, fs.constants.R_OK);
+        fs.renameSync(absoluteSourcePath, absoluteDestinationPath);
+
+        // 성공 목록에 추가
+        moveResults.success.push(imageName);
+      } catch (error) {
+        // 실패 목록에 추가
+        moveResults.failed.push({ imageName, error: error.message });
+      }
+    }
+
+    // 이동 처리 결과를 응답으로 반환합니다.
+    return res.status(HttpStatus.OK).json(moveResults);
+  }
+
+  @Post('moveClassImage')
+  async moveClassImage(
+    @Body('sourceFolders') sourceFolders: string,
+    @Body('destinationFolders') destinationFolders: string,
+    @Body('imageNames') imageNames: string,
     @Res() res: Response,
   ) {
     // 콤마로 구분된 문자열을 배열로 변환합니다.
