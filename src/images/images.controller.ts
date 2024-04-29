@@ -99,27 +99,20 @@ export class ImagesController {
 
   @Post('moveClassImage')
   async moveClassImage(
-    @Body('sourceFolders') sourceFolders: string,
-    @Body('destinationFolders') destinationFolders: string,
-    @Body('imageNames') imageNames: string,
+    @Body('sourceFolders') sourceFolders: any,
+    @Body('destinationFolders') destinationFolders: any,
+    @Body('fileNames') imageNames: any,
     @Res() res: Response,
   ) {
-    // 콤마로 구분된 문자열을 배열로 변환합니다.
-    const sourceFoldersArray = sourceFolders ? sourceFolders.split(',') : [];
-    const destinationFoldersArray = destinationFolders
-      ? destinationFolders.split(',')
-      : [];
-    console.log(imageNames);
-    const imageNamesArray = imageNames ? imageNames.split(',') : [];
+    // 전달된 매개변수가 배열인지 확인하고 그대로 사용
+    const sourceFoldersArray = Array.isArray(sourceFolders) ? sourceFolders : [];
+    const destinationFoldersArray = Array.isArray(destinationFolders) ? destinationFolders : [];
+    const imageNamesArray = Array.isArray(imageNames) ? imageNames : [];
 
-    // 매개변수 길이가 일치하는지 확인합니다.
-    if (
-      sourceFoldersArray.length !== destinationFoldersArray.length ||
-      sourceFoldersArray.length !== imageNamesArray.length
-    ) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ message: 'Invalid parameters' });
+    // 매개변수 길이 확인
+    if (sourceFoldersArray.length !== destinationFoldersArray.length ||
+      sourceFoldersArray.length !== imageNamesArray.length) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid parameters' });
     }
 
     // 이미지 이동 처리 결과를 저장할 객체
@@ -127,15 +120,13 @@ export class ImagesController {
       success: [],
       failed: [],
     };
-    console.log(imageNamesArray);
+
+    // 이미지 이동 처리
     for (let i = 0; i < imageNamesArray.length; i++) {
       const imageName = imageNamesArray[i];
       const absoluteSourcePath = path.join(sourceFoldersArray[i], imageName);
-      const absoluteDestinationPath = path.join(
-        destinationFoldersArray[i],
-        imageName,
-      );
-      console.log(absoluteSourcePath);
+      const absoluteDestinationPath = path.join(destinationFoldersArray[i], imageName);
+
       try {
         // 파일 이동
         fs.accessSync(absoluteSourcePath, fs.constants.R_OK);
@@ -149,9 +140,11 @@ export class ImagesController {
       }
     }
 
-    // 이동 처리 결과를 응답으로 반환합니다.
+    // 이동 처리 결과를 응답으로 반환
     return res.status(HttpStatus.OK).json(moveResults);
   }
+
+
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('image'))
