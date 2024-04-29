@@ -301,4 +301,11 @@ export class RuningInfoService {
       );
     }
   }
+  async getRunningInfoById(id: number): Promise<RuningInfoEntity | null> {
+    // 주어진 ID로 엔티티를 찾아 반환합니다.
+    const entity = await this.runingInfoEntityRepository.findOne({
+      where: { id },
+    });
+    return entity || null;
+  }
 }

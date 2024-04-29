@@ -6,6 +6,7 @@ import {
   Query,
   Put,
   Delete,
+  Param,
 } from '@nestjs/common';
 import { RuningInfoService } from './runingInfo.service';
 import {
@@ -38,6 +39,13 @@ export class RuningInfoController {
     @Body() updateDto: UpdateRuningInfoDto,
   ): Promise<RuningInfoEntity[]> {
     return this.runingInfoService.update(updateDto);
+  }
+
+  @Get('detail/:id')
+  async getRunningInfoById(
+    @Param('id') id: string,
+  ): Promise<RuningInfoEntity | null> {
+    return this.runingInfoService.getRunningInfoById(Number(id));
   }
 
   @Get('getAll')
