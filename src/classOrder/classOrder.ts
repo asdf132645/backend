@@ -9,26 +9,26 @@ export class ClassOrder {
   id?: number;
 
   @Column()
-  classId: string;
+  classId?: string;
 
   @Column()
-  title: string;
+  title?: string;
 
   @Column()
-  name: string;
+  name?: string;
 
   @Column()
-  count: string;
+  count?: string;
 
   @Column()
-  percentText: string;
+  percentText?: string;
 
   @Column()
-  keyText: string;
+  keyText?: string;
 
   @Column()
-  orderText: string;
+  orderText?: string;
 
   @Column()
-  userName: number;
+  userName?: number;
 }
