@@ -48,7 +48,6 @@ export class ImagesController {
     @Query('imageNames') imageNames: string,
     @Res() res: Response,
   ) {
-    // 콤마로 구분된 문자열을 배열로 변환합니다.
     const sourceFoldersArray = sourceFolders ? sourceFolders.split(',') : [];
     const destinationFoldersArray = destinationFolders
       ? destinationFolders.split(',')

@@ -176,15 +176,14 @@ export class RuningInfoService {
       whereClause.wbcCount = titleClauses;
     }
 
-    // 정렬 옵션을 추가합니다.
-    const orderClause: any = {};
-    if (wbcCountOrder) {
-      orderClause.wbcCount = wbcCountOrder.toUpperCase();
-    }
+    // const orderClause: any = {};
+    // if (wbcCountOrder) {
+    //   orderClause.wbcCount = wbcCountOrder.toUpperCase();
+    // }
 
     const [data, total] = await this.runingInfoEntityRepository.findAndCount({
       where: whereClause,
-      order: orderClause, // 정렬 옵션 추가
+      // order: orderClause,
       take: pageSize,
       skip: (page - 1) * pageSize,
     });
@@ -195,6 +194,16 @@ export class RuningInfoService {
     });
     function parseCreateDateString(createDateString: string): moment.Moment {
       return moment(createDateString, 'YYYYMMDDHHmmssSSS');
+    }
+
+    if (wbcCountOrder) {
+      data.sort((a, b) => {
+        if (wbcCountOrder.toUpperCase() === 'ASC') {
+          return Number(a.wbcCount) - Number(b.wbcCount);
+        } else {
+          return Number(b.wbcCount) - Number(a.wbcCount);
+        }
+      });
     }
 
     return { data, total };
@@ -302,7 +311,6 @@ export class RuningInfoService {
     }
   }
   async getRunningInfoById(id: number): Promise<RuningInfoEntity | null> {
-    // 주어진 ID로 엔티티를 찾아 반환합니다.
     const entity = await this.runingInfoEntityRepository.findOne({
       where: { id },
     });

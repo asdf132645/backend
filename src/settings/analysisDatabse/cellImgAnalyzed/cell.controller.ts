@@ -71,7 +71,6 @@ export class CellImgAnalyzedController {
         );
       }
 
-      // 업데이트 메서드를 호출하여 업데이트를 수행합니다.
       return await this.cellImgAnalyzedService.update(id, dto);
     } catch (error) {
       if (error instanceof NotFoundException) {
