@@ -105,14 +105,22 @@ export class ImagesController {
     @Res() res: Response,
   ) {
     // 전달된 매개변수가 배열인지 확인하고 그대로 사용
-    const sourceFoldersArray = Array.isArray(sourceFolders) ? sourceFolders : [];
-    const destinationFoldersArray = Array.isArray(destinationFolders) ? destinationFolders : [];
+    const sourceFoldersArray = Array.isArray(sourceFolders)
+      ? sourceFolders
+      : [];
+    const destinationFoldersArray = Array.isArray(destinationFolders)
+      ? destinationFolders
+      : [];
     const imageNamesArray = Array.isArray(imageNames) ? imageNames : [];
 
     // 매개변수 길이 확인
-    if (sourceFoldersArray.length !== destinationFoldersArray.length ||
-      sourceFoldersArray.length !== imageNamesArray.length) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid parameters' });
+    if (
+      sourceFoldersArray.length !== destinationFoldersArray.length ||
+      sourceFoldersArray.length !== imageNamesArray.length
+    ) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Invalid parameters' });
     }
 
     // 이미지 이동 처리 결과를 저장할 객체
@@ -125,7 +133,10 @@ export class ImagesController {
     for (let i = 0; i < imageNamesArray.length; i++) {
       const imageName = imageNamesArray[i];
       const absoluteSourcePath = path.join(sourceFoldersArray[i], imageName);
-      const absoluteDestinationPath = path.join(destinationFoldersArray[i], imageName);
+      const absoluteDestinationPath = path.join(
+        destinationFoldersArray[i],
+        imageName,
+      );
 
       try {
         // 파일 이동
@@ -143,8 +154,6 @@ export class ImagesController {
     // 이동 처리 결과를 응답으로 반환
     return res.status(HttpStatus.OK).json(moveResults);
   }
-
-
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('image'))
