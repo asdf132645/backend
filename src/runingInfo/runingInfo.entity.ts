@@ -145,4 +145,10 @@ export class RuningInfoEntity {
 
   @Column()
   pcIp?: string;
+
+  @Column()
+  siteCd?: string;
+
+  @Column()
+  deviceBarcode?: string;
 }

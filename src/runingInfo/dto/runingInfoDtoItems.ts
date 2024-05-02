@@ -48,6 +48,8 @@ export class RuningInfoDtoItems {
   rbcMemo?: string;
   bmInfoAfter?: any[];
   pcIp: string;
+  siteCd?: string;
+  deviceBarcode?: string;
 }
 
 export class WbcInfoDto {
