@@ -187,14 +187,14 @@ export class RuningInfoService {
       take: pageSize,
       skip: (page - 1) * pageSize,
     });
-    data.sort((a, b) => {
-      const dateA = parseCreateDateString(a.createDate);
-      const dateB = parseCreateDateString(b.createDate);
-      return dateB.valueOf() - dateA.valueOf();
-    });
-    function parseCreateDateString(createDateString: string): moment.Moment {
-      return moment(createDateString, 'YYYYMMDDHHmmssSSS');
-    }
+    // data.sort((a, b) => {
+    //   const dateA = parseCreateDateString(a.createDate);
+    //   const dateB = parseCreateDateString(b.createDate);
+    //   return dateB.valueOf() - dateA.valueOf();
+    // });
+    // function parseCreateDateString(createDateString: string): moment.Moment {
+    //   return moment(createDateString, 'YYYYMMDDHHmmssSSS');
+    // }
 
     if (wbcCountOrder) {
       data.sort((a, b) => {

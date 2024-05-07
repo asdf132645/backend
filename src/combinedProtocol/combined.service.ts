@@ -145,6 +145,7 @@ export class CombinedService
   }
 
   webSocketGetData(message: any): void {
+    console.log(message);
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
