@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, In, Like, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
-import * as moment from 'moment-timezone';
 
 import {
   RbcInfoDto,
