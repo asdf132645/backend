@@ -33,7 +33,8 @@ import { FileSystemController } from './fileSys/file-system.controller';
 import { FileSystemService } from './fileSys/file-system.service';
 import { IpModule } from './ipService/ipService.module';
 import { ClassOrderModule } from './classOrder/classOrder.module';
-import { CacheControlInterceptor } from "./interceptors/cache-control.interceptor";
+import { CacheInterceptor } from './interceptors/cache-control.interceptor';
+import { CacheService } from './cache/CacheService';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -71,6 +72,7 @@ import { CacheControlInterceptor } from "./interceptors/cache-control.intercepto
     FileSystemController,
   ],
   providers: [
+    CacheService,
     LoggerService,
     AppService,
     FileSystemService,
@@ -84,7 +86,7 @@ import { CacheControlInterceptor } from "./interceptors/cache-control.intercepto
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: CacheControlInterceptor,
+      useClass: CacheInterceptor,
     },
   ],
 })
