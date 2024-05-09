@@ -31,9 +31,20 @@ export class ImagesController {
     const absoluteImagePath = path.join(folder, imageName);
 
     try {
-      fs.accessSync(absoluteImagePath, fs.constants.R_OK);
-      const fileStream = fs.createReadStream(absoluteImagePath);
-      fileStream.pipe(res);
+      // 이미지 최적화
+      sharp(absoluteImagePath)
+        .toFormat('webp') // 이미지를 WebP 형식으로 변환
+        .jpeg({ quality: 70 }) // JPEG 형식의 경우 품질을 조절
+        .toBuffer()
+        .then((data) => {
+          res.setHeader('Content-Type', 'image/webp');
+          res.send(data);
+        })
+        .catch(() => {
+          res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send('Image processing error');
+        });
     } catch (error) {
       res
         .status(HttpStatus.NOT_FOUND)
