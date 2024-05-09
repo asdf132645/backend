@@ -80,6 +80,7 @@ export class ClassOrderService {
         // 레코드가 존재하면 업데이트
         existingRecord.count = dto.count;
         existingRecord.percentText = dto.percentText;
+        console.log(dto.orderText);
         existingRecord.orderText = dto.orderText;
         await this.classOrderRepository.save(existingRecord);
         updatedData.push(this.entityToDto(existingRecord));

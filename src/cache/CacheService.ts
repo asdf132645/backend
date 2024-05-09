@@ -4,18 +4,25 @@ import { Injectable } from '@nestjs/common';
 export class CacheService {
   private cache = new Map<string, any>();
 
-  // 캐시 데이터 조회
   get(cacheKey: string): any {
     return this.cache.get(cacheKey);
   }
 
-  // 캐시 데이터 저장
   set(cacheKey: string, data: any): void {
-    this.cache.set(cacheKey, data);
+    try {
+      this.cache.set(cacheKey, data);
+      console.log(`Data set in cache for key: ${cacheKey}`);
+    } catch (error) {
+      console.error(`Error setting data in cache for key: ${cacheKey}`, error);
+    }
   }
 
-  // 캐시 데이터 삭제
   delete(cacheKey: string): void {
-    this.cache.delete(cacheKey);
+    try {
+      this.cache.delete(cacheKey);
+      console.log(`Cache entry deleted for key: ${cacheKey}`);
+    } catch (error) {
+      console.error(`Error deleting cache entry for key: ${cacheKey}`, error);
+    }
   }
 }
