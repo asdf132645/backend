@@ -33,7 +33,7 @@ import { FileSystemController } from './fileSys/file-system.controller';
 import { FileSystemService } from './fileSys/file-system.service';
 import { IpModule } from './ipService/ipService.module';
 import { ClassOrderModule } from './classOrder/classOrder.module';
-import { CacheInterceptor } from './interceptors/cache-control.interceptor';
+// import { CacheInterceptor } from './interceptors/cache-control.interceptor';
 import { CacheService } from './cache/CacheService';
 @Module({
   imports: [
@@ -84,10 +84,10 @@ import { CacheService } from './cache/CacheService';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor,
+    // },
   ],
 })
 export class AppModule {}
