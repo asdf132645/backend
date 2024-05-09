@@ -34,7 +34,7 @@ export class ImagesController {
       // 이미지 최적화
       sharp(absoluteImagePath)
         .toFormat('webp') // 이미지를 WebP 형식으로 변환
-        .jpeg({ quality: 70 }) // JPEG 형식의 경우 품질을 조절
+        .jpeg({ quality: 85 }) // JPEG 형식의 경우 품질을 조절
         .toBuffer()
         .then((data) => {
           res.setHeader('Content-Type', 'image/webp');
