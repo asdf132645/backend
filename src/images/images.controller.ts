@@ -90,7 +90,7 @@ export class ImagesController {
     console.log(imageNames);
     const imageNamesArray = imageNames ? imageNames.split(',') : [];
 
-    // 매개변수 길이가 일치하는지 확인합니다.
+    // 매개변수 길이가 일치하는지 확인
     if (
       sourceFoldersArray.length !== destinationFoldersArray.length ||
       sourceFoldersArray.length !== imageNamesArray.length
@@ -127,7 +127,7 @@ export class ImagesController {
       }
     }
 
-    // 이동 처리 결과를 응답으로 반환합니다.
+    // 이동 처리 결과를 응답으로 반환
     return res.status(HttpStatus.OK).json(moveResults);
   }
 
