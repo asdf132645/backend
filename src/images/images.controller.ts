@@ -14,11 +14,14 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as sharp from 'sharp';
+import { CacheService } from '../cache/CacheService';
 
 @Controller('images')
 export class ImagesController {
+  private cacheService: CacheService; // Define cacheService property
+
   @Get()
-  getImage(
+  async getImage(
     @Query('folder') folder: string,
     @Query('imageName') imageName: string,
     @Res() res: Response,
@@ -27,28 +30,31 @@ export class ImagesController {
       return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
     }
 
-    // 이미지 경로를 받아와서 절대 경로로 조합
+    const cacheKey = `${folder}-${imageName}`;
+    const cachedImageData = this.cacheService.get(cacheKey);
+
+    if (cachedImageData) {
+      console.log('Image found in cache:', cacheKey);
+      return res.status(HttpStatus.OK).send(cachedImageData);
+    }
+
     const absoluteImagePath = path.join(folder, imageName);
 
     try {
-      // 이미지 최적화
-      sharp(absoluteImagePath)
-        .toFormat('webp') // 이미지를 WebP 형식으로 변환
-        .jpeg({ quality: 60 }) // JPEG 형식의 경우 품질을 조절
-        .toBuffer()
-        .then((data) => {
-          res.setHeader('Content-Type', 'image/webp');
-          res.send(data);
-        })
-        .catch(() => {
-          res
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .send('Image processing error');
-        });
+      const imageBuffer = await sharp(absoluteImagePath)
+        .toFormat('webp')
+        .jpeg({ quality: 60 })
+        .toBuffer();
+
+      this.cacheService.set(cacheKey, imageBuffer);
+
+      res.setHeader('Content-Type', 'image/webp');
+      res.send(imageBuffer);
     } catch (error) {
+      console.error('Error processing image:', error);
       res
-        .status(HttpStatus.NOT_FOUND)
-        .send('File not found or permission issue');
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Image processing error');
     }
   }
 

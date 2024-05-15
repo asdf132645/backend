@@ -88,6 +88,7 @@ export class RuningInfoService {
         existingEntity.rbcMemo = item.rbcMemo;
         existingEntity.state = item.state;
         existingEntity.pcIp = item.pcIp;
+        existingEntity.submitDate = item.submitDate;
         // WbcInfoDto 매핑
         // existingEntity.wbcInfo = this.mapWbcInfo(item.wbcInfo);
 
