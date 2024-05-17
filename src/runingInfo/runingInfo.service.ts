@@ -2,7 +2,14 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Like, Repository } from 'typeorm';
+import {
+  Between,
+  In,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
@@ -147,8 +154,33 @@ export class RuningInfoService {
     wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number }> {
     const whereClause: any = {};
-    if (startDay && endDay) {
-      whereClause.analyzedDttm = Between(startDay, endDay);
+
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear().toString();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const seconds = date.getSeconds().toString().padStart(2, '0');
+      const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+      return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
+    };
+
+    if (startDay) {
+      const formattedStartDay = formatDate(startDay);
+      whereClause.createDate = MoreThanOrEqual(formattedStartDay);
+    }
+
+    if (endDay) {
+      // endDay를 23:59:59.999로 설정
+      const endDayAdjusted = new Date(endDay);
+      endDayAdjusted.setHours(23, 59, 59, 999);
+      const formattedEndDay = formatDate(endDayAdjusted);
+      if (whereClause.createDate) {
+        whereClause.createDate = Between(formatDate(startDay), formattedEndDay);
+      } else {
+        whereClause.createDate = LessThanOrEqual(formattedEndDay);
+      }
     }
 
     if (barcodeNo) {
@@ -168,7 +200,7 @@ export class RuningInfoService {
     }
 
     if (nrCount !== '0') {
-      whereClause.wbcCount = Like(`%{"title": "NR", "count": "${nrCount}" }%`);
+      whereClause.wbcCount = Like(`%{"title": "NR", "count": "${nrCount}"}%`);
     }
 
     if (titles && titles.length > 0) {
@@ -176,28 +208,14 @@ export class RuningInfoService {
       whereClause.wbcCount = titleClauses;
     }
 
-    // const orderClause: any = {};
-    // if (wbcCountOrder) {
-    //   orderClause.wbcCount = wbcCountOrder.toUpperCase();
-    // }
-
-    const [data, total] = await this.runingInfoEntityRepository.findAndCount({
+    // 1. 모든 데이터를 가져옵니다.
+    const allData = await this.runingInfoEntityRepository.find({
       where: whereClause,
-      // order: orderClause,
-      take: pageSize,
-      skip: (page - 1) * pageSize,
     });
-    // data.sort((a, b) => {
-    //   const dateA = parseCreateDateString(a.createDate);
-    //   const dateB = parseCreateDateString(b.createDate);
-    //   return dateB.valueOf() - dateA.valueOf();
-    // });
-    // function parseCreateDateString(createDateString: string): moment.Moment {
-    //   return moment(createDateString, 'YYYYMMDDHHmmssSSS');
-    // }
 
+    // 2. wbcCountOrder에 따라 데이터를 정렬합니다.
     if (wbcCountOrder) {
-      data.sort((a, b) => {
+      allData.sort((a, b) => {
         if (wbcCountOrder.toUpperCase() === 'ASC') {
           return Number(a.wbcCount) - Number(b.wbcCount);
         } else {
@@ -206,16 +224,20 @@ export class RuningInfoService {
       });
     }
 
-    return { data, total };
+    // 3. 전체 데이터 수를 계산합니다.
+    const total = allData.length;
+
+    // 4. 페이징을 적용합니다.
+    let paginatedData: RuningInfoEntity[] = [];
+    if (startDay && endDay && (endDay.getTime() - startDay.getTime()) === 86400000) { // 1일인 경우에만 페이지 크기를 다시 적용
+      paginatedData = allData.slice((page - 1) * pageSize, page * pageSize);
+    } else {
+      paginatedData = allData;
+    }
+
+    return { data: paginatedData, total };
   }
-  // private mapWbcInfo(wbcInfo: WbcInfoDto[]): any[] {
-  //   console.log(wbcInfo);
-  //   return wbcInfo.map((item) => ({
-  //     categoryId: item.categoryId,
-  //     categoryNm: item.categoryNm,
-  //     classInfo: this.mapClassInfo(item.classInfo),
-  //   }));
-  // }
+
 
   private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
     // wbcInfoAfter가 null이면 빈 배열을 반환
