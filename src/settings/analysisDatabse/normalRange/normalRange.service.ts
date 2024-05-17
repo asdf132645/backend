@@ -47,7 +47,7 @@ export class NormalRangeService {
     });
 
     if (existingNormalRange) {
-      await this.normalRangeRepository.update(existingNormalRange.userId, item);
+      await this.normalRangeRepository.update(existingNormalRange.num, item);
       return await this.normalRangeRepository.findOne({
         where: { userId, num: item.num },
       });

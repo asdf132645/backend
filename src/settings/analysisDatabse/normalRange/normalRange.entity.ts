@@ -5,10 +5,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class NormalRange {
-  @Column()
+  @PrimaryGeneratedColumn()
   num: number;
 
-  @PrimaryGeneratedColumn()
+  @Column()
   classId: string;
 
   @Column({ default: 0 })
