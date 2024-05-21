@@ -55,6 +55,7 @@ export class CombinedService
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
     if (process.env.DB_HOST === ipAddress) {
+      this.logger.log(`clientExit 누름`);
       this.webSocketGetData({
         type: 'SEND_DATA',
         payload: {
@@ -100,6 +101,7 @@ export class CombinedService
         if (this.wss) {
           // this.logger.log(message);
           if (ipAddress === process.env.DB_HOST) {
+            this.logger.log(`정상 수신 데이터 ${message}`);
             this.webSocketGetData(message);
           }
         }
@@ -131,11 +133,6 @@ export class CombinedService
     });
 
     client.on('disconnect', async () => {
-      // if (!this.connectedClient || this.connectedClient.destroyed) {
-      //   if (process.env.DB_HOST === ipAddress) {
-      //     this.webSocketGetData({ jobCmd: 'clientExit' });
-      //   }
-      // }
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });
 
@@ -145,7 +142,6 @@ export class CombinedService
   }
 
   webSocketGetData(message: any): void {
-    console.log(message);
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
@@ -200,30 +196,12 @@ export class CombinedService
       const newClient = new net.Socket();
       newClient.connect(newPort, newAddress, () => {
         this.connectedClient = newClient;
-        console.log('setupTcpClient');
       });
 
       const partialData: Buffer[] = []; // 부분적인 데이터를 저장할 배열
 
       newClient.on('data', (chunk) => {
-        // console.log(chunk);
         partialData.push(chunk);
-
-        // 데이터가 JSON 형식으로 완전히 전송되었는지 확인
-        // let jsonData: string | null = null;
-        // for (let i = 0; i < partialData.length; i++) {
-        //   const buffer = partialData[i];
-        //   if (buffer.toString().includes('}')) {
-        //     jsonData = Buffer.concat(partialData).toString('utf-8');
-        //     break;
-        //   }
-        // }
-
-        // 완전한 JSON이 수신되었을 경우 처리
-        // if (chunk !== null) {
-        //   this.handleTcpData(chunk);
-        //   partialData.length = 0; // 버퍼 초기화
-        // }
 
         if (this.wss) {
           this.sendDataToWebSocketClients(chunk);

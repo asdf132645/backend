@@ -153,7 +153,8 @@ export class RuningInfoService {
     testType?: string,
     wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number }> {
-    const whereClause: any = {};
+    const queryBuilder =
+      this.runingInfoEntityRepository.createQueryBuilder('runInfo');
 
     const formatDate = (date: Date): string => {
       const year = date.getFullYear().toString();
@@ -167,77 +168,66 @@ export class RuningInfoService {
     };
 
     if (startDay) {
-      const formattedStartDay = formatDate(startDay);
-      whereClause.createDate = MoreThanOrEqual(formattedStartDay);
-    }
-
-    if (endDay) {
-      // endDay를 23:59:59.999로 설정
-      const endDayAdjusted = new Date(endDay);
-      endDayAdjusted.setHours(23, 59, 59, 999);
-      const formattedEndDay = formatDate(endDayAdjusted);
-      if (whereClause.createDate) {
-        whereClause.createDate = Between(formatDate(startDay), formattedEndDay);
-      } else {
-        whereClause.createDate = LessThanOrEqual(formattedEndDay);
-      }
-    }
-
-    if (barcodeNo) {
-      whereClause.barcodeNo = barcodeNo;
-    }
-
-    if (patientId) {
-      whereClause.patientId = patientId;
-    }
-
-    if (patientNm) {
-      whereClause.patientNm = patientNm;
-    }
-
-    if (testType) {
-      whereClause.testType = testType;
-    }
-
-    if (nrCount !== '0') {
-      whereClause.wbcCount = Like(`%{"title": "NR", "count": "${nrCount}"}%`);
-    }
-
-    if (titles && titles.length > 0) {
-      const titleClauses = titles.map((title) => `%{"title": "${title}"%`);
-      whereClause.wbcCount = titleClauses;
-    }
-
-    // 1. 모든 데이터를 가져옵니다.
-    const allData = await this.runingInfoEntityRepository.find({
-      where: whereClause,
-    });
-
-    // 2. wbcCountOrder에 따라 데이터를 정렬합니다.
-    if (wbcCountOrder) {
-      allData.sort((a, b) => {
-        if (wbcCountOrder.toUpperCase() === 'ASC') {
-          return Number(a.wbcCount) - Number(b.wbcCount);
-        } else {
-          return Number(b.wbcCount) - Number(a.wbcCount);
-        }
+      queryBuilder.andWhere('runInfo.createDate >= :startDay', {
+        startDay: formatDate(startDay),
       });
     }
 
-    // 3. 전체 데이터 수를 계산합니다.
-    const total = allData.length;
-
-    // 4. 페이징을 적용합니다.
-    let paginatedData: RuningInfoEntity[] = [];
-    if (startDay && endDay && (endDay.getTime() - startDay.getTime()) === 86400000) { // 1일인 경우에만 페이지 크기를 다시 적용
-      paginatedData = allData.slice((page - 1) * pageSize, page * pageSize);
-    } else {
-      paginatedData = allData;
+    if (endDay) {
+      const endDayAdjusted = new Date(endDay);
+      endDayAdjusted.setHours(23, 59, 59, 999);
+      queryBuilder.andWhere('runInfo.createDate <= :endDay', {
+        endDay: formatDate(endDayAdjusted),
+      });
     }
 
-    return { data: paginatedData, total };
-  }
+    if (barcodeNo) {
+      queryBuilder.andWhere('runInfo.barcodeNo = :barcodeNo', { barcodeNo });
+    }
 
+    if (patientId) {
+      queryBuilder.andWhere('runInfo.patientId = :patientId', { patientId });
+    }
+
+    if (patientNm) {
+      queryBuilder.andWhere('runInfo.patientNm LIKE :patientNm', {
+        patientNm: `%${patientNm}%`,
+      });
+    }
+
+    if (testType) {
+      queryBuilder.andWhere('runInfo.testType = :testType', { testType });
+    }
+
+    if (nrCount !== '0') {
+      queryBuilder.andWhere('runInfo.wbcCount LIKE :nrCount', {
+        nrCount: `%{"title": "NR", "count": "${nrCount}"}%`,
+      });
+    }
+
+    if (titles && titles.length > 0) {
+      titles.forEach((title, index) => {
+        queryBuilder.andWhere(`runInfo.wbcCount LIKE :title${index}`, {
+          [`title${index}`]: `%{"title": "${title}"%`,
+        });
+      });
+    }
+
+    if (wbcCountOrder) {
+      queryBuilder.orderBy(
+        'runInfo.wbcCount',
+        wbcCountOrder.toUpperCase() as 'ASC' | 'DESC',
+      );
+    }
+
+    const [data, total] = await queryBuilder
+      .orderBy('runInfo.createDate', 'DESC') // 마지막 날짜 기준으로 정렬
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+
+    return { data, total };
+  }
 
   private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
     // wbcInfoAfter가 null이면 빈 배열을 반환
