@@ -2,14 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Between,
-  In,
-  LessThanOrEqual,
-  Like,
-  MoreThanOrEqual,
-  Repository,
-} from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
@@ -156,30 +149,28 @@ export class RuningInfoService {
     const queryBuilder =
       this.runingInfoEntityRepository.createQueryBuilder('runInfo');
 
-    const formatDate = (date: Date): string => {
-      const year = date.getFullYear().toString();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-      const seconds = date.getSeconds().toString().padStart(2, '0');
-      const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
-      return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
-    };
+    const startFormatted = startDay
+      ? `${startDay.getFullYear()}${(startDay.getMonth() + 1).toString().padStart(2, '0')}${startDay.getDate().toString().padStart(2, '0')}000000000`
+      : undefined;
+    const endFormatted = endDay
+      ? `${endDay.getFullYear()}${(endDay.getMonth() + 1).toString().padStart(2, '0')}${endDay.getDate().toString().padStart(2, '0')}235959999`
+      : undefined;
 
-    if (startDay) {
-      queryBuilder.andWhere('runInfo.createDate >= :startDay', {
-        startDay: formatDate(startDay),
-      });
+    if (startFormatted || endFormatted) {
+      queryBuilder.andWhere(
+        startFormatted && endFormatted
+          ? 'runInfo.createDate BETWEEN :startDay AND :endDay'
+          : startFormatted
+            ? 'runInfo.createDate >= :startDay'
+            : 'runInfo.createDate <= :endDay',
+        {
+          startDay: startFormatted,
+          endDay: endFormatted,
+        },
+      );
     }
 
-    if (endDay) {
-      const endDayAdjusted = new Date(endDay);
-      endDayAdjusted.setHours(23, 59, 59, 999);
-      queryBuilder.andWhere('runInfo.createDate <= :endDay', {
-        endDay: formatDate(endDayAdjusted),
-      });
-    }
+    queryBuilder.orderBy('runInfo.createDate', 'DESC');
 
     if (barcodeNo) {
       queryBuilder.andWhere('runInfo.barcodeNo = :barcodeNo', { barcodeNo });
@@ -213,18 +204,21 @@ export class RuningInfoService {
       });
     }
 
-    if (wbcCountOrder) {
-      queryBuilder.orderBy(
-        'runInfo.wbcCount',
-        wbcCountOrder.toUpperCase() as 'ASC' | 'DESC',
-      );
-    }
+    // eslint-disable-next-line prefer-const
+    let [data, total] = await queryBuilder.getManyAndCount();
 
-    const [data, total] = await queryBuilder
-      .orderBy('runInfo.createDate', 'DESC') // 마지막 날짜 기준으로 정렬
-      .skip((page - 1) * pageSize)
-      .take(pageSize)
-      .getManyAndCount();
+    if (wbcCountOrder) {
+      data.sort((a, b) => {
+        const aCount = Number(a.wbcCount);
+        const bCount = Number(b.wbcCount);
+        return wbcCountOrder.toUpperCase() === 'ASC'
+          ? aCount - bCount
+          : bCount - aCount;
+      });
+    }
+    if (pageSize && page) {
+      data = data.slice((page - 1) * pageSize, page * pageSize);
+    }
 
     return { data, total };
   }
