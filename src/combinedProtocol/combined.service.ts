@@ -101,7 +101,7 @@ export class CombinedService
         if (this.wss) {
           // this.logger.log(message);
           if (ipAddress === process.env.DB_HOST) {
-            // this.logger.log(`정상 수신 데이터 ${message}`);
+            this.logger.log(`정상 수신 데이터 ${message}`);
             this.webSocketGetData(message);
           }
         }
@@ -179,9 +179,9 @@ export class CombinedService
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
       }
     } else {
-      // this.logger.warn(
-      //   '활성화된 TCP 클라이언트 연결 없음. 데이터 전송되지 않았습니다.???',
-      // );
+      this.logger.warn(
+        '활성화된 TCP 클라이언트 연결 없음. 데이터 전송되지 않았습니다.???',
+      );
     }
   }
 
@@ -217,7 +217,7 @@ export class CombinedService
       });
 
       newClient.on('error', (err) => {
-        // this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
+        this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
         this.sendDataToWebSocketClients({ err: true });
       });
     } else {

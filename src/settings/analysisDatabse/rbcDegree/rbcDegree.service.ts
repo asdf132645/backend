@@ -81,9 +81,7 @@ export class RbcDegreeService {
     });
 
     if (!degree) {
-      throw new NotFoundException(
-        `userId가 ${userId}인 정보를 찾을 수 없습니다`,
-      );
+      return degree;
     }
 
     return degree;
