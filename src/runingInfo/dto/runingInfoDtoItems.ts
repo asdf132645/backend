@@ -34,7 +34,6 @@ export class RuningInfoDtoItems {
   wbcInfoAfter?: any[];
   rbcInfo: any[];
   rbcInfoAfter: any[];
-  rbcInfoPathAfter: any[];
   bminfo: any[];
   userId: number;
   cassetId: string;
