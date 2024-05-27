@@ -35,6 +35,7 @@ import { IpModule } from './ipService/ipService.module';
 import { ClassOrderModule } from './classOrder/classOrder.module';
 // import { CacheInterceptor } from './interceptors/cache-control.interceptor';
 import { CacheService } from './cache/CacheService';
+import { DziReaderModule } from './dziReader/dziReader.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -62,6 +63,7 @@ import { CacheService } from './cache/CacheService';
     CombinedModule,
     IpModule,
     ClassOrderModule,
+    DziReaderModule,
   ],
   controllers: [
     AppController,

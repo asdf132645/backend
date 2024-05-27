@@ -32,7 +32,9 @@ export class RuningInfoDtoItems {
   runningPath: any[];
   wbcInfo: any[];
   wbcInfoAfter?: any[];
-  rbcInfo: RbcInfoDto[];
+  rbcInfo: any[];
+  rbcInfoAfter: any[];
+  rbcInfoPathAfter: any[];
   bminfo: any[];
   userId: number;
   cassetId: string;

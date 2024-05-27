@@ -104,6 +104,12 @@ export class RuningInfoEntity {
   rbcInfo: any[];
 
   @Column('json')
+  rbcInfoAfter: any[];
+
+  @Column('json')
+  rbcInfoPathAfter: any[];
+
+  @Column('json')
   processInfo: {
     cassetteNo: number;
     barcodeId: string;
