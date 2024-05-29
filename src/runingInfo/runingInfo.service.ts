@@ -7,8 +7,8 @@ import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
   RbcInfoDto,
-  ProcessInfoDto,
-  OrderDto,
+  // ProcessInfoDto,
+  // OrderDto,
   ClassInfoDto,
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
@@ -72,9 +72,9 @@ export class RuningInfoService {
         existingEntity.orderDttm = item.orderDttm;
         existingEntity.testType = item.testType;
         // existingEntity.analyzedDttm = item.analyzedDttm;
-        existingEntity.pltCount = item.pltCount;
-        existingEntity.malariaCount = item.malariaCount;
-        existingEntity.maxRbcCount = item.maxRbcCount;
+        // existingEntity.pltCount = item.pltCount;
+        // existingEntity.malariaCount = item.malariaCount;
+        // existingEntity.maxRbcCount = item.maxRbcCount;
         existingEntity.stateCd = item.stateCd;
         existingEntity.tactTime = item.tactTime;
         existingEntity.maxWbcCount = item.maxWbcCount;
@@ -84,7 +84,7 @@ export class RuningInfoService {
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
         existingEntity.submit = item.submit;
-        existingEntity.memo = item.memo;
+        existingEntity.wbcMemo = item.wbcMemo;
         existingEntity.rbcMemo = item.rbcMemo;
         existingEntity.state = item.state;
         existingEntity.pcIp = item.pcIp;
@@ -95,22 +95,22 @@ export class RuningInfoService {
 
         // wbcInfoAfter 매핑
         existingEntity.wbcInfoAfter = this.mapWbcInfoAfter(item.wbcInfoAfter);
-        existingEntity.bmInfoAfter = this.mapWbcInfoAfter(item.bmInfoAfter);
+        // existingEntity.bmInfoAfter = this.mapWbcInfoAfter(item.bmInfoAfter);
 
         // ProcessInfoDto 매핑
-        existingEntity.processInfo = this.mapProcessInfo(item.processInfo);
-        if (Array.isArray(item.orderList)) {
-          existingEntity.orderList = this.mapOrderList(item.orderList);
-        } else if (item.orderList && typeof item.orderList === 'object') {
-          existingEntity.orderList = this.mapOrderList([item.orderList]);
-        }
+        // existingEntity.processInfo = this.mapProcessInfo(item.processInfo);
+        // if (Array.isArray(item.orderList)) {
+        //   existingEntity.orderList = this.mapOrderList(item.orderList);
+        // } else if (item.orderList && typeof item.orderList === 'object') {
+        //   existingEntity.orderList = this.mapOrderList([item.orderList]);
+        // }
 
         existingEntity.signedState = item.signedState;
         existingEntity.signedOfDate = item.signedOfDate;
         existingEntity.signedUserId = item.signedUserId;
-        existingEntity.classificationResult = this.mapClassificationResult(
-          item.classificationResult,
-        );
+        // existingEntity.classificationResult = this.mapClassificationResult(
+        //   item.classificationResult,
+        // );
         // 엔터티를 업데이트하고 업데이트된 엔터티를 배열에 추가
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
@@ -257,37 +257,37 @@ export class RuningInfoService {
     }));
   }
 
-  private mapProcessInfo(processInfo: ProcessInfoDto): any {
-    return {
-      cassetteNo: processInfo.cassetteNo,
-      barcodeId: processInfo.barcodeId,
-      patientId: processInfo.patientId,
-      patientName: processInfo.patientName,
-      wbcCount: processInfo.wbcCount,
-      orderDate: processInfo.orderDate,
-      analyzedDttm: processInfo.analyzedDttm,
-    };
-  }
+  // private mapProcessInfo(processInfo: ProcessInfoDto): any {
+  //   return {
+  //     cassetteNo: processInfo.cassetteNo,
+  //     barcodeId: processInfo.barcodeId,
+  //     patientId: processInfo.patientId,
+  //     patientName: processInfo.patientName,
+  //     wbcCount: processInfo.wbcCount,
+  //     orderDate: processInfo.orderDate,
+  //     analyzedDttm: processInfo.analyzedDttm,
+  //   };
+  // }
 
-  private mapOrderList(orderList: OrderDto[]): any[] {
-    return orderList.map((order) => ({
-      barcodeId: order.barcodeId,
-      patientName: order.patientName,
-      orderDate: order.orderDate,
-      analyzedDttm: order.analyzedDttm,
-      state: order.state,
-    }));
-  }
+  // private mapOrderList(orderList: OrderDto[]): any[] {
+  //   return orderList.map((order) => ({
+  //     barcodeId: order.barcodeId,
+  //     patientName: order.patientName,
+  //     orderDate: order.orderDate,
+  //     analyzedDttm: order.analyzedDttm,
+  //     state: order.state,
+  //   }));
+  // }
 
-  private mapClassificationResult(classificationResult: any[]): any[] {
-    return classificationResult.map((classItem) => ({
-      count: classItem.count,
-      dirName: classItem.dirName,
-      title: classItem.title,
-      analyzedDttm: classItem.analyzedDttm,
-      percent: classItem.percent,
-    }));
-  }
+  // private mapClassificationResult(classificationResult: any[]): any[] {
+  //   return classificationResult.map((classItem) => ({
+  //     count: classItem.count,
+  //     dirName: classItem.dirName,
+  //     title: classItem.title,
+  //     analyzedDttm: classItem.analyzedDttm,
+  //     percent: classItem.percent,
+  //   }));
+  // }
 
   async clearPcIpAndSetStateFalse(pcIp: string): Promise<void> {
     try {

@@ -34,7 +34,7 @@ export class RuningInfoDtoItems {
   wbcInfoAfter?: any[];
   rbcInfo: any[];
   rbcInfoAfter: any[];
-  bminfo: any[];
+  // bminfo: any[];
   userId: number;
   cassetId: string;
   isNormal: string;
@@ -45,9 +45,9 @@ export class RuningInfoDtoItems {
   signedUserId?: string;
   classificationResult?: any[];
   isNsNbIntegration?: string;
-  memo?: string;
+  wbcMemo?: string;
   rbcMemo?: string;
-  bmInfoAfter?: any[];
+  // bmInfoAfter?: any[];
   pcIp: string;
   siteCd?: string;
   deviceBarcode?: string;

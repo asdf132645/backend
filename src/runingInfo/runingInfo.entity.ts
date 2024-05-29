@@ -55,14 +55,14 @@ export class RuningInfoEntity {
   @Column()
   createDate: string;
 
-  @Column()
-  pltCount: string;
-
-  @Column()
-  malariaCount: string;
-
-  @Column()
-  maxRbcCount: string;
+  // @Column()
+  // pltCount: string;
+  //
+  // @Column()
+  // malariaCount: string;
+  //
+  // @Column()
+  // maxRbcCount: string;
 
   @Column()
   stateCd: string;
@@ -79,8 +79,8 @@ export class RuningInfoEntity {
   @Column('json')
   runningPath: any[];
 
-  @Column('json')
-  bminfo: any[];
+  // @Column('json')
+  // bminfo: any[];
 
   @Column()
   userId: number;
@@ -97,8 +97,8 @@ export class RuningInfoEntity {
   @Column('json')
   wbcInfoAfter: any[];
 
-  @Column('json')
-  bmInfoAfter: any[];
+  // @Column('json')
+  // bmInfoAfter: any[];
 
   @Column('json')
   rbcInfo: any[];
@@ -106,25 +106,25 @@ export class RuningInfoEntity {
   @Column('json')
   rbcInfoAfter: any[];
 
-  @Column('json')
-  processInfo: {
-    cassetteNo: number;
-    barcodeId: string;
-    patientId: string;
-    patientName: string;
-    wbcCount: string;
-    orderDate: string;
-    analyzedDttm: string;
-  };
+  // @Column('json')
+  // processInfo: {
+  //   cassetteNo: number;
+  //   barcodeId: string;
+  //   patientId: string;
+  //   patientName: string;
+  //   wbcCount: string;
+  //   orderDate: string;
+  //   analyzedDttm: string;
+  // };
 
-  @Column('json')
-  orderList: {
-    barcodeId: string;
-    patientName: string;
-    orderDate: string;
-    analyzedDttm: string;
-    state: string;
-  }[];
+  // @Column('json')
+  // orderList: {
+  //   barcodeId: string;
+  //   patientName: string;
+  //   orderDate: string;
+  //   analyzedDttm: string;
+  //   state: string;
+  // }[];
   @Column()
   signedState?: string;
 
@@ -134,14 +134,14 @@ export class RuningInfoEntity {
   @Column()
   signedUserId?: string;
 
-  @Column('json')
-  classificationResult?: any[];
+  // @Column('json')
+  // classificationResult?: any[];
 
   @Column()
   isNsNbIntegration?: string;
 
   @Column()
-  memo?: string;
+  wbcMemo?: string;
 
   @Column()
   rbcMemo?: string;
