@@ -100,7 +100,9 @@ export class CombinedService
       try {
         if (this.wss) {
           // this.logger.log(message);
+
           if (ipAddress === process.env.DB_HOST) {
+            console.log(ipAddress);
             this.logger.log(`정상 수신 데이터 ${message}`);
             this.webSocketGetData(message);
           }
