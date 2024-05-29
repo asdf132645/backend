@@ -54,7 +54,7 @@ export class CombinedService
     if (ipAddress) {
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
-    if (process.env.DB_HOST === ipAddress) {
+    if (process.env.MAIN_API === ipAddress) {
       this.logger.log(`clientExit 누름`);
       this.webSocketGetData({
         type: 'SEND_DATA',
@@ -101,7 +101,7 @@ export class CombinedService
         if (this.wss) {
           // this.logger.log(message);
 
-          if (ipAddress === process.env.DB_HOST) {
+          if (ipAddress === process.env.MAIN_API) {
             console.log(ipAddress);
             this.logger.log(`정상 수신 데이터 ${message}`);
             this.webSocketGetData(message);
@@ -125,7 +125,7 @@ export class CombinedService
     client.on('viewerCheck', () => {
       try {
         if (this.wss) {
-          if (process.env.DB_HOST === ipAddress) {
+          if (process.env.MAIN_API === ipAddress) {
             this.wss.emit('viewerCheck', ipAddress);
           }
         }
