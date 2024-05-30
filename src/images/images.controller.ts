@@ -15,10 +15,12 @@ import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as sharp from 'sharp';
 import { CacheService } from '../cache/CacheService';
+import { ImagesService } from './images.service';
 
 @Controller('images')
 export class ImagesController {
   private cacheService: CacheService; // Define cacheService property
+  constructor(private readonly imagesService: ImagesService) {}
 
   @Get()
   async getImage(
@@ -80,6 +82,15 @@ export class ImagesController {
         .status(HttpStatus.NOT_FOUND)
         .send('File not found or permission issue');
     }
+  }
+
+  @Get('getImageWbc')
+  async getImageWbc(
+    @Query('folder') folder: string,
+    @Query('imageName') imageName: string,
+    @Res() res: Response,
+  ) {
+    await this.imagesService.getImageWbc(folder, imageName, res);
   }
 
   @Get('move')

@@ -37,6 +37,7 @@ import { ClassOrderModule } from './classOrder/classOrder.module';
 import { CacheService } from './cache/CacheService';
 import { DziReaderModule } from './dziReader/dziReader.module';
 import { FileModule } from './file/file.module';
+import { ImagesService } from './images/images.service';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { FileModule } from './file/file.module';
     LoggerService,
     AppService,
     FileSystemService,
+    ImagesService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,
