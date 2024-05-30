@@ -75,6 +75,10 @@ export class RuningInfoService {
         // existingEntity.pltCount = item.pltCount;
         // existingEntity.malariaCount = item.malariaCount;
         // existingEntity.maxRbcCount = item.maxRbcCount;
+        existingEntity.cbcPatientNo = item.cbcPatientNo;
+        existingEntity.cbcPatientNm = item.cbcPatientNm;
+        existingEntity.cbcSex = item.cbcSex;
+        existingEntity.cbcAge = item.cbcAge;
         existingEntity.stateCd = item.stateCd;
         existingEntity.tactTime = item.tactTime;
         existingEntity.maxWbcCount = item.maxWbcCount;

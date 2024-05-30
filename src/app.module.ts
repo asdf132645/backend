@@ -38,6 +38,7 @@ import { CacheService } from './cache/CacheService';
 import { DziReaderModule } from './dziReader/dziReader.module';
 import { FileModule } from './file/file.module';
 import { ImagesService } from './images/images.service';
+import { Hl7Module } from './hl7/hl7.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { ImagesService } from './images/images.service';
     ClassOrderModule,
     DziReaderModule,
     FileModule,
+    Hl7Module,
   ],
   controllers: [
     AppController,

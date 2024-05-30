@@ -51,6 +51,10 @@ export class RuningInfoDtoItems {
   pcIp: string;
   siteCd?: string;
   deviceBarcode?: string;
+  cbcPatientNo?: string;
+  cbcPatientNm?: string;
+  cbcSex?: string;
+  cbcAge?: string;
 }
 
 export class WbcInfoDto {

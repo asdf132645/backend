@@ -154,4 +154,16 @@ export class RuningInfoEntity {
 
   @Column()
   deviceBarcode?: string;
+
+  @Column()
+  cbcPatientNo?: string;
+
+  @Column()
+  cbcPatientNm?: string;
+
+  @Column()
+  cbcSex?: string;
+
+  @Column()
+  cbcAge?: string;
 }
