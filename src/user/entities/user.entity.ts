@@ -79,10 +79,6 @@ export class User {
   })
   viewerCheck?: string;
 
-  @OneToOne(() => CellImgAnalyzed, (cellImgAnalyzed) => cellImgAnalyzed.user)
-  @JoinColumn({ name: 'userId' })
-  cellImgAnalyzed: CellImgAnalyzed;
-
   @OneToOne(() => RbcDegree, (RbcDegree) => RbcDegree.user)
   @JoinColumn({ name: 'userId' })
   rbcDegrees: RbcDegree[];
@@ -90,10 +86,6 @@ export class User {
   @OneToOne(() => WbcCustomClass, (WbcCustomClass) => WbcCustomClass.user)
   @JoinColumn({ name: 'userId' })
   wbcCustomClass: WbcCustomClass;
-
-  @OneToOne(() => WbcHotKeys, { cascade: true })
-  @JoinColumn({ name: 'userId' })
-  wbcHotKeys: WbcHotKeys;
 
   @OneToOne(() => NormalRange, { cascade: true })
   @JoinColumn({ name: 'userId' })
