@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ImagePrintEntity } from './imagePrint.entity';
-import { CreateImagePrintDto } from './dto/imgaePrintDto'; // 변경된 부분
+import { CreateImagePrintDto } from './dto/imgaePrintDto';
+import { CbcCodeEntity } from "../cbcCode/cbcCode.entity"; // 변경된 부분
 
 @Injectable()
 export class ImagePrintService {
@@ -27,7 +28,27 @@ export class ImagePrintService {
 
   async update(updateDto: CreateImagePrintDto): Promise<ImagePrintEntity[]> {
     const { imagePrintItems } = updateDto;
-    return imagePrintItems;
+    const updatedItems: ImagePrintEntity[] = [];
+    for (const item of imagePrintItems) {
+      const updatedItem = await this.updateItem(item);
+      updatedItems.push(updatedItem);
+    }
+    return updatedItems;
+  }
+
+  private async updateItem(item: any): Promise<ImagePrintEntity> {
+    const existingBfHotKeys = await this.imagePrintEntityRepository.findOne({
+      where: { id: item.id },
+    });
+
+    if (existingBfHotKeys) {
+      await this.imagePrintEntityRepository.update(existingBfHotKeys.id, item);
+      return await this.imagePrintEntityRepository.findOne({
+        where: { id: item.id },
+      });
+    }
+
+    return null;
   }
 
   async find(): Promise<ImagePrintEntity[]> {
