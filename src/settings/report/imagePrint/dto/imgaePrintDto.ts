@@ -1,7 +1,6 @@
 import {
   IsString,
   IsInt,
-  IsOptional,
   IsArray,
   ValidateNested,
   IsBoolean,
@@ -9,10 +8,6 @@ import {
 import { Type } from 'class-transformer';
 
 export class CreateImagePrintDto {
-  @IsInt()
-  @IsOptional()
-  userId?: number;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ImagePrintItems)

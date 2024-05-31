@@ -13,13 +13,10 @@ export class ImagePrintService {
   ) {}
 
   async create(createDto: CreateImagePrintDto): Promise<ImagePrintEntity> {
-    const { userId, imagePrintItems } = createDto as CreateImagePrintDto;
+    const { imagePrintItems } = createDto as CreateImagePrintDto;
     const createdItems: ImagePrintEntity[] = [];
     for (const item of imagePrintItems) {
-      const imagePrintEntity = this.imagePrintEntityRepository.create({
-        ...item,
-        userId,
-      });
+      const imagePrintEntity = this.imagePrintEntityRepository.create({ ...item });
       const createdItem =
         await this.imagePrintEntityRepository.save(imagePrintEntity);
       createdItems.push(createdItem);
@@ -28,40 +25,12 @@ export class ImagePrintService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateImagePrintDto,
-  ): Promise<ImagePrintEntity[]> {
+  async update(updateDto: CreateImagePrintDto): Promise<ImagePrintEntity[]> {
     const { imagePrintItems } = updateDto;
-
-    const updatedItems: ImagePrintEntity[] = [];
-    for (const item of imagePrintItems) {
-      const updatedItem = await this.updateItem(userId, item);
-      updatedItems.push(updatedItem);
-    }
-
-    return updatedItems;
+    return imagePrintItems;
   }
 
-  private async updateItem(
-    userId: number,
-    item: any,
-  ): Promise<ImagePrintEntity> {
-    const existingBfHotKeys = await this.imagePrintEntityRepository.findOne({
-      where: { userId, id: item.id },
-    });
-
-    if (existingBfHotKeys) {
-      await this.imagePrintEntityRepository.update(existingBfHotKeys.id, item);
-      return await this.imagePrintEntityRepository.findOne({
-        where: { userId, id: item.id },
-      });
-    }
-
-    return null;
-  }
-
-  async findByUserId(userId: number): Promise<ImagePrintEntity[]> {
-    return await this.imagePrintEntityRepository.find({ where: { userId } });
+  async find(): Promise<ImagePrintEntity[]> {
+    return await this.imagePrintEntityRepository.find();
   }
 }
