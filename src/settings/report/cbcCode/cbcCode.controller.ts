@@ -8,25 +8,17 @@ export class CbcCodeController {
   constructor(private readonly cbcCodeService: CbcCodeService) {}
 
   @Post('create')
-  async create(
-    @Param('userId') userId: number,
-    @Body() createDto: CreateCbcCodeDto,
-  ): Promise<CbcCodeEntity> {
+  async create(@Body() createDto: CreateCbcCodeDto): Promise<CbcCodeEntity> {
     return this.cbcCodeService.create(createDto);
   }
 
-  @Put('update/:id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateDto: CreateCbcCodeDto,
-  ): Promise<CbcCodeEntity[]> {
-    return this.cbcCodeService.update(Number(id), updateDto);
+  @Put('update')
+  async update(@Body() updateDto: CreateCbcCodeDto): Promise<CbcCodeEntity[]> {
+    return this.cbcCodeService.update(updateDto);
   }
 
-  @Get('get/:userId')
-  async findByUserId(
-    @Param('userId') userId: number,
-  ): Promise<CbcCodeEntity[]> {
-    return this.cbcCodeService.findByUserId(userId);
+  @Get('get')
+  async get(): Promise<CbcCodeEntity[]> {
+    return this.cbcCodeService.find();
   }
 }

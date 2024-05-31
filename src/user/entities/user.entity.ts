@@ -96,10 +96,6 @@ export class User {
   @JoinColumn({ name: 'userId' })
   lisCodeRbc: LisCodeRbcEntity;
 
-  @OneToOne(() => CbcCodeEntity, { cascade: true })
-  @JoinColumn({ name: 'userId' })
-  cbcCode: CbcCodeEntity;
-
   @OneToOne(() => FilePathSetEntity, { cascade: true })
   @JoinColumn({ name: 'userId' })
   filePathSet: FilePathSetEntity;

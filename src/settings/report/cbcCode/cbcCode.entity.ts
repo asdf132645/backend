@@ -1,6 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
-import { User } from '../../../user/entities/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class CbcCodeEntity {
@@ -18,11 +16,4 @@ export class CbcCodeEntity {
 
   @Column({ default: false })
   isSelected: boolean;
-
-  @Column()
-  @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
-  userId: number;
-
-  @OneToOne(() => User, (userTable) => userTable.cbcCode)
-  userTable: User;
 }
