@@ -11,7 +11,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CellImgAnalyzed } from '../../settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
 import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
 import { WbcCustomClass } from '../../settings/analysisDatabse/wbcCustomClass/wbcCustomClass.entity';
-import { WbcHotKeys } from '../../settings/analysisDatabse/wbcHotKeys/wbcHotKeys.entity';
 import { NormalRange } from '../../settings/analysisDatabse/normalRange/normalRange.entity';
 import { ImagePrintEntity } from '../../settings/report/imagePrint/imagePrint.entity';
 import { LisCodeEntity } from '../../settings/report/lisCode/wbc/lisCode.entity';
@@ -87,9 +86,9 @@ export class User {
   @JoinColumn({ name: 'userId' })
   wbcCustomClass: WbcCustomClass;
 
-  @OneToOne(() => NormalRange, { cascade: true })
-  @JoinColumn({ name: 'userId' })
-  normalRange: NormalRange;
+  @OneToOne(() => CellImgAnalyzed, (CellImgAnalyzed) => CellImgAnalyzed.user)
+  @JoinColumn({name: 'userId'})
+  cellImgAnalyzed: CellImgAnalyzed;
 
   @OneToOne(() => ImagePrintEntity, { cascade: true })
   @JoinColumn({ name: 'userId' })

@@ -8,10 +8,6 @@ import {
 import { Type } from 'class-transformer';
 
 export class NormalRangeDto {
-  @IsInt()
-  @IsOptional()
-  userId?: number;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => normalRangeItems)
