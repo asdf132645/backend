@@ -14,13 +14,10 @@ export class BfHotKeysService {
 
   async create(createDto: CreateBfHotKeysDto): Promise<BfHotKeys> {
     // 변경된 부분
-    const { userId, bfHotKeysItems } = createDto;
+    const { bfHotKeysItems } = createDto;
     const createdItems: BfHotKeys[] = [];
     for (const item of bfHotKeysItems) {
-      const bfHotKeys = this.bfHotKeysRepository.create({
-        ...item,
-        userId,
-      });
+      const bfHotKeys = this.bfHotKeysRepository.create({ ...item });
       const createdItem = await this.bfHotKeysRepository.save(bfHotKeys);
       createdItems.push(createdItem);
     }
@@ -28,37 +25,30 @@ export class BfHotKeysService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateBfHotKeysDto, // 변경된 부분
-  ): Promise<BfHotKeys[]> {
+  async update(updateDto: CreateBfHotKeysDto): Promise<BfHotKeys[]> {
     const { bfHotKeysItems } = updateDto;
 
     const updatedItems: BfHotKeys[] = [];
     for (const item of bfHotKeysItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
 
     return updatedItems;
   }
 
-  private async updateItem(userId: number, item: any): Promise<BfHotKeys> {
-    const existingBfHotKeys = await this.bfHotKeysRepository.findOne({
-      where: { userId, id: item.id },
-    });
+  private async updateItem(item: any): Promise<BfHotKeys> {
+    const existingBfHotKeys = await this.bfHotKeysRepository.findOne({ where: { id: item.id } });
 
     if (existingBfHotKeys) {
       await this.bfHotKeysRepository.update(existingBfHotKeys.id, item);
-      return await this.bfHotKeysRepository.findOne({
-        where: { userId, id: item.id },
-      });
+      return await this.bfHotKeysRepository.findOne({ where: { id: item.id } });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<BfHotKeys[]> {
-    return await this.bfHotKeysRepository.find({ where: { userId } });
+  async find(): Promise<BfHotKeys[]> {
+    return await this.bfHotKeysRepository.find();
   }
 }
