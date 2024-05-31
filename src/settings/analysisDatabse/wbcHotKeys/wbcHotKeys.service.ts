@@ -14,13 +14,10 @@ export class WbcHotKeysService {
   ) {}
 
   async create(createDto: CreateWbcHotKeysDto): Promise<WbcHotKeys> {
-    const { userId, wbcHotKeysItems } = createDto;
+    const { wbcHotKeysItems } = createDto;
     const createdItems: WbcHotKeys[] = [];
     for (const item of wbcHotKeysItems) {
-      const wbcHotKeys = this.wbcHotKeysRepository.create({
-        ...item,
-        userId,
-      });
+      const wbcHotKeys = this.wbcHotKeysRepository.create({ ...item });
       const createdItem = await this.wbcHotKeysRepository.save(wbcHotKeys);
       createdItems.push(createdItem);
     }
@@ -28,38 +25,31 @@ export class WbcHotKeysService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateWbcHotKeysDto,
-  ): Promise<WbcHotKeys[]> {
+  async update(updateDto: CreateWbcHotKeysDto): Promise<WbcHotKeys[]> {
     const { wbcHotKeysItems } = updateDto;
 
     const updatedItems: WbcHotKeys[] = [];
     for (const item of wbcHotKeysItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
 
     return updatedItems;
   }
 
-  private async updateItem(userId: number, item: any): Promise<WbcHotKeys> {
-    const existingWbcHotKeys = await this.wbcHotKeysRepository.findOne({
-      where: { userId, id: item.id },
-    });
+  private async updateItem(item: any): Promise<WbcHotKeys> {
+    const existingWbcHotKeys = await this.wbcHotKeysRepository.findOne({ where: { id: item.id } });
 
     if (existingWbcHotKeys) {
       await this.wbcHotKeysRepository.update(existingWbcHotKeys.id, item);
-      return await this.wbcHotKeysRepository.findOne({
-        where: { userId, id: item.id },
-      });
+      return await this.wbcHotKeysRepository.findOne({ where: { id: item.id } });
     }
 
     return null;
   }
 
 
-  async findByUserId(userId: number): Promise<WbcHotKeys[]> {
-    return await this.wbcHotKeysRepository.find({ where: { userId } });
+  async find(): Promise<WbcHotKeys[]> {
+    return await this.wbcHotKeysRepository.find();
   }
 }

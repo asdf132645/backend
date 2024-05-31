@@ -25,11 +25,4 @@ export class WbcHotKeys {
 
   @Column()
   order: number;
-
-  @Column()
-  @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
-  userId: number;
-
-  @OneToOne(() => User, (userTable) => userTable.wbcHotKeys)
-  userTable: User;
 }
