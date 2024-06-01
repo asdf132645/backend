@@ -8,13 +8,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { CellImgAnalyzed } from '../../settings/analysisDatabse/cellImgAnalyzed/entities/cell.entity';
 import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
-import { WbcCustomClass } from '../../settings/analysisDatabse/wbcCustomClass/wbcCustomClass.entity';
 import { LisCodeEntity } from '../../settings/report/lisCode/wbc/lisCode.entity';
 import { LisCodeRbcEntity } from '../../settings/report/lisCode/rbc/lisCodeRbc.entity';
-import { CbcCodeEntity } from '../../settings/report/cbcCode/cbcCode.entity';
-import { FilePathSetEntity } from '../../settings/report/filrPathSet/filePathSetEntity';
 
 @Entity('user')
 export class User {
@@ -80,10 +76,6 @@ export class User {
   @JoinColumn({ name: 'userId' })
   rbcDegrees: RbcDegree[];
 
-  @OneToOne(() => CellImgAnalyzed, (CellImgAnalyzed) => CellImgAnalyzed.user)
-  @JoinColumn({name: 'userId'})
-  cellImgAnalyzed: CellImgAnalyzed;
-
   @OneToOne(() => LisCodeEntity, { cascade: true })
   @JoinColumn({ name: 'userId' })
   lisCode: LisCodeEntity;
@@ -91,8 +83,4 @@ export class User {
   @OneToOne(() => LisCodeRbcEntity, { cascade: true })
   @JoinColumn({ name: 'userId' })
   lisCodeRbc: LisCodeRbcEntity;
-
-  @OneToOne(() => FilePathSetEntity, { cascade: true })
-  @JoinColumn({ name: 'userId' })
-  filePathSet: FilePathSetEntity;
 }

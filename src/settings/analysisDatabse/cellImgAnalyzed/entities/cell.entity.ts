@@ -1,12 +1,5 @@
 // cell-img-analyzed.entity.ts
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
-import { User } from '../../../../user/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('cell_img_analyzed')
@@ -78,12 +71,4 @@ export class CellImgAnalyzed {
   @Column({ type: 'date' })
   @ApiProperty({ example: '2024-02-20', description: '백업 종료 날짜' })
   backupEndDate: Date;
-
-  @Column()
-  @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
-  userId: number;
-
-  @OneToOne(() => User, (user) => user.cellImgAnalyzed)
-  @JoinColumn({ name: 'userId' })
-  user: User;
 }

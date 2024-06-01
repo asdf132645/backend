@@ -17,5 +17,4 @@ export class CellImgAnalyzedDto {
   backupPath: string;
   backupStartDate: Date;
   backupEndDate: Date;
-  userId?: string; // Keep only userId
 }
