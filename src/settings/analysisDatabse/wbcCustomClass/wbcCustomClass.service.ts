@@ -17,7 +17,7 @@ export class WbcCustomClassService {
   ) {}
 
   async create(createDto: CreateWbcCustomClassDto): Promise<WbcCustomClass[]> {
-    const { classArr, userId } = createDto;
+    const { classArr } = createDto;
 
     const createdClasses: WbcCustomClass[] = [];
 
@@ -26,7 +26,6 @@ export class WbcCustomClassService {
         abbreviation: classItem.abbreviation,
         className: classItem.className,
         customNum: classItem.customNum,
-        userId,
       });
       const createdClass =
         await this.wbcCustomClassRepository.save(wbcCustomClass);
@@ -36,10 +35,7 @@ export class WbcCustomClassService {
     return createdClasses;
   }
 
-  async update(
-    userId: number,
-    updateDto: UpdateWbcCustomClassDto,
-  ): Promise<WbcCustomClass[]> {
+  async update(updateDto: UpdateWbcCustomClassDto): Promise<WbcCustomClass[]> {
     const { classArr } = updateDto;
     const updatedClasses: WbcCustomClass[] = [];
 
@@ -50,14 +46,14 @@ export class WbcCustomClassService {
         customNum: classItem.customNum,
       });
 
-      // userId와 customNum이 모두 일치하는 엔터티를 찾기 위해 where 옵션을 추가
+      // customNum가 일치하는 엔터티를 찾기 위해 where 옵션을 추가
       await this.wbcCustomClassRepository.update(
-        { userId, id: classItem?.id },
+        { id: classItem?.id },
         wbcCustomClass,
       );
 
       const updatedClass = await this.wbcCustomClassRepository.findOne({
-        where: { userId, customNum: classItem?.id },
+        where: { customNum: classItem?.id },
       });
 
       updatedClasses.push(updatedClass);
@@ -70,7 +66,7 @@ export class WbcCustomClassService {
     return this.wbcCustomClassRepository.find();
   }
 
-  async findByUserId(userId: number): Promise<WbcCustomClass[]> {
-    return this.wbcCustomClassRepository.find({ where: { userId } });
+  async find(): Promise<WbcCustomClass[]> {
+    return this.wbcCustomClassRepository.find();
   }
 }

@@ -80,10 +80,6 @@ export class User {
   @JoinColumn({ name: 'userId' })
   rbcDegrees: RbcDegree[];
 
-  @OneToOne(() => WbcCustomClass, (WbcCustomClass) => WbcCustomClass.user)
-  @JoinColumn({ name: 'userId' })
-  wbcCustomClass: WbcCustomClass;
-
   @OneToOne(() => CellImgAnalyzed, (CellImgAnalyzed) => CellImgAnalyzed.user)
   @JoinColumn({name: 'userId'})
   cellImgAnalyzed: CellImgAnalyzed;
