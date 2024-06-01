@@ -13,42 +13,32 @@ export class FilePathSetService {
   ) {}
 
   async create(createDto: CreateFilePathSetDto): Promise<FilePathSetEntity> {
-    const { userId, filePathSetItems } = createDto as CreateFilePathSetDto;
+    const { filePathSetItems } = createDto as CreateFilePathSetDto;
     const createdItems: FilePathSetEntity[] = [];
     for (const item of filePathSetItems) {
-      const imagePrintEntity = this.filePathSetEntityRepository.create({
-        ...item,
-        userId,
-      });
-      const createdItem =
-        await this.filePathSetEntityRepository.save(imagePrintEntity);
+      const imagePrintEntity = this.filePathSetEntityRepository.create({ ...item });
+      const createdItem = await this.filePathSetEntityRepository.save(imagePrintEntity);
       createdItems.push(createdItem);
     }
 
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateFilePathSetDto,
-  ): Promise<FilePathSetEntity[]> {
+  async update(updateDto: CreateFilePathSetDto): Promise<FilePathSetEntity[]> {
     const { filePathSetItems } = updateDto;
 
     const updatedItems: FilePathSetEntity[] = [];
     for (const item of filePathSetItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
 
     return updatedItems;
   }
 
-  private async updateItem(
-    userId: number,
-    item: any,
-  ): Promise<FilePathSetEntity> {
+  private async updateItem(item: any): Promise<FilePathSetEntity> {
     const existingFilePathSet = await this.filePathSetEntityRepository.findOne({
-      where: { userId, id: item.id },
+      where: { id: item.id },
     });
 
     if (existingFilePathSet) {
@@ -57,14 +47,14 @@ export class FilePathSetService {
         item,
       );
       return await this.filePathSetEntityRepository.findOne({
-        where: { userId, id: item.id },
+        where: { id: item.id },
       });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<FilePathSetEntity[]> {
-    return await this.filePathSetEntityRepository.find({ where: { userId } });
+  async find(): Promise<FilePathSetEntity[]> {
+    return await this.filePathSetEntityRepository.find();
   }
 }
