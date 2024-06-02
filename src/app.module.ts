@@ -12,7 +12,7 @@ import { WbcHotKeysModule } from './settings/analysisDatabse/wbcHotKeys/wbcHotKe
 import { NormalRangeModule } from './settings/analysisDatabse/normalRange/normalRange.module';
 import { BfHotKeysModule } from './settings/analysisDatabse/bhHotKeys/bfHotKeys.module';
 import { ImagePrintModule } from './settings/report/imagePrint/imagePrint.module';
-import { LisCodeModule } from './settings/report/lisCode/wbc/lisCode.module';
+import { LisCodeWbcModule } from './settings/report/lisCode/wbc/lisCodeWbc.module';
 import { LisCodeRbcModule } from './settings/report/lisCode/rbc/lisCodeRbc.module';
 import { CbcCodeModule } from './settings/report/cbcCode/cbcCode.module';
 import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModule';
@@ -56,7 +56,7 @@ import { Hl7Module } from './hl7/hl7.module';
     NormalRangeModule,
     BfHotKeysModule,
     ImagePrintModule,
-    LisCodeModule,
+    LisCodeWbcModule,
     LisCodeRbcModule,
     CbcCodeModule,
     FilePathSetModule,

@@ -9,8 +9,6 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
-import { LisCodeEntity } from '../../settings/report/lisCode/wbc/lisCode.entity';
-import { LisCodeRbcEntity } from '../../settings/report/lisCode/rbc/lisCodeRbc.entity';
 
 @Entity('user')
 export class User {
@@ -75,12 +73,4 @@ export class User {
   @OneToOne(() => RbcDegree, (RbcDegree) => RbcDegree.user)
   @JoinColumn({ name: 'userId' })
   rbcDegrees: RbcDegree[];
-
-  @OneToOne(() => LisCodeEntity, { cascade: true })
-  @JoinColumn({ name: 'userId' })
-  lisCode: LisCodeEntity;
-
-  @OneToOne(() => LisCodeRbcEntity, { cascade: true })
-  @JoinColumn({ name: 'userId' })
-  lisCodeRbc: LisCodeRbcEntity;
 }
