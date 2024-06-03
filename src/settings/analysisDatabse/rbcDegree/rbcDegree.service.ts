@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CategoryDto, RbcDegreeDto } from './dto/rbcDegree.dto';
-import { User } from '../../../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RbcDegree } from './rbcDegree.entity';
 import { Category } from './category.entity';
@@ -11,8 +10,6 @@ export class RbcDegreeService {
   constructor(
     @InjectRepository(RbcDegree)
     private readonly rbcDegreeRepository: Repository<RbcDegree>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
   ) {}
@@ -34,27 +31,11 @@ export class RbcDegreeService {
     await this.categoryRepository.save(categories);
   }
 
-  async update(
-    updateRbcDegreeDto: CategoryDto[],
-    userId: number,
-  ): Promise<RbcDegreeDto> {
-    console.log('update');
-    await this.findUserById(userId);
-
-    const existingDegree = await this.rbcDegreeRepository.findOne({
-      where: { userId },
-      relations: ['categories'],
-    });
-    // console.log('uuuuu');
-
-    if (!existingDegree) {
-      throw new NotFoundException(
-        `userId가 ${userId}인 정보를 찾을 수 없습니다`,
-      );
-    }
+  async update(updateRbcDegreeDto: CategoryDto[]): Promise<RbcDegreeDto> {
+    const existingDegree = await this.rbcDegreeRepository.find({ relations: ['categories'] });
 
     updateRbcDegreeDto.forEach((updatedCategory: any) => {
-      const existingCategory = existingDegree.categories.find(
+      const existingCategory = existingDegree[0].categories.find(
         (category: any) =>
           category.category_id === updatedCategory.category_id &&
           category.class_id === updatedCategory.class_id &&
@@ -69,22 +50,21 @@ export class RbcDegreeService {
     });
 
     await this.rbcDegreeRepository.save(existingDegree);
-    await this.categoryRepository.save(existingDegree.categories);
-    return existingDegree;
+    await this.categoryRepository.save(existingDegree[0].categories);
+    return existingDegree[0];
   }
 
-  async findOne(userId: number): Promise<RbcDegreeDto> {
+  async find(): Promise<RbcDegreeDto> {
     // Find the RbcDegree entity by userId
-    const degree = await this.rbcDegreeRepository.findOne({
-      where: { userId },
+    const degree = await this.rbcDegreeRepository.find({
       relations: ['categories'], // Load categories relation
     });
 
     if (!degree) {
-      return degree;
+      return degree[0];
     }
 
-    return degree;
+    return degree[0];
   }
 
   async findAll(): Promise<RbcDegreeDto[]> {
@@ -92,35 +72,13 @@ export class RbcDegreeService {
     return this.rbcDegreeRepository.find({ relations: ['categories'] }); // Load categories relation
   }
 
-  async remove(userId: number): Promise<void> {
+  async remove(): Promise<void> {
     // Find the RbcDegree entity by userId
-    const degree = await this.rbcDegreeRepository.findOne({
-      where: { userId },
+    const degree = await this.rbcDegreeRepository.find({
       relations: ['categories'], // Load categories relation
     });
 
-    if (!degree) {
-      throw new NotFoundException(
-        `userId가 ${userId}인 정보를 찾을 수 없습니다`,
-      );
-    }
-
     // Remove the degree from the database
     await this.rbcDegreeRepository.remove(degree);
-  }
-
-  private async findUserById(userId: number): Promise<void> {
-    try {
-      // Check if user exists
-      const user = await this.userRepository.findOne({ where: { id: userId } });
-      console.log('findUserById');
-      if (!user) {
-        throw new NotFoundException(
-          `userId가 ${userId}인 사용자를 찾을 수 없습니다`,
-        );
-      }
-    } catch (error) {
-      throw error;
-    }
   }
 }

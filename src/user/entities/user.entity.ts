@@ -69,8 +69,4 @@ export class User {
     nullable: true,
   })
   viewerCheck?: string;
-
-  @OneToOne(() => RbcDegree, (RbcDegree) => RbcDegree.user)
-  @JoinColumn({ name: 'userId' })
-  rbcDegrees: RbcDegree[];
 }

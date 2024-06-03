@@ -4,10 +4,8 @@ import {
   Column,
   OneToMany,
   JoinColumn,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '../../../user/entities/user.entity';
 import { Category } from './category.entity';
 
 @Entity()
@@ -16,13 +14,9 @@ export class RbcDegree {
   id: number;
 
   @OneToMany(() => Category, (category) => category.rbcDegree)
-  @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
+  @JoinColumn({ name: 'rbc_degree_category_id', referencedColumnName: 'rbc_degree_category_id' })
   categories: Category[];
 
   @Column()
-  userId: number;
-
-  @OneToOne(() => User, (user) => user.rbcDegrees)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  rbc_degree_category_id: number;
 }
