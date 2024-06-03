@@ -39,6 +39,7 @@ import { DziReaderModule } from './dziReader/dziReader.module';
 import { FileModule } from './file/file.module';
 import { ImagesService } from './images/images.service';
 import { Hl7Module } from './hl7/hl7.module';
+import { DeviceModule } from "./device/device.module";
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { Hl7Module } from './hl7/hl7.module';
     DziReaderModule,
     FileModule,
     Hl7Module,
+    DeviceModule,
   ],
   controllers: [
     AppController,
