@@ -49,8 +49,8 @@ export class RuningInfoDtoItems {
   rbcMemo?: string;
   // bmInfoAfter?: any[];
   pcIp: string;
-  siteCd?: string;
-  deviceBarcode?: string;
+  // siteCd?: string;
+  // deviceBarcode?: string;
   cbcPatientNo?: string;
   cbcPatientNm?: string;
   cbcSex?: string;

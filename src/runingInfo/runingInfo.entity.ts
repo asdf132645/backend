@@ -149,11 +149,11 @@ export class RuningInfoEntity {
   @Column()
   pcIp?: string;
 
-  @Column()
-  siteCd?: string;
+  // @Column()
+  // siteCd?: string;
 
-  @Column()
-  deviceBarcode?: string;
+  // @Column()
+  // deviceBarcode?: string;
 
   @Column()
   cbcPatientNo?: string;
