@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+// src/rbcDegree/rbcDegree.service.ts
+import { Injectable } from '@nestjs/common';
 import { CategoryDto, RbcDegreeDto } from './dto/rbcDegree.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RbcDegree } from './rbcDegree.entity';
@@ -23,7 +24,7 @@ export class RbcDegreeService {
     const categories = rbcDegreeDto.categories.map((categoryDto) => {
       const category = this.categoryRepository.create({
         ...categoryDto,
-        rbcDegree: rbcDegree,
+        rbcDegree: rbcDegree, // 외래 키 관계 설정
       });
       return category;
     });

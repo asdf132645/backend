@@ -1,4 +1,3 @@
-// src/rbcDegree/category.entity.ts
 import {
   Entity,
   Column,
@@ -34,11 +33,10 @@ export class Category {
   @Column()
   degree3: string;
 
-
   @Column()
-  rbc_degree_category_id: number; // 외래 키로 사용될 컬럼
+  rbc_degree_id: number;
 
   @ManyToOne(() => RbcDegree, (rbcDegree) => rbcDegree.categories)
-  @JoinColumn({ name: 'rbc_degree_category_id' }) // 외래 키와의 연결
+  @JoinColumn({ name: 'rbc_degree_id' }) // 외래 키와의 연결
   rbcDegree: RbcDegree;
 }
