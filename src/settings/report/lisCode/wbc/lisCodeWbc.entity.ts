@@ -1,23 +1,16 @@
-// LisCodeRbcEntity 수정
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class LisCodeRbcEntity {
+export class LisCodeWbcEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '' })
-  categoryId: string;
+  text: string;
 
   @Column({ default: '' })
-  categoryNm: string;
+  value: string;
 
   @Column({ default: '' })
-  classId: string;
-
-  @Column({ default: '' })
-  classNm: string;
-
-  @Column({ default: '0' })
   code: string;
 }

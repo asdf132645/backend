@@ -7,6 +7,5 @@ export class ClassOrderDto {
   percentText?: string;
   keyText?: string;
   orderText?: string;
-  userName?: number;
   classId?: string;
 }

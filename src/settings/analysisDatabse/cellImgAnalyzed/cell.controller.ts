@@ -58,19 +58,7 @@ export class CellImgAnalyzedController {
     description: '성공적으로 세포 이미지 분석이 갱신되었습니다.',
   })
   async update(@Param('id') id: string, @Body() dto: CellImgAnalyzedDto) {
-    const userId = dto.userId;
-
     try {
-      // 유저가 존재하지 않으면 NotFoundException을 던집니다.
-      const user = await this.cellImgAnalyzedService.findUserById(
-        Number(userId),
-      );
-      if (!user) {
-        throw new NotFoundException(
-          `userId ${userId}를 가진 사용자를 찾을 수 없습니다.`,
-        );
-      }
-
       return await this.cellImgAnalyzedService.update(id, dto);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -80,19 +68,18 @@ export class CellImgAnalyzedController {
     }
   }
 
-  @Get(':userId')
+  @Get()
   @ApiOperation({
-    summary: '사용자 ID로 세포 이미지 분석 조회',
-    description: '사용자 ID로 세포 이미지 분석을 조회합니다.',
+    summary: '세포 이미지 분석 조회',
+    description: '세포 이미지 분석을 조회합니다.',
   })
-  @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({
     status: 200,
-    description: '사용자 ID로 성공적으로 세포 이미지 분석이 조회되었습니다.',
+    description: '성공적으로 세포 이미지 분석이 조회되었습니다.',
   })
-  async findByUserId(@Param('userId') userId: string) {
+  async findByUserId() {
     try {
-      return await this.cellImgAnalyzedService.findByUserId(userId);
+      return await this.cellImgAnalyzedService.find();
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);

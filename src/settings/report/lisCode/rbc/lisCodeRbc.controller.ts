@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
 import { LisCodeRbcService } from './lisCodeRbc.service';
 import { LisCodeRbcEntity } from './lisCodeRbc.entity';
 import { CreateLisCodeRbcDto } from './dto/lisCodeRbcDto';
@@ -8,25 +8,17 @@ export class LisCodeController {
   constructor(private readonly lisCode: LisCodeRbcService) {}
 
   @Post('create')
-  async create(
-    @Param('userId') userId: number,
-    @Body() createDto: CreateLisCodeRbcDto,
-  ): Promise<LisCodeRbcEntity> {
+  async create(@Body() createDto: CreateLisCodeRbcDto): Promise<LisCodeRbcEntity> {
     return this.lisCode.create(createDto);
   }
 
-  @Put('update/:id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateDto: CreateLisCodeRbcDto,
-  ): Promise<LisCodeRbcEntity[]> {
-    return this.lisCode.update(Number(id), updateDto);
+  @Put('update')
+  async update(@Body() updateDto: CreateLisCodeRbcDto): Promise<LisCodeRbcEntity[]> {
+    return this.lisCode.update(updateDto);
   }
 
-  @Get('get/:userId')
-  async findByUserId(
-    @Param('userId') userId: number,
-  ): Promise<LisCodeRbcEntity[]> {
-    return this.lisCode.findByUserId(userId);
+  @Get('get')
+  async get(): Promise<LisCodeRbcEntity[]> {
+    return this.lisCode.find();
   }
 }

@@ -12,13 +12,10 @@ export class NormalRangeService {
   ) {}
 
   async create(createDto: NormalRangeDto): Promise<NormalRange> {
-    const { userId, normalRangeItems } = createDto;
+    const { normalRangeItems } = createDto;
     const createdItems: NormalRange[] = [];
     for (const item of normalRangeItems) {
-      const normalRange = this.normalRangeRepository.create({
-        ...item,
-        userId,
-      });
+      const normalRange = this.normalRangeRepository.create({ ...item });
       const createdItem = await this.normalRangeRepository.save(normalRange);
       createdItems.push(createdItem);
     }
@@ -26,37 +23,34 @@ export class NormalRangeService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: NormalRangeDto,
-  ): Promise<NormalRange[]> {
+  async update(updateDto: NormalRangeDto): Promise<NormalRange[]> {
     const { normalRangeItems } = updateDto;
 
     const updatedItems: NormalRange[] = [];
     for (const item of normalRangeItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
 
     return updatedItems;
   }
 
-  private async updateItem(userId: number, item: any): Promise<NormalRange> {
+  private async updateItem(item: any): Promise<NormalRange> {
     const existingNormalRange = await this.normalRangeRepository.findOne({
-      where: { userId, num: item.num },
+      where: { num: item.num },
     });
 
     if (existingNormalRange) {
       await this.normalRangeRepository.update(existingNormalRange.num, item);
       return await this.normalRangeRepository.findOne({
-        where: { userId, num: item.num },
+        where: { num: item.num },
       });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<NormalRange[]> {
-    return await this.normalRangeRepository.find({ where: { userId } });
+  async find(): Promise<NormalRange[]> {
+    return await this.normalRangeRepository.find();
   }
 }

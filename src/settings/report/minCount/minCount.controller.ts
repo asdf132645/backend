@@ -8,25 +8,17 @@ export class MinCountController {
   constructor(private readonly minCountService: MinCountService) {}
 
   @Post('create')
-  async create(
-    @Param('userId') userId: number,
-    @Body() createDto: CreateMinCountDto,
-  ): Promise<MinCountEntity> {
+  async create(@Body() createDto: CreateMinCountDto): Promise<MinCountEntity> {
     return this.minCountService.create(createDto);
   }
 
-  @Put('update/:id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateDto: CreateMinCountDto,
-  ): Promise<MinCountEntity[]> {
-    return this.minCountService.update(Number(id), updateDto);
+  @Put('update')
+  async update(@Body() updateDto: CreateMinCountDto): Promise<MinCountEntity[]> {
+    return this.minCountService.update(updateDto);
   }
 
-  @Get('get/:userId')
-  async findByUserId(
-    @Param('userId') userId: number,
-  ): Promise<MinCountEntity[]> {
-    return this.minCountService.findByUserId(userId);
+  @Get('get')
+  async get(): Promise<MinCountEntity[]> {
+    return this.minCountService.find();
   }
 }

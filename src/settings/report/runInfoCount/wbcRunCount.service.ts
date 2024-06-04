@@ -12,18 +12,12 @@ export class WbcCountSetService {
   ) {}
 
   async create(createDto: CreateWbcRunCountDto): Promise<WbcRunCountEntity> {
-    const { userId, wbcRunCountItems } = createDto as CreateWbcRunCountDto;
+    const { wbcRunCountItems } = createDto as CreateWbcRunCountDto;
     const createdItems: WbcRunCountEntity[] = [];
-    console.log(wbcRunCountItems);
-    console.log(typeof wbcRunCountItems);
     if (wbcRunCountItems && wbcRunCountItems.length) {
       for (const item of wbcRunCountItems) {
-        const imagePrintEntity = this.wbcRunCountEntityRepository.create({
-          ...item,
-          userId,
-        });
-        const createdItem =
-          await this.wbcRunCountEntityRepository.save(imagePrintEntity);
+        const imagePrintEntity = this.wbcRunCountEntityRepository.create({ ...item });
+        const createdItem = await this.wbcRunCountEntityRepository.save(imagePrintEntity);
         createdItems.push(createdItem);
       }
     }
@@ -31,28 +25,22 @@ export class WbcCountSetService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateWbcRunCountDto,
-  ): Promise<WbcRunCountEntity[]> {
+  async update(updateDto: CreateWbcRunCountDto): Promise<WbcRunCountEntity[]> {
     const { wbcRunCountItems } = updateDto;
 
     const updatedItems: WbcRunCountEntity[] = [];
     if (wbcRunCountItems && wbcRunCountItems.length) {
       for (const item of wbcRunCountItems) {
-        const updatedItem = await this.updateItem(userId, item);
+        const updatedItem = await this.updateItem(item);
         updatedItems.push(updatedItem);
       }
     }
     return updatedItems;
   }
 
-  private async updateItem(
-    userId: number,
-    item: any,
-  ): Promise<WbcRunCountEntity> {
+  private async updateItem(item: any): Promise<WbcRunCountEntity> {
     const existingFilePathSet = await this.wbcRunCountEntityRepository.findOne({
-      where: { userId, num: item.num },
+      where: { num: item.num },
     });
 
     if (existingFilePathSet) {
@@ -61,14 +49,14 @@ export class WbcCountSetService {
         item,
       );
       return await this.wbcRunCountEntityRepository.findOne({
-        where: { userId, num: item.num },
+        where: { num: item.num },
       });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<WbcRunCountEntity[]> {
-    return await this.wbcRunCountEntityRepository.find({ where: { userId } });
+  async find(): Promise<WbcRunCountEntity[]> {
+    return await this.wbcRunCountEntityRepository.find();
   }
 }

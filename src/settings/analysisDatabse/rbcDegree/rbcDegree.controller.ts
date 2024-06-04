@@ -28,17 +28,14 @@ export class RbcDegreeController {
       throw error;
     }
   }
-  @Put(':userId')
-  async update(
-    @Param('userId') userId: number,
-    @Body() updateRbcDegreeDto: CategoryDto[],
-  ): Promise<RbcDegreeDto> {
-    return this.rbcDegreeService.update(updateRbcDegreeDto, userId);
+  @Put()
+  async update(@Body() updateRbcDegreeDto: CategoryDto[]): Promise<RbcDegreeDto> {
+    return this.rbcDegreeService.update(updateRbcDegreeDto);
   }
 
-  @Get(':userId')
-  async findOne(@Param('userId') userId: number): Promise<RbcDegreeDto> {
-    return this.rbcDegreeService.findOne(Number(userId));
+  @Get()
+  async findOne(): Promise<RbcDegreeDto> {
+    return this.rbcDegreeService.find();
   }
 
   @Get()
@@ -46,8 +43,8 @@ export class RbcDegreeController {
     return this.rbcDegreeService.findAll();
   }
 
-  @Delete(':userId')
-  async remove(@Param('userId') userId: number): Promise<void> {
-    return this.rbcDegreeService.remove(Number(userId));
+  @Delete()
+  async remove(): Promise<void> {
+    return this.rbcDegreeService.remove();
   }
 }

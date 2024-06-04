@@ -3,7 +3,6 @@
 export class CreateWbcCustomClassDto {
   id: number;
   classArr: classArr[];
-  userId?: number;
 }
 
 export class classArr {
@@ -15,5 +14,4 @@ export class classArr {
 
 export class UpdateWbcCustomClassDto {
   classArr: classArr[];
-  userId?: number;
 }

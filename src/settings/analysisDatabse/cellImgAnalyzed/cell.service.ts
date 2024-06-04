@@ -16,28 +16,17 @@ export class CellImgAnalyzedService {
   ) {}
 
   async create(dto: CellImgAnalyzedDto): Promise<CellImgAnalyzed> {
-    const { userId, ...rest } = dto;
-    const user = await this.findUserById(Number(userId)); // 유저 정보 가져오기
-    if (!user) {
-      throw new NotFoundException(
-        `userId ${userId}를 가진 사용자를 찾을 수 없습니다.`,
-      );
-    }
-
-    const entity = this.cellImgAnalyzedRepository.create({
-      ...rest,
-      user: { id: user.id }, // 연관된 유저 정보 매칭
-    });
-
+    const { ...rest } = dto;
+    const entity = this.cellImgAnalyzedRepository.create({ ...rest });
     return await this.cellImgAnalyzedRepository.save(entity);
   }
 
-  async findByUserId(userId: string): Promise<CellImgAnalyzed | undefined> {
+  async find(): Promise<CellImgAnalyzed | undefined> {
     try {
       const queryBuilder = this.cellImgAnalyzedRepository
         .createQueryBuilder('cellImgAnalyzed')
-        .leftJoinAndSelect('cellImgAnalyzed.user', 'user')
-        .where('user.id = :id', { id: Number(userId) });
+        // .leftJoinAndSelect('cellImgAnalyzed.user', 'user')
+        // .where('user.id = :id', { id: Number(userId) });
       return await queryBuilder.getOne();
     } catch (error) {
       console.error('Error:', error);
@@ -46,15 +35,7 @@ export class CellImgAnalyzedService {
   }
 
   async update(id: string, dto: CellImgAnalyzedDto): Promise<CellImgAnalyzed> {
-    const { userId, ...rest } = dto;
-
-    // Check if the user with the provided ID exists
-    const user = await this.findUserById(Number(userId));
-    if (!user) {
-      throw new NotFoundException(
-        `userId ${userId}를 가진 사용자를 찾을 수 없습니다.`,
-      );
-    }
+    const { ...rest } = dto;
 
     // Check if the entity with the provided ID exists
     const existingEntity = await this.findById(id);
@@ -65,10 +46,7 @@ export class CellImgAnalyzedService {
     }
 
     // Update the entity with the new data
-    this.cellImgAnalyzedRepository.merge(existingEntity, {
-      ...rest,
-      user, // Use the user object directly in the merge
-    });
+    this.cellImgAnalyzedRepository.merge(existingEntity, { ...rest });
 
     // Save the updated entity
     return await this.cellImgAnalyzedRepository.save(existingEntity);
@@ -82,17 +60,5 @@ export class CellImgAnalyzedService {
       throw new NotFoundException(`id가 ${id}인 사용자를 찾을 수 없습니다`);
     }
     return entity;
-  }
-
-  async findUserById(id: number): Promise<User | undefined> {
-    try {
-      const user = await this.userRepository.findOne({ where: { id } });
-      if (!user) {
-        throw new NotFoundException(`id가 ${id}인 사용자를 찾을 수 없습니다`);
-      }
-      return user;
-    } catch (error) {
-      throw error;
-    }
   }
 }

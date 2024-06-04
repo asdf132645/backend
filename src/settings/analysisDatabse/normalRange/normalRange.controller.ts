@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
 import { NormalRangeService } from './normalRange.service';
 import { NormalRange } from './normalRange.entity';
 import { NormalRangeDto } from './dto/normalRangeDto';
@@ -8,23 +8,19 @@ export class NormalRangeController {
   constructor(private readonly normalRangeService: NormalRangeService) {}
 
   @Post('create')
-  async create(
-    @Param('userId') userId: number,
-    @Body() createDto: NormalRangeDto,
-  ): Promise<NormalRange> {
+  async create(@Body() createDto: NormalRangeDto): Promise<NormalRange> {
     return this.normalRangeService.create(createDto);
   }
 
-  @Put('update/:id')
+  @Put('update')
   async update(
-    @Param('id') id: string,
     @Body() updateDto: NormalRangeDto,
   ): Promise<NormalRange[]> {
-    return this.normalRangeService.update(Number(id), updateDto);
+    return this.normalRangeService.update(updateDto);
   }
 
-  @Get('get/:userId')
-  async findByUserId(@Param('userId') userId: number): Promise<NormalRange[]> {
-    return this.normalRangeService.findByUserId(userId);
+  @Get('get')
+  async find(): Promise<NormalRange[]> {
+    return this.normalRangeService.find();
   }
 }

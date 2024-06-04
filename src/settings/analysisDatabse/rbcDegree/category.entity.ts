@@ -34,10 +34,11 @@ export class Category {
   @Column()
   degree3: string;
 
+
   @Column()
-  userId: number; // 외래 키로 사용될 컬럼
+  rbc_degree_category_id: number; // 외래 키로 사용될 컬럼
 
   @ManyToOne(() => RbcDegree, (rbcDegree) => rbcDegree.categories)
-  @JoinColumn({ name: 'userId' }) // 외래 키와의 연결
+  @JoinColumn({ name: 'rbc_degree_category_id' }) // 외래 키와의 연결
   rbcDegree: RbcDegree;
 }

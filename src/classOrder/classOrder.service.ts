@@ -11,10 +11,8 @@ export class ClassOrderService {
     private classOrderRepository: Repository<ClassOrder>,
   ) {}
 
-  async getClassOrdersByUserName(userName: number): Promise<ClassOrderDto[]> {
-    const classOrders = await this.classOrderRepository.find({
-      where: { userName },
-    });
+  async getClassOrders(): Promise<ClassOrderDto[]> {
+    const classOrders = await this.classOrderRepository.find();
     return classOrders.map(this.entityToDto);
   }
 
@@ -26,9 +24,7 @@ export class ClassOrderService {
 
     for (const dto of createDtos) {
       // 이미 존재하는 주문인지 확인
-      const existingOrder = await this.classOrderRepository.findOne({
-        where: { userName: Number(dto.userName) },
-      });
+      const existingOrder = await this.classOrderRepository.find();
 
       if (!existingOrder) {
         // 존재하지 않는 경우 새로운 주문 생성
@@ -40,7 +36,6 @@ export class ClassOrderService {
         classOrderEntity.percentText = dto.percentText;
         classOrderEntity.keyText = dto.keyText;
         classOrderEntity.orderText = dto.orderText;
-        classOrderEntity.userName = dto.userName;
         classOrderEntity.classId = dto.classId;
 
         newClassOrders.push(classOrderEntity);
@@ -61,7 +56,6 @@ export class ClassOrderService {
       percentText: savedOrder.percentText,
       keyText: savedOrder.keyText,
       orderText: savedOrder.orderText,
-      userName: savedOrder.userName,
       classId: savedOrder.classId,
     }));
   }
@@ -71,16 +65,15 @@ export class ClassOrderService {
 
     // 새로운 데이터를 하나씩 처리하여 업데이트 또는 생성
     for (const dto of newData) {
-      // userName과 id를 이용하여 기존 레코드를 찾음
+      // id를 이용하여 기존 레코드를 찾음
       const existingRecord = await this.classOrderRepository.findOne({
-        where: { userName: Number(dto.userName), id: Number(dto.id) },
+        where: { id: Number(dto.id) },
       });
 
       if (existingRecord) {
         // 레코드가 존재하면 업데이트
         existingRecord.count = dto.count;
         existingRecord.percentText = dto.percentText;
-        console.log(dto.orderText);
         existingRecord.orderText = dto.orderText;
         await this.classOrderRepository.save(existingRecord);
         updatedData.push(this.entityToDto(existingRecord));
@@ -106,7 +99,6 @@ export class ClassOrderService {
       percentText,
       keyText,
       orderText,
-      userName,
       classId,
     } = classOrder;
     return {
@@ -118,7 +110,6 @@ export class ClassOrderService {
       percentText,
       keyText,
       orderText,
-      userName,
       classId,
     };
   }
@@ -132,7 +123,6 @@ export class ClassOrderService {
       percentText,
       keyText,
       orderText,
-      userName,
       classId,
     } = dto;
     const classOrderEntity = new ClassOrder();
@@ -143,7 +133,6 @@ export class ClassOrderService {
     classOrderEntity.percentText = percentText;
     classOrderEntity.keyText = keyText;
     classOrderEntity.orderText = orderText;
-    classOrderEntity.userName = userName;
     classOrderEntity.classId = classId;
     return classOrderEntity;
   }

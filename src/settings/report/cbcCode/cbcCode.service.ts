@@ -13,13 +13,10 @@ export class CbcCodeService {
   ) {}
 
   async create(createDto: CreateCbcCodeDto): Promise<CbcCodeEntity> {
-    const { userId, cbcCodeItems } = createDto as CreateCbcCodeDto;
+    const { cbcCodeItems } = createDto as CreateCbcCodeDto;
     const createdItems: CbcCodeEntity[] = [];
     for (const item of cbcCodeItems) {
-      const cbcCodeEntity = this.cbcCodeEntityRepository.create({
-        ...item,
-        userId,
-      });
+      const cbcCodeEntity = this.cbcCodeEntityRepository.create({ ...item });
       const createdItem =
         await this.cbcCodeEntityRepository.save(cbcCodeEntity);
       createdItems.push(createdItem);
@@ -28,37 +25,33 @@ export class CbcCodeService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateCbcCodeDto,
-  ): Promise<CbcCodeEntity[]> {
+  async update(updateDto: CreateCbcCodeDto): Promise<CbcCodeEntity[]> {
     const { cbcCodeItems } = updateDto;
 
     const updatedItems: CbcCodeEntity[] = [];
     for (const item of cbcCodeItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
-
     return updatedItems;
   }
 
-  private async updateItem(userId: number, item: any): Promise<CbcCodeEntity> {
+  private async updateItem(item: any): Promise<CbcCodeEntity> {
     const existingBfHotKeys = await this.cbcCodeEntityRepository.findOne({
-      where: { userId, id: item.id },
+      where: { id: item.id },
     });
 
     if (existingBfHotKeys) {
       await this.cbcCodeEntityRepository.update(existingBfHotKeys.id, item);
       return await this.cbcCodeEntityRepository.findOne({
-        where: { userId, id: item.id },
+        where: { id: item.id },
       });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<CbcCodeEntity[]> {
-    return await this.cbcCodeEntityRepository.find({ where: { userId } });
+  async find(): Promise<CbcCodeEntity[]> {
+    return await this.cbcCodeEntityRepository.find();
   }
 }

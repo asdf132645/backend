@@ -7,7 +7,7 @@ import { WbcHotKeys } from './src/settings/analysisDatabse/wbcHotKeys/wbcHotKeys
 import { BfHotKeys } from './src/settings/analysisDatabse/bhHotKeys/bfHotKeys.entity';
 import { NormalRange } from './src/settings/analysisDatabse/normalRange/normalRange.entity';
 import { ImagePrintEntity } from './src/settings/report/imagePrint/imagePrint.entity';
-import { LisCodeEntity } from './src/settings/report/lisCode/wbc/lisCode.entity';
+import { LisCodeWbcEntity } from './src/settings/report/lisCode/wbc/lisCodeWbc.entity';
 import { LisCodeRbcEntity } from './src/settings/report/lisCode/rbc/lisCodeRbc.entity';
 import { CbcCodeEntity } from './src/settings/report/cbcCode/cbcCode.entity';
 import { FilePathSetEntity } from './src/settings/report/filrPathSet/filePathSetEntity';
@@ -17,6 +17,7 @@ import { Category } from './src/settings/analysisDatabse/rbcDegree/category.enti
 import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
 import { ClassOrder } from './src/classOrder/classOrder';
 import * as dotenv from 'dotenv';
+import { DeviceEntity } from "./src/device/device.entity";
 dotenv.config(); // dotenv 설정 추가
 
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
@@ -38,7 +39,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       BfHotKeys,
       NormalRange,
       ImagePrintEntity,
-      LisCodeEntity,
+      LisCodeWbcEntity,
       LisCodeRbcEntity,
       CbcCodeEntity,
       FilePathSetEntity,
@@ -47,6 +48,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       Category,
       RuningInfoEntity,
       ClassOrder,
+      DeviceEntity
     ],
     extra: {
       connectionLimit: 10,

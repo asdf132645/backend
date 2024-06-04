@@ -28,7 +28,4 @@ export class ClassOrder {
 
   @Column()
   orderText?: string;
-
-  @Column()
-  userName?: number;
 }

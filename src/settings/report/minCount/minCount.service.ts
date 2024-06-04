@@ -12,13 +12,10 @@ export class MinCountService {
   ) {}
 
   async create(createDto: CreateMinCountDto): Promise<MinCountEntity> {
-    const { userId, minCountItems } = createDto as CreateMinCountDto;
+    const { minCountItems } = createDto as CreateMinCountDto;
     const createdItems: MinCountEntity[] = [];
     for (const item of minCountItems) {
-      const imagePrintEntity = this.minCountEntityRepository.create({
-        ...item,
-        userId,
-      });
+      const imagePrintEntity = this.minCountEntityRepository.create({ ...item });
       const createdItem =
         await this.minCountEntityRepository.save(imagePrintEntity);
       createdItems.push(createdItem);
@@ -27,37 +24,34 @@ export class MinCountService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateMinCountDto,
-  ): Promise<MinCountEntity[]> {
+  async update(updateDto: CreateMinCountDto): Promise<MinCountEntity[]> {
     const { minCountItems } = updateDto;
 
     const updatedItems: MinCountEntity[] = [];
     for (const item of minCountItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
 
     return updatedItems;
   }
 
-  private async updateItem(userId: number, item: any): Promise<MinCountEntity> {
+  private async updateItem(item: any): Promise<MinCountEntity> {
     const existingMinCount = await this.minCountEntityRepository.findOne({
-      where: { userId, id: item.id },
+      where: { id: item.id },
     });
 
     if (existingMinCount) {
       await this.minCountEntityRepository.update(existingMinCount.id, item);
       return await this.minCountEntityRepository.findOne({
-        where: { userId, id: item.id },
+        where: { id: item.id },
       });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<MinCountEntity[]> {
-    return await this.minCountEntityRepository.find({ where: { userId } });
+  async find(): Promise<MinCountEntity[]> {
+    return await this.minCountEntityRepository.find();
   }
 }

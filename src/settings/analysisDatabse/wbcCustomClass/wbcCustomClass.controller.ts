@@ -1,6 +1,6 @@
 // src/wbcCustomClass/wbcCustomClass.controller.ts
 
-import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put } from '@nestjs/common';
 import { WbcCustomClassService } from './wbcCustomClass.service';
 import {
   CreateWbcCustomClassDto,
@@ -16,17 +16,13 @@ export class WbcCustomClassController {
     return this.wbcCustomClassService.create(createDto);
   }
 
-  @Put('update/:userId')
-  update(
-    @Param('userId') id: number,
-    @Body() updateDto: UpdateWbcCustomClassDto,
-  ) {
-    // console.log(updateDto);
-    return this.wbcCustomClassService.update(updateDto.userId, updateDto);
+  @Put('update')
+  update(@Body() updateDto: UpdateWbcCustomClassDto) {
+    return this.wbcCustomClassService.update(updateDto);
   }
 
-  @Get('get/:userId')
-  findByUserId(@Param('userId') userId: number) {
-    return this.wbcCustomClassService.findByUserId(userId);
+  @Get('get')
+  get() {
+    return this.wbcCustomClassService.find();
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body } from '@nestjs/common';
 import { ClassOrderDto } from './dto/classOrder.dto';
 import { ClassOrderService } from './classOrder.service';
 
@@ -6,11 +6,9 @@ import { ClassOrderService } from './classOrder.service';
 export class ClassOrderController {
   constructor(private readonly classOrderService: ClassOrderService) {}
 
-  @Get('get/:userName')
-  async getClassOrdersByUserName(
-    @Param('userName') userName: string,
-  ): Promise<ClassOrderDto[]> {
-    return this.classOrderService.getClassOrdersByUserName(Number(userName));
+  @Get('get')
+  async getClassOrdersByUserName(): Promise<ClassOrderDto[]> {
+    return this.classOrderService.getClassOrders();
   }
 
   @Post('create')
@@ -18,7 +16,7 @@ export class ClassOrderController {
     return this.classOrderService.createClassOrder(createDtos);
   }
 
-  @Put('update/:userName')
+  @Put('update')
   async updateAllClassOrders(
     @Body() newData: ClassOrderDto[],
   ): Promise<ClassOrderDto[]> {

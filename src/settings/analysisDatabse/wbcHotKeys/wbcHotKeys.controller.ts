@@ -9,23 +9,17 @@ export class WbcHotKeysController {
   constructor(private readonly wbcHotKeysService: WbcHotKeysService) {}
 
   @Post('create')
-  async create(
-    @Param('userId') userId: number,
-    @Body() createDto: CreateWbcHotKeysDto,
-  ): Promise<WbcHotKeys> {
+  async create(@Body() createDto: CreateWbcHotKeysDto): Promise<WbcHotKeys> {
     return this.wbcHotKeysService.create(createDto);
   }
 
-  @Put('update/:id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateDto: CreateWbcHotKeysDto,
-  ): Promise<WbcHotKeys[]> {
-    return this.wbcHotKeysService.update(Number(id), updateDto);
+  @Put('update')
+  async update(@Body() updateDto: CreateWbcHotKeysDto): Promise<WbcHotKeys[]> {
+    return this.wbcHotKeysService.update(updateDto);
   }
 
-  @Get('get/:userId')
-  async findByUserId(@Param('userId') userId: number): Promise<WbcHotKeys[]> {
-    return this.wbcHotKeysService.findByUserId(userId);
+  @Get('get')
+  async find(): Promise<WbcHotKeys[]> {
+    return this.wbcHotKeysService.find();
   }
 }

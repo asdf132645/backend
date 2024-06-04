@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class MinCountEntity {
@@ -11,8 +10,4 @@ export class MinCountEntity {
 
   @Column({ default: 0 })
   minPaCount: number;
-
-  @Column()
-  @ApiProperty({ example: 1, description: '관련 사용자의 ID' })
-  userId: number;
 }

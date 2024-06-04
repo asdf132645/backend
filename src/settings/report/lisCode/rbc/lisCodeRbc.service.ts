@@ -13,13 +13,10 @@ export class LisCodeRbcService {
   ) {}
 
   async create(createDto: CreateLisCodeRbcDto): Promise<LisCodeRbcEntity> {
-    const { userId, lisCodeItems } = createDto as CreateLisCodeRbcDto;
+    const { lisCodeItems } = createDto as CreateLisCodeRbcDto;
     const createdItems: LisCodeRbcEntity[] = [];
     for (const item of lisCodeItems) {
-      const lisCodeEntity = this.lisCodeRbcEntityRepository.create({
-        ...item,
-        userId,
-      });
+      const lisCodeEntity = this.lisCodeRbcEntityRepository.create({ ...item });
       const createdItem =
         await this.lisCodeRbcEntityRepository.save(lisCodeEntity);
       createdItems.push(createdItem);
@@ -28,40 +25,35 @@ export class LisCodeRbcService {
     return createdItems[0];
   }
 
-  async update(
-    userId: number,
-    updateDto: CreateLisCodeRbcDto,
-  ): Promise<LisCodeRbcEntity[]> {
+  async update(updateDto: CreateLisCodeRbcDto): Promise<LisCodeRbcEntity[]> {
     const { lisCodeItems } = updateDto;
 
     const updatedItems: LisCodeRbcEntity[] = [];
     for (const item of lisCodeItems) {
-      const updatedItem = await this.updateItem(userId, item);
+      const updatedItem = await this.updateItem(item);
       updatedItems.push(updatedItem);
     }
-
     return updatedItems;
   }
 
   private async updateItem(
-    userId: number,
     item: any,
   ): Promise<LisCodeRbcEntity> {
     const existingLisCode = await this.lisCodeRbcEntityRepository.findOne({
-      where: { userId, id: item.id },
+      where: { id: item.id },
     });
 
     if (existingLisCode) {
       await this.lisCodeRbcEntityRepository.update(existingLisCode.id, item);
       return await this.lisCodeRbcEntityRepository.findOne({
-        where: { userId, id: item.id },
+        where: { id: item.id },
       });
     }
 
     return null;
   }
 
-  async findByUserId(userId: number): Promise<LisCodeRbcEntity[]> {
-    return await this.lisCodeRbcEntityRepository.find({ where: { userId } });
+  async find(): Promise<LisCodeRbcEntity[]> {
+    return await this.lisCodeRbcEntityRepository.find();
   }
 }
