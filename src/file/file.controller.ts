@@ -1,6 +1,8 @@
 // src/file/file.controller.ts
-import { Controller, Get, Query, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Query, HttpStatus, Post, Body } from '@nestjs/common';
 import { FileService } from './file.service';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Controller('file')
 export class FileController {
@@ -22,6 +24,32 @@ export class FileController {
         message: result.message,
         code: HttpStatus.INTERNAL_SERVER_ERROR,
       };
+    }
+  }
+
+  @Get('create-directory')
+  createDirectory(@Query('path') directoryPath: string) {
+    if (!directoryPath) {
+      return 'Path parameter is required';
+    }
+    const fullPath = path.resolve(directoryPath);
+    if (!fs.existsSync(fullPath)) {
+      fs.mkdirSync(fullPath, { recursive: true });
+    }
+    return `Directory created at ${directoryPath} (if it did not already exist)`;
+  }
+
+  @Post('createFile')
+  async createFile(
+    @Body() body: { path: string; filename: string; content: string },
+  ) {
+    const { path, filename, content } = body;
+    try {
+      // 파일 생성
+      fs.writeFileSync(`${path}/${filename}`, content);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
   }
 }
