@@ -1,11 +1,8 @@
-// src/rbcDegree/rbcDegree.entity.ts
 import {
   Entity,
-  Column,
   OneToMany,
-  JoinColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryGeneratedColumn, JoinColumn
+} from "typeorm";
 import { Category } from './category.entity';
 
 @Entity()
@@ -14,12 +11,6 @@ export class RbcDegree {
   id: number;
 
   @OneToMany(() => Category, (category) => category.rbcDegree)
-  @JoinColumn({
-    name: 'rbc_degree_category_id',
-    referencedColumnName: 'rbc_degree_category_id',
-  })
+  @JoinColumn({ name: 'id', referencedColumnName: 'id' })
   categories: Category[];
-
-  @Column()
-  rbc_degree_category_id: number;
 }

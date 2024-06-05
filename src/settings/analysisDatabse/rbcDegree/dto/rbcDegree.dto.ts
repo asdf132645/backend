@@ -1,7 +1,6 @@
 // src/rbcDegree/dto/rbcDegree.dto.ts
 export class RbcDegreeDto {
   categories: CategoryDto[]; // 타입 여기에 맞게 조정
-  userId?: number;
 }
 
 export class CategoryDto {
