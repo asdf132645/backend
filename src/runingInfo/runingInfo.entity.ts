@@ -11,13 +11,7 @@ export class RuningInfoEntity {
   state?: boolean;
 
   @Column()
-  submit?: string;
-
-  @Column()
   traySlot?: string;
-
-  @Column()
-  submitDate?: string;
 
   @Column()
   slotNo: string;
@@ -126,10 +120,10 @@ export class RuningInfoEntity {
   //   state: string;
   // }[];
   @Column()
-  signedState?: string;
+  submitState?: string;
 
   @Column()
-  signedOfDate?: Date;
+  submitOfDate?: Date;
 
   @Column()
   signedUserId?: string;

@@ -7,8 +7,6 @@ export class RuningInfoDtoItems {
   @IsInt()
   id: number;
   state?: boolean;
-  submit?: string;
-  submitDate?: string;
   traySlot?: string;
   slotNo: string;
   barcodeNo: string;
@@ -40,8 +38,8 @@ export class RuningInfoDtoItems {
   isNormal: string;
   processInfo: ProcessInfoDto;
   orderList: OrderDto[];
-  signedState?: string;
-  signedOfDate?: Date;
+  submitState?: string;
+  submitOfDate?: Date;
   signedUserId?: string;
   classificationResult?: any[];
   isNsNbIntegration?: string;

@@ -14,7 +14,10 @@ export class RbcDegree {
   id: number;
 
   @OneToMany(() => Category, (category) => category.rbcDegree)
-  @JoinColumn({ name: 'rbc_degree_category_id', referencedColumnName: 'rbc_degree_category_id' })
+  @JoinColumn({
+    name: 'rbc_degree_category_id',
+    referencedColumnName: 'rbc_degree_category_id',
+  })
   categories: Category[];
 
   @Column()

@@ -34,7 +34,6 @@ export class Category {
   @Column()
   degree3: string;
 
-
   @Column()
   rbc_degree_category_id: number; // 외래 키로 사용될 컬럼
 
