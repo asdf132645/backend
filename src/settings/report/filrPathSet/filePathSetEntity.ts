@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('lis_cbc_file_path_set_entity')
 export class FilePathSetEntity {
   @PrimaryGeneratedColumn()
   id: number;
