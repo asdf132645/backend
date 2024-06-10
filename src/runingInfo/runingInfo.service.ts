@@ -96,7 +96,6 @@ export class RuningInfoService {
 
   async delete(ids: string[]): Promise<boolean> {
     try {
-      // 해당하는 엔티티를 삭제하기 위한 조건을 명시
       console.log(ids);
       const result = await this.runingInfoEntityRepository.delete({
         id: In(ids),
@@ -196,39 +195,6 @@ export class RuningInfoService {
     }
 
     return { data, total };
-  }
-
-  private mapWbcInfoAfter(wbcInfoAfter: any[]): any[] {
-    // wbcInfoAfter가 null이면 빈 배열을 반환
-    if (!wbcInfoAfter) {
-      return [];
-    }
-
-    return wbcInfoAfter.map((item) => ({
-      id: item.id,
-      name: item.name,
-      count: item.count,
-      title: item.title,
-      images: item.images || [], // images가 없을 경우 빈 배열로 기본값 설정
-      percent: item.percent,
-    }));
-  }
-
-  private mapRbcInfo(rbcInfo: RbcInfoDto[]): any[] {
-    return rbcInfo.map((item) => ({
-      title: item.title,
-      name: item.name,
-      count: item.count,
-      images: item.images,
-    }));
-  }
-
-  private mapClassInfo(classInfo: ClassInfoDto[]): any[] {
-    return classInfo.map((info) => ({
-      classId: info.classId,
-      classNm: info.classNm,
-      degree: info.degree,
-    }));
   }
 
   async clearPcIpAndSetStateFalse(pcIp: string): Promise<void> {

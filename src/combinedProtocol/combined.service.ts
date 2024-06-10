@@ -12,7 +12,6 @@ import {
 import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
 import { RuningInfoService } from '../runingInfo/runingInfo.service';
-// import { Readable } from 'stream';
 
 dotenv.config(); // dotenv 설정 추가
 

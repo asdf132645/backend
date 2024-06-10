@@ -17,7 +17,7 @@ import { Category } from './src/settings/analysisDatabse/rbcDegree/category.enti
 import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
 import { ClassOrder } from './src/classOrder/classOrder';
 import * as dotenv from 'dotenv';
-import { DeviceEntity } from "./src/device/device.entity";
+import { DeviceEntity } from './src/device/device.entity';
 dotenv.config(); // dotenv 설정 추가
 
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
@@ -48,7 +48,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       Category,
       RuningInfoEntity,
       ClassOrder,
-      DeviceEntity
+      DeviceEntity,
     ],
     extra: {
       connectionLimit: 10,
