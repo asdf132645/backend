@@ -38,7 +38,9 @@ export class BfHotKeysService {
   }
 
   private async updateItem(item: any): Promise<BfHotKeys> {
-    const existingBfHotKeys = await this.bfHotKeysRepository.findOne({ where: { id: item.id } });
+    const existingBfHotKeys = await this.bfHotKeysRepository.findOne({
+      where: { id: item.id },
+    });
 
     if (existingBfHotKeys) {
       await this.bfHotKeysRepository.update(existingBfHotKeys.id, item);

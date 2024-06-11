@@ -160,4 +160,7 @@ export class RuningInfoEntity {
 
   @Column()
   cbcAge?: string;
+
+  @Column()
+  rootPath?: string;
 }
