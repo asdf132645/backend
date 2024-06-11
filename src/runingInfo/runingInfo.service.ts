@@ -6,8 +6,6 @@ import { In, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
-  RbcInfoDto,
-  ClassInfoDto,
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
 } from './dto/runingInfoDtoItems';
@@ -86,6 +84,7 @@ export class RuningInfoService {
         existingEntity.submitState = item.submitState;
         existingEntity.submitOfDate = item.submitOfDate;
         existingEntity.signedUserId = item.signedUserId;
+        existingEntity.rootPath = item.rootPath;
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
       }

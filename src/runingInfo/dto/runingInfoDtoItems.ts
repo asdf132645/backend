@@ -53,6 +53,7 @@ export class RuningInfoDtoItems {
   cbcPatientNm?: string;
   cbcSex?: string;
   cbcAge?: string;
+  rootPath?: string;
 }
 
 export class WbcInfoDto {

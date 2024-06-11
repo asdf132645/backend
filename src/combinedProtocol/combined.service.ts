@@ -98,7 +98,6 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          // this.logger.log(message);
 
           if (ipAddress === process.env.MAIN_API) {
             console.log(ipAddress);
