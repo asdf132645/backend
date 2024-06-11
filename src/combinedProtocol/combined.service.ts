@@ -98,10 +98,9 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-
           if (ipAddress === process.env.MAIN_API) {
             console.log(ipAddress);
-            this.logger.log(`정상 수신 데이터 ${message}`);
+            this.logger.log(`정상 수신 데이터 ${JSON.stringify(message)}`);
             this.webSocketGetData(message);
           }
         }
@@ -132,8 +131,22 @@ export class CombinedService
       }
     });
 
-    client.on('disconnect', async () => {
-      this.logger.log('WebSocket 클라이언트 연결 끊김');
+    client.on('disconnect', (reason) => {
+      this.logger.log(`클라이언트가 닫힘: ${client.id}, Reason: ${reason}`);
+    });
+
+    client.conn.on('close', (code) => {
+      this.logger.log(
+        `1000번을 제외한 code는 비정상 종료: ${client.id}, Code: ${code}`,
+      );
+
+      if (code === 1000) {
+        this.logger.log('Normal closure');
+      } else if (code === 1006) {
+        this.logger.log('Abnormal closure');
+      } else {
+        this.logger.log(`Closure with code: ${code}`);
+      }
     });
 
     client.on('error', (error) => {
