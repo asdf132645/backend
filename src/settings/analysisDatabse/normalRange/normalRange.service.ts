@@ -51,10 +51,6 @@ export class NormalRangeService {
   }
 
   async find(): Promise<NormalRange[]> {
-    // return await this.normalRangeRepository.find();
-
-    // userId 삭제로 인해 첫번째 classOrder만 받기 위해 slice method 사용
-    const result = await this.normalRangeRepository.find();
-    return result.slice(0, 17);
+    return await this.normalRangeRepository.find();
   }
 }
