@@ -48,6 +48,7 @@ export class CombinedService
   async handleDisconnect(client: Socket) {
     const clientIpAddress =
       client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
+    console.log(clientIpAddress);
     const ipAddress = this.extractIPAddress(clientIpAddress);
     // PC IP 확인 후 처리
     if (ipAddress) {
@@ -94,14 +95,13 @@ export class CombinedService
     const ipAddress = this.extractIPAddress(clientIpAddress);
     this.clients.push(client);
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
-
+    // 클라이언트의 Origin 헤더 가져오기
+    const clientOrigin = client.handshake.headers['origin'];
+    console.log(clientOrigin.includes('127.0.0.1'));
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          // this.logger.log(message);
-
-          if (ipAddress === process.env.DB_HOST) {
-            console.log(ipAddress);
+          if (clientOrigin.includes('127.0.0.1')) {
             this.logger.log(`정상 수신 데이터 ${message}`);
             this.webSocketGetData(message);
           }
