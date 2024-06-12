@@ -28,11 +28,19 @@ export class RuningInfoController {
   }
 
   @Delete('delete')
-  async deleteMultiple(@Body() ids: string[]): Promise<{ success: boolean }> {
-    console.log(ids);
-    const result = await this.runingInfoService.delete(ids);
+  async deleteMultiple(@Body() req: any): Promise<{ success: boolean }> {
+    console.log(req.ids);
+    const result = await this.runingInfoService.delete(req.ids, req.rootPath);
     return { success: result };
   }
+
+  // @Post('detail')
+  // async getRunningInfoById(@Body() req: any): Promise<any> {
+  //   return this.runingInfoService.getRunningInfoById(
+  //     Number(req.id),
+  //     req.rootPath,
+  //   );
+  // }
 
   @Put('update')
   async update(

@@ -9,6 +9,8 @@ import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
 } from './dto/runingInfoDtoItems';
+import * as fs from 'fs';
+import * as path from "path";
 
 @Injectable()
 export class RuningInfoService {
@@ -93,19 +95,44 @@ export class RuningInfoService {
     return updatedItems;
   }
 
-  async delete(ids: string[]): Promise<boolean> {
+  async delete(ids: string[], rootPaths: string[]): Promise<boolean> {
     try {
       console.log(ids);
       const result = await this.runingInfoEntityRepository.delete({
         id: In(ids),
       });
+
+      if (result.affected > 0) {
+        for (const rootPath of rootPaths) {
+          // 폴더 삭제
+          try {
+            fs.rmdirSync(rootPath, { recursive: true });
+            console.log(`Folder at ${rootPath} has been deleted successfully`);
+          } catch (error) {
+            console.error(`Failed to delete folder at ${rootPath}:`, error);
+            // 폴더가 비어 있지 않아도 삭제를 시도했기 때문에 오류를 무시합니다.
+            // throw new Error('Folder deletion failed');
+          }
+        }
+      }
       return result.affected > 0; // affected가 0보다 크면 성공
     } catch (error) {
       console.error('Error while deleting entities:', error);
       return false; // 삭제 실패
     }
   }
-
+  private deleteFolderRecursive(folderPath: string) {
+    if (fs.existsSync(folderPath)) {
+      fs.readdirSync(folderPath).forEach((file) => {
+        const curPath = path.join(folderPath, file);
+        if (fs.lstatSync(curPath).isDirectory()) {
+          this.deleteFolderRecursive(curPath);
+        } else {
+          fs.unlinkSync(curPath);
+        }
+      });
+    }
+  }
   async findAllWithPagingAndFilter(
     page: number,
     pageSize: number,
