@@ -13,7 +13,11 @@ async function bootstrap() {
 
   // CORS 에러 이슈로 프론트 8080 허용
   const corsOptions: CorsOptions = {
-    origin: process.env.CORS_ORIGIN.split(','),
+    origin: [
+      'http://localhost:8080',
+      'http://192.168.0.131:8080',
+      'http://192.168.0.110:8080',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   };
