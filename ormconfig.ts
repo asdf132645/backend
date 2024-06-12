@@ -22,11 +22,11 @@ dotenv.config(); // dotenv 설정 추가
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
   const options: TypeOrmModuleOptions = {
     type: 'mysql',
-    host: process.env.DB_HOST, // 환경 변수 사용
-    port: parseInt(process.env.DB_PORT), // 환경 변수 사용
-    username: process.env.DB_USERNAME, // 환경 변수 사용
-    password: process.env.DB_PASSWORD, // 환경 변수 사용
-    database: process.env.DB_DATABASE, // 환경 변수 사용
+    host: '127.0.0.1', // 환경 변수 사용
+    port: 3306, // 환경 변수 사용
+    username: 'root', // 환경 변수 사용
+    password: 'uimd5191!', // 환경 변수 사용
+    database: 'pb_db', // 환경 변수 사용
     synchronize: false,
     migrations: ['src/migrations/**/*{.ts,.js}'],
     entities: [
