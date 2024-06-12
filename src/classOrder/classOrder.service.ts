@@ -13,7 +13,9 @@ export class ClassOrderService {
 
   async getClassOrders(): Promise<ClassOrderDto[]> {
     const classOrders = await this.classOrderRepository.find();
-    return classOrders.map(this.entityToDto);
+    // return classOrders.map(this.entityToDto);
+    // userId 삭제로 인해 첫번째 classOrder만 받기 위해 slice method 사용
+    return classOrders.map(this.entityToDto).slice(0, 20);
   }
 
   async createClassOrder(
