@@ -5,10 +5,9 @@ import { RbcDegreeController } from './rbcDegree.controller';
 import { RbcDegreeService } from './rbcDegree.service';
 import { RbcDegree } from './rbcDegree.entity';
 import { User } from '../../../user/entities/user.entity';
-import { Category } from './category.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RbcDegree, User, Category])], // Category 추가
+  imports: [TypeOrmModule.forFeature([RbcDegree, User])],
   controllers: [RbcDegreeController],
   providers: [RbcDegreeService],
 })

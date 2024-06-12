@@ -13,7 +13,6 @@ import { CbcCodeEntity } from './src/settings/report/cbcCode/cbcCode.entity';
 import { FilePathSetEntity } from './src/settings/report/filrPathSet/filePathSetEntity';
 import { WbcRunCountEntity } from './src/settings/report/runInfoCount/wbcRunCount.entity';
 import { MinCountEntity } from './src/settings/report/minCount/minCount.entity';
-import { Category } from './src/settings/analysisDatabse/rbcDegree/category.entity';
 import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
 import { ClassOrder } from './src/classOrder/classOrder';
 import * as dotenv from 'dotenv';
@@ -45,7 +44,6 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       FilePathSetEntity,
       WbcRunCountEntity,
       MinCountEntity,
-      Category,
       RuningInfoEntity,
       ClassOrder,
       DeviceEntity,

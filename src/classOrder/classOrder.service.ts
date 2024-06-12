@@ -13,7 +13,9 @@ export class ClassOrderService {
 
   async getClassOrders(): Promise<ClassOrderDto[]> {
     const classOrders = await this.classOrderRepository.find();
-    return classOrders.map(this.entityToDto);
+    // return classOrders.map(this.entityToDto);
+    // userId 삭제로 인해 첫번째 classOrder만 받기 위해 slice method 사용
+    return classOrders.map(this.entityToDto).slice(0, 20);
   }
 
   async createClassOrder(
@@ -26,7 +28,7 @@ export class ClassOrderService {
       // 이미 존재하는 주문인지 확인
       const existingOrder = await this.classOrderRepository.find();
 
-      if (!existingOrder) {
+      if (existingOrder.length === 0 || !existingOrder) {
         // 존재하지 않는 경우 새로운 주문 생성
         const classOrderEntity = new ClassOrder();
         classOrderEntity.id = Number(dto.id);
@@ -115,16 +117,8 @@ export class ClassOrderService {
   }
 
   private dtoToEntity(dto: ClassOrderDto): ClassOrder {
-    const {
-      id,
-      title,
-      name,
-      count,
-      percentText,
-      keyText,
-      orderText,
-      classId,
-    } = dto;
+    const { id, title, name, count, percentText, keyText, orderText, classId } =
+      dto;
     const classOrderEntity = new ClassOrder();
     classOrderEntity.id = Number(id); // Assuming id is a number
     classOrderEntity.title = title;

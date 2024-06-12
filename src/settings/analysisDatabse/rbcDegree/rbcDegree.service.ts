@@ -1,9 +1,8 @@
 // src/rbcDegree/rbcDegree.service.ts
 import { Injectable } from '@nestjs/common';
-import { CategoryDto, RbcDegreeDto } from './dto/rbcDegree.dto';
+import { RbcDegreeDto } from './dto/rbcDegree.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RbcDegree } from './rbcDegree.entity';
-import { Category } from './category.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,73 +10,57 @@ export class RbcDegreeService {
   constructor(
     @InjectRepository(RbcDegree)
     private readonly rbcDegreeRepository: Repository<RbcDegree>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async create(rbcDegreeDto: RbcDegreeDto): Promise<void> {
-    // RbcDegree 엔터티 생성 및 저장
-    const rbcDegree = this.rbcDegreeRepository.create(rbcDegreeDto);
-    await this.rbcDegreeRepository.save(rbcDegree);
-
+  async create(rbcDegreeDto: RbcDegreeDto[]): Promise<void> {
     // 카테고리 엔터티 생성 및 저장
-    const categories = rbcDegreeDto.categories.map((categoryDto) => {
-      const category = this.categoryRepository.create({
-        ...categoryDto,
-        rbcDegree: rbcDegree, // 외래 키 관계 설정
-      });
+    const categories = rbcDegreeDto.map((categoryDto) => {
+      const category = this.rbcDegreeRepository.create({ ...categoryDto });
       return category;
     });
 
-    await this.categoryRepository.save(categories);
+    await this.rbcDegreeRepository.save(categories);
   }
 
-  async update(updateRbcDegreeDto: CategoryDto[]): Promise<RbcDegreeDto> {
-    const existingDegree = await this.rbcDegreeRepository.find({ relations: ['categories'] });
-
-    updateRbcDegreeDto.forEach((updatedCategory: any) => {
-      const existingCategory = existingDegree[0].categories.find(
-        (category: any) =>
-          category.category_id === updatedCategory.category_id &&
-          category.class_id === updatedCategory.class_id &&
-          category.class_nm === updatedCategory.class_nm,
-      );
-
-      if (existingCategory) {
-        existingCategory.degree1 = updatedCategory.degree1;
-        existingCategory.degree2 = updatedCategory.degree2;
-        existingCategory.degree3 = updatedCategory.degree3;
+  async update(updateRbcDegreeDto: RbcDegreeDto[]): Promise<RbcDegreeDto[]> {
+    const updatedItems: RbcDegreeDto[] = [];
+    for (const item of updateRbcDegreeDto) {
+      const updatedItem = await this.updateItem(item);
+      if (updatedItem) {
+        updatedItems.push(updatedItem);
       }
-    });
-
-    await this.rbcDegreeRepository.save(existingDegree);
-    await this.categoryRepository.save(existingDegree[0].categories);
-    return existingDegree[0];
-  }
-
-  async find(): Promise<RbcDegreeDto> {
-    // Find the RbcDegree entity by userId
-    const degree = await this.rbcDegreeRepository.find({
-      relations: ['categories'], // Load categories relation
-    });
-
-    if (!degree) {
-      return degree[0];
     }
-
-    return degree[0];
+    return updatedItems;
   }
 
-  async findAll(): Promise<RbcDegreeDto[]> {
-    // Find all RbcDegree entities
-    return this.rbcDegreeRepository.find({ relations: ['categories'] }); // Load categories relation
+  private async updateItem(item: RbcDegreeDto): Promise<RbcDegreeDto> {
+    const existingRbcDegree = await this.rbcDegreeRepository.findOne({
+      where: {
+        category_id: item.category_id,
+        class_id: item.class_id,
+        class_nm: item.class_nm,
+      },
+    });
+
+    if (existingRbcDegree) {
+      await this.rbcDegreeRepository.update(existingRbcDegree.id, item);
+      return await this.rbcDegreeRepository.findOne({
+        where: {
+          category_id: item.category_id,
+          class_id: item.class_id,
+          class_nm: item.class_nm,
+        },
+      });
+    }
+    return null;
+  }
+
+  async find(): Promise<RbcDegreeDto[]> {
+    return await this.rbcDegreeRepository.find();
   }
 
   async remove(): Promise<void> {
-    // Find the RbcDegree entity by userId
-    const degree = await this.rbcDegreeRepository.find({
-      relations: ['categories'], // Load categories relation
-    });
+    const degree = await this.rbcDegreeRepository.find();
 
     // Remove the degree from the database
     await this.rbcDegreeRepository.remove(degree);

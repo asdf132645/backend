@@ -8,10 +8,6 @@ import {
 import { Type } from 'class-transformer';
 
 export class CreateBfHotKeysDto {
-  @IsInt()
-  @IsOptional()
-  userId?: number;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BfHotKeysItems)
@@ -28,12 +24,6 @@ export class BfHotKeysItems {
 
   @IsString()
   name: string;
-
-  @IsInt()
-  count: number;
-
-  @IsInt()
-  percent: number;
 
   @IsString()
   key: string;

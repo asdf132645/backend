@@ -9,10 +9,6 @@ import {
 import { Type } from 'class-transformer';
 
 export class CreateWbcHotKeysDto {
-  @IsInt()
-  @IsOptional()
-  userId?: number;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => wbcHotKeysItems)
@@ -29,12 +25,6 @@ export class wbcHotKeysItems {
 
   @IsString()
   name: string;
-
-  @IsInt()
-  count: number;
-
-  @IsInt()
-  percent: number;
 
   @IsString()
   key: string;
