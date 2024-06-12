@@ -26,7 +26,7 @@ export class ClassOrderService {
       // 이미 존재하는 주문인지 확인
       const existingOrder = await this.classOrderRepository.find();
 
-      if (!existingOrder) {
+      if (existingOrder.length === 0 || !existingOrder) {
         // 존재하지 않는 경우 새로운 주문 생성
         const classOrderEntity = new ClassOrder();
         classOrderEntity.id = Number(dto.id);
@@ -115,16 +115,8 @@ export class ClassOrderService {
   }
 
   private dtoToEntity(dto: ClassOrderDto): ClassOrder {
-    const {
-      id,
-      title,
-      name,
-      count,
-      percentText,
-      keyText,
-      orderText,
-      classId,
-    } = dto;
+    const { id, title, name, count, percentText, keyText, orderText, classId } =
+      dto;
     const classOrderEntity = new ClassOrder();
     classOrderEntity.id = Number(id); // Assuming id is a number
     classOrderEntity.title = title;

@@ -1,9 +1,5 @@
 // src/rbcDegree/dto/rbcDegree.dto.ts
 export class RbcDegreeDto {
-  categories: CategoryDto[]; // 타입 여기에 맞게 조정
-}
-
-export class CategoryDto {
   category_id: string;
   category_nm: string;
   class_id: string;

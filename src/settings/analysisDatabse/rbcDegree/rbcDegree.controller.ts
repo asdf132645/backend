@@ -10,14 +10,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RbcDegreeService } from './rbcDegree.service';
-import { CategoryDto, RbcDegreeDto } from './dto/rbcDegree.dto';
+import { RbcDegreeDto } from './dto/rbcDegree.dto';
 
 @Controller('rbcDegree')
 export class RbcDegreeController {
   constructor(private readonly rbcDegreeService: RbcDegreeService) {}
 
   @Post('rbcDegreeAdd')
-  async create(@Body() rbcDegreeDto: RbcDegreeDto): Promise<void> {
+  async create(@Body() rbcDegreeDto: RbcDegreeDto[]): Promise<void> {
     try {
       await this.rbcDegreeService.create(rbcDegreeDto);
     } catch (error) {
@@ -27,19 +27,17 @@ export class RbcDegreeController {
       throw error;
     }
   }
+
   @Put()
-  async update(@Body() updateRbcDegreeDto: CategoryDto[]): Promise<RbcDegreeDto> {
+  async update(
+    @Body() updateRbcDegreeDto: RbcDegreeDto[],
+  ): Promise<RbcDegreeDto[]> {
     return this.rbcDegreeService.update(updateRbcDegreeDto);
   }
 
   @Get()
-  async findOne(): Promise<RbcDegreeDto> {
+  async findOne(): Promise<RbcDegreeDto[]> {
     return this.rbcDegreeService.find();
-  }
-
-  @Get()
-  async findAll(): Promise<RbcDegreeDto[]> {
-    return this.rbcDegreeService.findAll();
   }
 
   @Delete()

@@ -20,6 +20,7 @@ export class ClassOrderController {
   async updateAllClassOrders(
     @Body() newData: ClassOrderDto[],
   ): Promise<ClassOrderDto[]> {
+    console.log("newData", newData)
     return this.classOrderService.updateClassOrders(newData);
   }
 }

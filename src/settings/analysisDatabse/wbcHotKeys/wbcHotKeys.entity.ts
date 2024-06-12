@@ -1,7 +1,5 @@
 // src/wbc-hot-keys/wbc-hot-keys.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
-import { User } from '../../../user/entities/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class WbcHotKeys {
@@ -13,12 +11,6 @@ export class WbcHotKeys {
 
   @Column()
   name: string;
-
-  @Column({ default: 0 })
-  count: number;
-
-  @Column({ default: 0 })
-  percent: number;
 
   @Column({ default: '' })
   key: string;

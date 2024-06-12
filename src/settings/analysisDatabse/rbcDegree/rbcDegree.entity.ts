@@ -1,16 +1,28 @@
-import {
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn, JoinColumn
-} from "typeorm";
-import { Category } from './category.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity()
+@Entity('category')
 export class RbcDegree {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => Category, (category) => category.rbcDegree)
-  @JoinColumn({ name: 'id', referencedColumnName: 'id' })
-  categories: Category[];
+  @Column()
+  category_id: string;
+
+  @Column()
+  category_nm: string;
+
+  @Column()
+  class_id: string;
+
+  @Column()
+  class_nm: string;
+
+  @Column()
+  degree1: string;
+
+  @Column()
+  degree2: string;
+
+  @Column()
+  degree3: string;
 }
