@@ -20,6 +20,37 @@ import * as moment from 'moment';
 export class RuningInfoController {
   constructor(private readonly runingInfoService: RuningInfoService) {}
 
+  @Get('pageUpDown')
+  async getPageUpDown(
+    @Query('id') id: string,
+    @Query('step') step: number,
+    @Query('type') type: string,
+  ): Promise<RuningInfoEntity | null> {
+    return this.runingInfoService.getUpDownRunnInfo(
+      Number(id),
+      Number(step),
+      type,
+    );
+  }
+
+  @Get('clearPcIpState')
+  async clearPcIpAndState(@Query('oldPcIp') oldPcIp: string): Promise<void> {
+    await this.runingInfoService.clearPcIpAndState(oldPcIp);
+  }
+
+  @Get('updatePcIpState')
+  async updatePcIpAndState(
+    @Query('oldPcIp') oldPcIp: string,
+    @Query('newEntityId') newEntityId: number,
+    @Query('newPcIp') newPcIp: string,
+  ): Promise<void> {
+    await this.runingInfoService.updatePcIpAndState(
+      oldPcIp,
+      newEntityId,
+      newPcIp,
+    );
+  }
+
   @Post('create')
   async create(
     @Body() createDto: CreateRuningInfoDto,
@@ -33,14 +64,6 @@ export class RuningInfoController {
     const result = await this.runingInfoService.delete(req.ids, req.rootPath);
     return { success: result };
   }
-
-  // @Post('detail')
-  // async getRunningInfoById(@Body() req: any): Promise<any> {
-  //   return this.runingInfoService.getRunningInfoById(
-  //     Number(req.id),
-  //     req.rootPath,
-  //   );
-  // }
 
   @Put('update')
   async update(

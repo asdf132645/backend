@@ -10,7 +10,7 @@ import {
   UpdateRuningInfoDto,
 } from './dto/runingInfoDtoItems';
 import * as fs from 'fs';
-import * as path from "path";
+import * as path from 'path';
 
 @Injectable()
 export class RuningInfoService {
@@ -110,7 +110,6 @@ export class RuningInfoService {
             console.log(`Folder at ${rootPath} has been deleted successfully`);
           } catch (error) {
             console.error(`Failed to delete folder at ${rootPath}:`, error);
-            // 폴더가 비어 있지 않아도 삭제를 시도했기 때문에 오류를 무시합니다.
             // throw new Error('Folder deletion failed');
           }
         }
@@ -256,5 +255,68 @@ export class RuningInfoService {
       where: { id },
     });
     return entity || null;
+  }
+
+  async getUpDownRunnInfo(
+    id: number,
+    step: number,
+    type: string,
+  ): Promise<RuningInfoEntity | null> {
+    // 현재 엔티티를 찾기
+    const currentEntity = await this.runingInfoEntityRepository.findOne({
+      where: { id },
+    });
+    if (!currentEntity) {
+      return null;
+    }
+
+    let newEntity: RuningInfoEntity | null = null;
+
+    if (type === 'up') {
+      // 현재 id보다 큰 id를 가진 항목 중 step번째 항목 찾기
+      newEntity = await this.runingInfoEntityRepository
+        .createQueryBuilder('entity')
+        .where('entity.id > :id', { id })
+        .orderBy('entity.id', 'ASC')
+        .offset(step - 1) // step 만큼 건너뜀
+        .limit(1) // 하나의 항목만 가져옴
+        .getOne();
+    } else if (type === 'down') {
+      // 현재 id보다 작은 id를 가진 항목 중 step번째 항목 찾기
+      newEntity = await this.runingInfoEntityRepository
+        .createQueryBuilder('entity')
+        .where('entity.id < :id', { id })
+        .orderBy('entity.id', 'DESC')
+        .offset(step - 1) // step 만큼 건너뜀
+        .limit(1) // 하나의 항목만 가져옴
+        .getOne();
+    }
+
+    return newEntity || null;
+  }
+
+  async updatePcIpAndState(
+    oldPcIp: string,
+    newEntityId: number,
+    newPcIp: string,
+  ): Promise<void> {
+    // 동일한 pcIp를 가진 모든 엔티티 업데이트
+    await this.runingInfoEntityRepository.update(
+      { pcIp: oldPcIp },
+      { pcIp: '', state: false },
+    );
+
+    // 새로운 엔티티 업데이트
+    await this.runingInfoEntityRepository.update(
+      { id: newEntityId },
+      { pcIp: newPcIp, state: true },
+    );
+  }
+
+  async clearPcIpAndState(oldPcIp: string): Promise<void> {
+    await this.runingInfoEntityRepository.update(
+      { pcIp: oldPcIp },
+      { pcIp: '', state: false },
+    );
   }
 }
