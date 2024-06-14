@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 export class RuningInfoDtoItems {
   @IsInt()
   id: number;
-  state?: boolean;
+  lock_status?: boolean;
   traySlot?: string;
   slotNo: string;
   barcodeNo: string;
@@ -18,16 +18,16 @@ export class RuningInfoDtoItems {
   slotId: string;
   orderDttm: string;
   testType: string;
-  analyzedDttm: Date;
-  createDate: string;
+  analyzedDttm: string;
+  // createDate: string;
   pltCount: string;
   malariaCount: string;
   maxRbcCount: string;
-  stateCd: string;
+  // stateCd: string;
   tactTime: string;
   maxWbcCount: string;
-  lowPowerPath: any[];
-  runningPath: any[];
+  bf_lowPowerPath: any[];
+  // runningPath: any[];
   wbcInfo: any[];
   wbcInfoAfter?: any[];
   rbcInfo: any[];
@@ -40,7 +40,7 @@ export class RuningInfoDtoItems {
   orderList: OrderDto[];
   submitState?: string;
   submitOfDate?: Date;
-  signedUserId?: string;
+  submitUserId?: string;
   classificationResult?: any[];
   isNsNbIntegration?: string;
   wbcMemo?: string;

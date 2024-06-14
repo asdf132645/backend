@@ -8,7 +8,7 @@ export class RuningInfoEntity {
   id: number;
 
   @Column()
-  state?: boolean;
+  lock_status?: boolean;
 
   @Column()
   traySlot?: string;
@@ -44,10 +44,10 @@ export class RuningInfoEntity {
   testType: string;
 
   @Column()
-  analyzedDttm: Date;
+  analyzedDttm: string;
 
-  @Column()
-  createDate: string;
+  // @Column()
+  // createDate: string;
 
   // @Column()
   // pltCount: string;
@@ -58,8 +58,8 @@ export class RuningInfoEntity {
   // @Column()
   // maxRbcCount: string;
 
-  @Column()
-  stateCd: string;
+  // @Column()
+  // stateCd: string;
 
   @Column()
   tactTime: string;
@@ -68,10 +68,10 @@ export class RuningInfoEntity {
   maxWbcCount: string;
 
   @Column('json')
-  lowPowerPath: any[];
+  bf_lowPowerPath: any[];
 
-  @Column('json')
-  runningPath: any[];
+  // @Column('json')
+  // runningPath: any[];
 
   // @Column('json')
   // bminfo: any[];
@@ -126,7 +126,7 @@ export class RuningInfoEntity {
   submitOfDate?: Date;
 
   @Column()
-  signedUserId?: string;
+  submitUserId?: string;
 
   // @Column('json')
   // classificationResult?: any[];

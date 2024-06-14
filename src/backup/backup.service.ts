@@ -44,7 +44,7 @@ export class BackupService {
     // 지정된 날짜 범위의 데이터를 조회
     const dataToBackup = await this.runningInfoRepository.find({
       where: {
-        createDate: Between(formattedStartDate, formattedEndDate),
+        analyzedDttm: Between(formattedStartDate, formattedEndDate),
       },
     });
 

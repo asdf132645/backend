@@ -14,11 +14,11 @@ export declare class RuningInfoEntity {
     testType: string;
     analyzedDttm: Date;
     createDate: string;
-    stateCd: string;
+    // stateCd: string;
     tactTime: string;
     maxWbcCount: string;
     lowPowerPath: any[];
-    runningPath: any[];
+    // runningPath: any[];
     userId: number;
     cassetId: string;
     isNormal: string;

@@ -70,22 +70,22 @@ export class RuningInfoService {
         existingEntity.cbcPatientNm = item.cbcPatientNm;
         existingEntity.cbcSex = item.cbcSex;
         existingEntity.cbcAge = item.cbcAge;
-        existingEntity.stateCd = item.stateCd;
+        // existingEntity.stateCd = item.stateCd;
         existingEntity.tactTime = item.tactTime;
         existingEntity.maxWbcCount = item.maxWbcCount;
-        existingEntity.lowPowerPath = item.lowPowerPath;
-        existingEntity.runningPath = item.runningPath;
+        existingEntity.bf_lowPowerPath = item.bf_lowPowerPath;
+        // existingEntity.runningPath = item.runningPath;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
         existingEntity.wbcMemo = item.wbcMemo;
         existingEntity.rbcMemo = item.rbcMemo;
-        existingEntity.state = item.state;
+        existingEntity.lock_status = item.lock_status;
         existingEntity.pcIp = item.pcIp;
         existingEntity.rbcInfoAfter = item.rbcInfoAfter;
         existingEntity.wbcInfoAfter = item.wbcInfoAfter;
         existingEntity.submitState = item.submitState;
         existingEntity.submitOfDate = item.submitOfDate;
-        existingEntity.signedUserId = item.signedUserId;
+        existingEntity.submitUserId = item.submitUserId;
         existingEntity.rootPath = item.rootPath;
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
@@ -158,10 +158,10 @@ export class RuningInfoService {
     if (startFormatted || endFormatted) {
       queryBuilder.andWhere(
         startFormatted && endFormatted
-          ? 'runInfo.createDate BETWEEN :startDay AND :endDay'
+          ? 'runInfo.analyzedDttm BETWEEN :startDay AND :endDay'
           : startFormatted
-            ? 'runInfo.createDate >= :startDay'
-            : 'runInfo.createDate <= :endDay',
+            ? 'runInfo.analyzedDttm >= :startDay'
+            : 'runInfo.analyzedDttm <= :endDay',
         {
           startDay: startFormatted,
           endDay: endFormatted,
@@ -169,7 +169,7 @@ export class RuningInfoService {
       );
     }
 
-    queryBuilder.orderBy('runInfo.createDate', 'DESC');
+    queryBuilder.orderBy('runInfo.analyzedDttm', 'DESC');
 
     if (barcodeNo) {
       queryBuilder.andWhere('runInfo.barcodeNo = :barcodeNo', { barcodeNo });
@@ -239,7 +239,7 @@ export class RuningInfoService {
       entityWithPcIp.pcIp = '';
 
       // 상태를 false로 변경
-      entityWithPcIp.state = false;
+      entityWithPcIp.lock_status = false;
 
       // 변경된 엔터티를 저장
       await this.runingInfoEntityRepository.save(entityWithPcIp);
@@ -303,20 +303,20 @@ export class RuningInfoService {
     // 동일한 pcIp를 가진 모든 엔티티 업데이트
     await this.runingInfoEntityRepository.update(
       { pcIp: oldPcIp },
-      { pcIp: '', state: false },
+      { pcIp: '', lock_status: false },
     );
 
     // 새로운 엔티티 업데이트
     await this.runingInfoEntityRepository.update(
       { id: newEntityId },
-      { pcIp: newPcIp, state: true },
+      { pcIp: newPcIp, lock_status: true },
     );
   }
 
   async clearPcIpAndState(oldPcIp: string): Promise<void> {
     await this.runingInfoEntityRepository.update(
       { pcIp: oldPcIp },
-      { pcIp: '', state: false },
+      { pcIp: '', lock_status: false },
     );
   }
 }
