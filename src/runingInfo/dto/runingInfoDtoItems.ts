@@ -33,7 +33,7 @@ export class RuningInfoDtoItems {
   rbcInfo: any[];
   rbcInfoAfter: any[];
   // bminfo: any[];
-  userId: number;
+  // userId: number;
   cassetId: string;
   isNormal: string;
   processInfo: ProcessInfoDto;
@@ -53,7 +53,7 @@ export class RuningInfoDtoItems {
   cbcPatientNm?: string;
   cbcSex?: string;
   cbcAge?: string;
-  rootPath?: string;
+  img_drive_root_path?: string;
 }
 
 export class WbcInfoDto {

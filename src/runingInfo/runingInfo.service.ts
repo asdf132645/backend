@@ -20,12 +20,11 @@ export class RuningInfoService {
   ) {}
 
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
-    const { userId, runingInfoDtoItems } = createDto;
+    const { runingInfoDtoItems } = createDto;
 
     // 동일한 slotId가 존재하는지 확인
     const existingEntity = await this.runingInfoEntityRepository.findOne({
       where: {
-        userId: userId,
         slotId: runingInfoDtoItems.slotId,
       },
     });
@@ -38,7 +37,6 @@ export class RuningInfoService {
 
     // 동일한 slotId가 존재하지 않는 경우 엔티티를 생성
     const entity = this.runingInfoEntityRepository.create({
-      userId,
       ...runingInfoDtoItems,
     });
 
@@ -86,7 +84,7 @@ export class RuningInfoService {
         existingEntity.submitState = item.submitState;
         existingEntity.submitOfDate = item.submitOfDate;
         existingEntity.submitUserId = item.submitUserId;
-        existingEntity.rootPath = item.rootPath;
+        existingEntity.img_drive_root_path = item.img_drive_root_path;
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
       }

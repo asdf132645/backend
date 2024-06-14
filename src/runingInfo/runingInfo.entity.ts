@@ -76,8 +76,8 @@ export class RuningInfoEntity {
   // @Column('json')
   // bminfo: any[];
 
-  @Column()
-  userId: number;
+  // @Column()
+  // userId: number;
 
   @Column()
   cassetId: string;
@@ -162,5 +162,5 @@ export class RuningInfoEntity {
   cbcAge?: string;
 
   @Column()
-  rootPath?: string;
+  img_drive_root_path?: string;
 }
