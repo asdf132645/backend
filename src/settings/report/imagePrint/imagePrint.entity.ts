@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('image_print_setting')
 export class ImagePrintEntity {
   @PrimaryGeneratedColumn()
   id: number;

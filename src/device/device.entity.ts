@@ -9,5 +9,5 @@ export class DeviceEntity {
   siteCd: string;
 
   @Column({default: '2024050000000'})
-  deviceBarCode: string;
+  deviceSerialNm: string;
 }

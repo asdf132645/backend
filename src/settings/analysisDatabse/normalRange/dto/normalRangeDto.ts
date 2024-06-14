@@ -32,8 +32,8 @@ export class normalRangeItems {
   unit: string;
 
   @IsString()
-  title: string;
+  abbreviation: string;
 
   @IsString()
-  name: string;
+  fullNm: string;
 }

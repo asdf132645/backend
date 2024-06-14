@@ -1,12 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('wbc_run_count_setting')
 export class WbcRunCountEntity {
   @PrimaryGeneratedColumn()
-  num: number;
-
-  @Column({ default: '' })
-  id: string;
+  id: number;
 
   @Column({ default: 0 })
   min: number;

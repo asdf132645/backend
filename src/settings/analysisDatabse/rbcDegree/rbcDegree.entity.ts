@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity('category')
+@Entity('rbc_degree_setting')
 export class RbcDegree {
   @PrimaryGeneratedColumn()
   id: number;

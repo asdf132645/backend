@@ -1,31 +1,22 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'class_order' })
+@Entity({ name: 'sort_class_order_setting' })
 export class ClassOrder {
   @PrimaryGeneratedColumn()
-  idx?: number;
-
-  @Column()
   id?: number;
 
   @Column()
   classId?: string;
 
   @Column()
-  title?: string;
+  abbreviation?: string;
 
   @Column()
-  name?: string;
-
-  @Column()
-  count?: string;
-
-  @Column()
-  percentText?: string;
+  fullNm?: string;
 
   @Column()
   keyText?: string;
 
   @Column()
-  orderText?: string;
+  orderIdx?: string;
 }

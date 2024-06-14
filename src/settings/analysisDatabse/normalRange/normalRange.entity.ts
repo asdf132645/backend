@@ -1,10 +1,10 @@
 // src/wbc-hot-keys/wbc-hot-keys.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('normal_range_setting')
 export class NormalRange {
   @PrimaryGeneratedColumn()
-  num: number;
+  id: number;
 
   @Column()
   classId: string;
@@ -19,8 +19,8 @@ export class NormalRange {
   unit: string;
 
   @Column()
-  title: string;
+  abbreviation: string;
 
   @Column()
-  name: string;
+  fullNm: string;
 }

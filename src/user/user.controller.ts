@@ -96,12 +96,11 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   async updateUser(
-    @Body() { pcIp, viewerCheck, userId }: Partial<CreateUserDto>,
+    @Body() { pcIp, userId }: Partial<CreateUserDto>,
   ) {
     try {
       const updatedUser = await this.userService.update(userId, {
         pcIp,
-        viewerCheck,
       });
 
       if (updatedUser === undefined) {

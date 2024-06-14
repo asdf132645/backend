@@ -10,8 +10,8 @@ export class CreateMinCountDto {
 
 export class minCountItems {
   @IsInt()
-  minGpCount: number;
+  minGPCount: number;
 
   @IsInt()
-  minPaCount: number;
+  minPACount: number;
 }

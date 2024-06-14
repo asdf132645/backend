@@ -3,6 +3,6 @@
   "DB_PASSWORD": "uimd5191!",
   "DB_HOST": "127.0.0.1",
   "DB_PORT": 3306,
-  "DB_DATABASE": "pb_db",
-  "MAIN_API": "192.168.0.131"
+  "DB_DATABASE": "pb_db_web",
+  "MAIN_API": "192.168.0.140"
 }

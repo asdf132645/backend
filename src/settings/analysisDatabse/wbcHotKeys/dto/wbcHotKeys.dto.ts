@@ -21,14 +21,14 @@ export class wbcHotKeysItems {
   id?: number;
 
   @IsString()
-  title: string;
+  abbreviation: string;
 
   @IsString()
-  name: string;
+  fullNm: string;
 
   @IsString()
   key: string;
 
   @IsInt()
-  order: number;
+  orderIdx: number;
 }

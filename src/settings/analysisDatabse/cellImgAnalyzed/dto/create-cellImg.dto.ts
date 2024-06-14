@@ -6,10 +6,10 @@ export class CellImgAnalyzedDto {
   wbcPositionMargin: string;
   rbcPositionMargin: string;
   pltPositionMargin: string;
-  pbAnalysisType2: string;
+  pbsAnalysisType: string;
   stitchCount: string;
   bfAnalysisType: string;
-  pbiaRootPath: string;
+  iaRootPath: string;
   isNsNbIntegration: boolean;
   isAlarm: boolean;
   alarmCount: string;

@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('lis_code_wbc_setting')
 export class LisCodeWbcEntity {
   @PrimaryGeneratedColumn()
   id: number;

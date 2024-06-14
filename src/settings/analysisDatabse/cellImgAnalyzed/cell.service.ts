@@ -25,8 +25,6 @@ export class CellImgAnalyzedService {
     try {
       const queryBuilder = this.cellImgAnalyzedRepository
         .createQueryBuilder('cellImgAnalyzed')
-        // .leftJoinAndSelect('cellImgAnalyzed.user', 'user')
-        // .where('user.id = :id', { id: Number(userId) });
       return await queryBuilder.getOne();
     } catch (error) {
       console.error('Error:', error);

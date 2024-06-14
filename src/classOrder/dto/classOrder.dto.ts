@@ -1,11 +1,8 @@
 export class ClassOrderDto {
-  idx?: number;
-  id?: string;
-  title?: string;
-  name?: string;
-  count?: string;
-  percentText?: string;
+  id?: number;
+  abbreviation?: string;
+  fullNm?: string;
   keyText?: string;
-  orderText?: string;
+  orderIdx?: string;
   classId?: string;
 }

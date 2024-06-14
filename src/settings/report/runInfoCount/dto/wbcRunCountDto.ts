@@ -1,5 +1,4 @@
 import {
-  IsString,
   IsInt,
   IsArray,
   ValidateNested,
@@ -15,10 +14,7 @@ export class CreateWbcRunCountDto {
 
 export class WbcRunCountItems {
   @IsInt()
-  num: number;
-
-  @IsString()
-  id: string;
+  id: number;
 
   @IsInt()
   min: number;

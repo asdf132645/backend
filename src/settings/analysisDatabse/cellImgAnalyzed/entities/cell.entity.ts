@@ -2,7 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity('cell_img_analyzed')
+@Entity('cell_img_analyzed_setting')
 export class CellImgAnalyzed {
   @PrimaryGeneratedColumn()
   @ApiProperty({ example: 1, description: '세포 이미지 분석 ID' })
@@ -30,7 +30,7 @@ export class CellImgAnalyzed {
 
   @Column()
   @ApiProperty({ example: '100', description: 'PBS 분석 유형 2' })
-  pbAnalysisType2: string;
+  pbsAnalysisType: string;
 
   @Column()
   @ApiProperty({ example: '1', description: '스티치 카운트' })
@@ -42,7 +42,7 @@ export class CellImgAnalyzed {
 
   @Column()
   @ApiProperty({ example: '', description: 'IA 루트 경로' })
-  pbiaRootPath: string;
+  iaRootPath: string;
 
   @Column()
   @ApiProperty({ example: false, description: 'NS/NB 통합 여부' })
