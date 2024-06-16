@@ -6,7 +6,7 @@ export class ImagePrintEntity {
   id: number;
 
   @Column({ default: '' })
-  text: string;
+  classNm: string;
 
   @Column()
   value: string;

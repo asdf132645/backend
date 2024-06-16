@@ -19,7 +19,7 @@ export class ImagePrintItems {
   id: number;
 
   @IsString()
-  text: string;
+  classNm: string;
 
   @IsString()
   value: string;
