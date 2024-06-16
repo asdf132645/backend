@@ -24,9 +24,6 @@ export class ImagePrintItems {
   @IsString()
   value: string;
 
-  @IsString()
-  code: string;
-
   @IsBoolean()
   checked: boolean;
 }

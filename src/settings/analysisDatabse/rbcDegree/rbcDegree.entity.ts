@@ -6,16 +6,16 @@ export class RbcDegree {
   id: number;
 
   @Column()
-  category_id: string;
+  categoryId: string;
 
   @Column()
-  category_nm: string;
+  categoryNm: string;
 
   @Column()
-  class_id: string;
+  classId: string;
 
   @Column()
-  class_nm: string;
+  classNm: string;
 
   @Column()
   degree1: string;

@@ -15,7 +15,7 @@ export class ClassOrder {
   fullNm?: string;
 
   @Column()
-  keyText?: string;
+  key?: string;
 
   @Column()
   orderIdx?: string;

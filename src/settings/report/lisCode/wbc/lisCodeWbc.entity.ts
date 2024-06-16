@@ -6,7 +6,7 @@ export class LisCodeWbcEntity {
   id: number;
 
   @Column({ default: '' })
-  text: string;
+  classNm: string;
 
   @Column({ default: '' })
   value: string;

@@ -11,9 +11,6 @@ export class ImagePrintEntity {
   @Column()
   value: string;
 
-  @Column({ default: '' })
-  code: string;
-
   @Column({ default: false })
   checked: boolean;
 }
