@@ -43,16 +43,7 @@ export class ClassOrderService {
     // 새로운 주문을 데이터베이스에 저장
     const savedClassOrders =
       await this.classOrderRepository.save(newClassOrders);
-
-    // 저장된 주문을 DTO 배열로 변환하여 반환
-    return savedClassOrders.map((savedOrder) => ({
-      id: Number(savedOrder.id),
-      abbreviation: savedOrder.abbreviation,
-      fullNm: savedOrder.fullNm,
-      key: savedOrder.key,
-      orderIdx: savedOrder.orderIdx,
-      classId: savedOrder.classId,
-    }));
+    return savedClassOrders;
   }
 
   async updateClassOrders(newData: ClassOrderDto[]): Promise<ClassOrderDto[]> {
