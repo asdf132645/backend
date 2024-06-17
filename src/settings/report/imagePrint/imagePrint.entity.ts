@@ -6,10 +6,10 @@ export class ImagePrintEntity {
   id: number;
 
   @Column({ default: '' })
-  classNm: string;
+  fullNm: string;
 
   @Column()
-  value: string;
+  classId: string;
 
   @Column({ default: false })
   checked: boolean;

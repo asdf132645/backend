@@ -19,10 +19,10 @@ export class ImagePrintItems {
   id: number;
 
   @IsString()
-  classNm: string;
+  fullNm: string;
 
   @IsString()
-  value: string;
+  classId: string;
 
   @IsBoolean()
   checked: boolean;
