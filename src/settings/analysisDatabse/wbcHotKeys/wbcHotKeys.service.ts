@@ -38,16 +38,19 @@ export class WbcHotKeysService {
   }
 
   private async updateItem(item: any): Promise<WbcHotKeys> {
-    const existingWbcHotKeys = await this.wbcHotKeysRepository.findOne({ where: { id: item.id } });
+    const existingWbcHotKeys = await this.wbcHotKeysRepository.findOne({
+      where: { id: item.id },
+    });
 
     if (existingWbcHotKeys) {
       await this.wbcHotKeysRepository.update(existingWbcHotKeys.id, item);
-      return await this.wbcHotKeysRepository.findOne({ where: { id: item.id } });
+      return await this.wbcHotKeysRepository.findOne({
+        where: { id: item.id },
+      });
     }
 
     return null;
   }
-
 
   async find(): Promise<WbcHotKeys[]> {
     return await this.wbcHotKeysRepository.find();
