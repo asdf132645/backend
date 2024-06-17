@@ -26,8 +26,8 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
     host: '127.0.0.1', // 환경 변수 사용
     port: 3306, // 환경 변수 사용
     username: 'root', // 환경 변수 사용
-    password: '0000', // 환경 변수 사용
-    database: 'pb_db', // 환경 변수 사용
+    password: 'uimd5191!', // 환경 변수 사용
+    database: 'pb_db_web', // 환경 변수 사용
     synchronize: false,
     migrations: ['src/migrations/**/*{.ts,.js}'],
     entities: [
