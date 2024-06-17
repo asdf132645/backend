@@ -1,7 +1,7 @@
 // LisCodeRbcEntity 수정
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('lis_code_rbc_setting')
 export class LisCodeRbcEntity {
   @PrimaryGeneratedColumn()
   id: number;

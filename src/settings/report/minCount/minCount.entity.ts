@@ -1,13 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('min_count_setting')
 export class MinCountEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
   @Column({ default: 0 })
-  minGpCount: number;
+  minGPCount: number;
 
   @Column({ default: 0 })
-  minPaCount: number;
+  minPACount: number;
 }

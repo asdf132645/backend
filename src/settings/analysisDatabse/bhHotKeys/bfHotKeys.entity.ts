@@ -1,20 +1,20 @@
 // src/wbc-hot-keys/wbc-hot-keys.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('bf_hot_keys_setting')
 export class BfHotKeys {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '' })
-  title: string;
+  abbreviation: string;
 
   @Column()
-  name: string;
+  fullNm: string;
 
   @Column()
   key: string;
 
   @Column()
-  order: number;
+  orderIdx: number;
 }

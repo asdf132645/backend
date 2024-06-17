@@ -93,7 +93,7 @@ export class UserService {
 
   async update(
     userId: string,
-    { pcIp, viewerCheck }: Partial<CreateUserDto>,
+    { pcIp }: Partial<CreateUserDto>,
   ): Promise<User | undefined> {
     try {
       const user = await this.userRepository.findOne({ where: { userId } });
@@ -103,7 +103,7 @@ export class UserService {
         return undefined;
       }
 
-      await this.userRepository.update(user.id, { pcIp, viewerCheck });
+      await this.userRepository.update(user.id, { pcIp });
       const updatedUser = await this.userRepository.findOne({
         where: { userId },
       });

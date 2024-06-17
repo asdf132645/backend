@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ImagePrintEntity } from './imagePrint.entity';
 import { CreateImagePrintDto } from './dto/imgaePrintDto';
-import { CbcCodeEntity } from "../cbcCode/cbcCode.entity"; // 변경된 부분
 
 @Injectable()
 export class ImagePrintService {

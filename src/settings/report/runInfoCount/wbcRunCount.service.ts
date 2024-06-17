@@ -40,16 +40,16 @@ export class WbcCountSetService {
 
   private async updateItem(item: any): Promise<WbcRunCountEntity> {
     const existingFilePathSet = await this.wbcRunCountEntityRepository.findOne({
-      where: { num: item.num },
+      where: { id: item.id },
     });
 
     if (existingFilePathSet) {
       await this.wbcRunCountEntityRepository.update(
-        existingFilePathSet.num,
+        existingFilePathSet.id,
         item,
       );
       return await this.wbcRunCountEntityRepository.findOne({
-        where: { num: item.num },
+        where: { id: item.id },
       });
     }
 

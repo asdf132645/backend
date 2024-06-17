@@ -51,22 +51,10 @@ export class User {
   latestDate: Date;
 
   @Column({ nullable: true })
-  @ApiProperty({ example: 'active', description: 'User state', nullable: true })
-  state?: string;
-
-  @Column({ nullable: true })
   @ApiProperty({
     example: '192.65.131.55',
     description: 'User ip',
     nullable: true,
   })
   pcIp?: string;
-
-  @Column({ nullable: true })
-  @ApiProperty({
-    example: '',
-    description: 'viewerCheck',
-    nullable: true,
-  })
-  viewerCheck?: string;
 }

@@ -6,7 +6,7 @@ import {
   Column,
 } from 'typeorm';
 
-@Entity()
+@Entity('wbc_custom_class_setting')
 export class WbcCustomClass {
   @PrimaryGeneratedColumn()
   id: number;

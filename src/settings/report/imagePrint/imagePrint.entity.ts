@@ -1,18 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('image_print_setting')
 export class ImagePrintEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '' })
-  text: string;
+  classNm: string;
 
   @Column()
   value: string;
-
-  @Column({ default: '' })
-  code: string;
 
   @Column({ default: false })
   checked: boolean;

@@ -18,7 +18,7 @@ export class ListCodeDto {
   id: number;
 
   @IsString()
-  text: string;
+  classNm: string;
 
   @IsString()
   value: string;

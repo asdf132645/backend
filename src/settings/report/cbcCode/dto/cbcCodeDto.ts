@@ -22,10 +22,10 @@ export class CbcCodeItems {
   cd: string;
 
   @IsString()
-  testCd: string;
+  classCd: string;
 
   @IsString()
-  testNm: string;
+  classNm: string;
 
   @IsBoolean()
   isSelected: boolean;

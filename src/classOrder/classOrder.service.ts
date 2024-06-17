@@ -30,12 +30,10 @@ export class ClassOrderService {
         // 존재하지 않는 경우 새로운 주문 생성
         const classOrderEntity = new ClassOrder();
         classOrderEntity.id = Number(dto.id);
-        classOrderEntity.title = dto.title;
-        classOrderEntity.name = dto.name;
-        classOrderEntity.count = dto.count;
-        classOrderEntity.percentText = dto.percentText;
-        classOrderEntity.keyText = dto.keyText;
-        classOrderEntity.orderText = dto.orderText;
+        classOrderEntity.abbreviation = dto.abbreviation;
+        classOrderEntity.fullNm = dto.fullNm;
+        classOrderEntity.key = dto.key;
+        classOrderEntity.orderIdx = dto.orderIdx;
         classOrderEntity.classId = dto.classId;
 
         newClassOrders.push(classOrderEntity);
@@ -48,14 +46,11 @@ export class ClassOrderService {
 
     // 저장된 주문을 DTO 배열로 변환하여 반환
     return savedClassOrders.map((savedOrder) => ({
-      idx: savedOrder.idx,
-      id: savedOrder.id.toString(),
-      title: savedOrder.title,
-      name: savedOrder.name,
-      count: savedOrder.count,
-      percentText: savedOrder.percentText,
-      keyText: savedOrder.keyText,
-      orderText: savedOrder.orderText,
+      id: Number(savedOrder.id),
+      abbreviation: savedOrder.abbreviation,
+      fullNm: savedOrder.fullNm,
+      key: savedOrder.key,
+      orderIdx: savedOrder.orderIdx,
       classId: savedOrder.classId,
     }));
   }
@@ -72,9 +67,7 @@ export class ClassOrderService {
 
       if (existingRecord) {
         // 레코드가 존재하면 업데이트
-        existingRecord.count = dto.count;
-        existingRecord.percentText = dto.percentText;
-        existingRecord.orderText = dto.orderText;
+        existingRecord.orderIdx = dto.orderIdx;
         await this.classOrderRepository.save(existingRecord);
         updatedData.push(this.entityToDto(existingRecord));
       } else {
@@ -90,41 +83,25 @@ export class ClassOrderService {
   }
 
   private entityToDto(classOrder: ClassOrder): ClassOrderDto {
-    const {
-      idx,
-      id,
-      title,
-      name,
-      count,
-      percentText,
-      keyText,
-      orderText,
-      classId,
-    } = classOrder;
+    const { id, abbreviation, fullNm, key, orderIdx, classId } = classOrder;
     return {
-      idx: idx,
-      id: id.toString(),
-      title,
-      name,
-      count,
-      percentText,
-      keyText,
-      orderText,
+      id: Number(id),
+      abbreviation,
+      fullNm,
+      key,
+      orderIdx,
       classId,
     };
   }
 
   private dtoToEntity(dto: ClassOrderDto): ClassOrder {
-    const { id, title, name, count, percentText, keyText, orderText, classId } =
-      dto;
+    const { id, abbreviation, fullNm, key, orderIdx, classId } = dto;
     const classOrderEntity = new ClassOrder();
-    classOrderEntity.id = Number(id); // Assuming id is a number
-    classOrderEntity.title = title;
-    classOrderEntity.name = name;
-    classOrderEntity.count = count;
-    classOrderEntity.percentText = percentText;
-    classOrderEntity.keyText = keyText;
-    classOrderEntity.orderText = orderText;
+    classOrderEntity.id = Number(id);
+    classOrderEntity.abbreviation = abbreviation;
+    classOrderEntity.fullNm = fullNm;
+    classOrderEntity.key = key;
+    classOrderEntity.orderIdx = orderIdx;
     classOrderEntity.classId = classId;
     return classOrderEntity;
   }

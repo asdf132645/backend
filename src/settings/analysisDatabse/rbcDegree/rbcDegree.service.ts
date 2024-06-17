@@ -36,9 +36,9 @@ export class RbcDegreeService {
   private async updateItem(item: RbcDegreeDto): Promise<RbcDegreeDto> {
     const existingRbcDegree = await this.rbcDegreeRepository.findOne({
       where: {
-        category_id: item.category_id,
-        class_id: item.class_id,
-        class_nm: item.class_nm,
+        categoryId: item.categoryId,
+        classId: item.classId,
+        classNm: item.classNm,
       },
     });
 
@@ -46,9 +46,9 @@ export class RbcDegreeService {
       await this.rbcDegreeRepository.update(existingRbcDegree.id, item);
       return await this.rbcDegreeRepository.findOne({
         where: {
-          category_id: item.category_id,
-          class_id: item.class_id,
-          class_nm: item.class_nm,
+          categoryId: item.categoryId,
+          classId: item.classId,
+          classNm: item.classNm,
         },
       });
     }

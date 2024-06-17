@@ -28,18 +28,10 @@ export class CreateUserDto {
   })
   latestDate: Date;
 
-  @ApiProperty({ example: 'active', description: 'User state', nullable: true })
-  state?: string;
   @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
   pcIp?: string;
-
-  @ApiProperty({
-    example: 'viewerCheck',
-    description: 'viewerCheck',
-    nullable: true,
-  })
-  viewerCheck?: string;
 }
+
 
 export class UserResponse {
   @ApiProperty({ example: 'honggildong', description: 'User ID' })
@@ -69,18 +61,8 @@ export class UserResponse {
   })
   latestDate: Date;
 
-  @ApiProperty({ example: 'active', description: 'User state', nullable: true })
-  state?: string;
-
   @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
   pcIp?: string;
-
-  @ApiProperty({
-    example: 'viewerCheck',
-    description: 'viewerCheck',
-    nullable: true,
-  })
-  viewerCheck?: string;
 }
 
 export class LoginDto {

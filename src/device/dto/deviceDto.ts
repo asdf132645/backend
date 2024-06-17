@@ -16,5 +16,5 @@ export class DeviceDto {
   siteCd: string;
 
   @IsString()
-  deviceBarcode: string;
+  deviceSerialNm: string;
 }

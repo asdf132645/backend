@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
 import { WbcCountSetService } from './wbcRunCount.service';
 import { WbcRunCountEntity } from './wbcRunCount.entity';
 import { CreateWbcRunCountDto } from './dto/wbcRunCountDto';

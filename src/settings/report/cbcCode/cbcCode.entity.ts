@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('cbc_code_setting')
 export class CbcCodeEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -9,10 +9,10 @@ export class CbcCodeEntity {
   cd: string;
 
   @Column()
-  testCd: string;
+  classCd: string;
 
   @Column({ default: '' })
-  testNm: string;
+  classNm: string;
 
   @Column({ default: false })
   isSelected: boolean;
