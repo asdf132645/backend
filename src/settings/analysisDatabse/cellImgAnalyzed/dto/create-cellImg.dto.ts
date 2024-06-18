@@ -2,13 +2,13 @@
 export class CellImgAnalyzedDto {
   id?: number;
   analysisType: string;
-  cellAnalyzingCount: string;
+  diffCellAnalyzingCount: string;
+  pbsCellAnalyzingCount: string;
+  bfCellAnalyzingCount: string;
   wbcPositionMargin: string;
   rbcPositionMargin: string;
   pltPositionMargin: string;
-  pbsAnalysisType: string;
   stitchCount: string;
-  bfAnalysisType: string;
   iaRootPath: string;
   isNsNbIntegration: boolean;
   isAlarm: boolean;

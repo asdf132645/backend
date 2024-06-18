@@ -14,7 +14,15 @@ export class CellImgAnalyzed {
 
   @Column()
   @ApiProperty({ example: '100', description: '세포 분석 횟수' })
-  cellAnalyzingCount: string;
+  diffCellAnalyzingCount: string;
+
+  @Column()
+  @ApiProperty({ example: '100', description: 'PBS 분석 유형 2' })
+  pbsCellAnalyzingCount: string;
+
+  @Column()
+  @ApiProperty({ example: '100', description: 'BF 분석 유형' })
+  bfCellAnalyzingCount: string;
 
   @Column()
   @ApiProperty({ example: '0', description: 'WBC 위치 여백' })
@@ -29,16 +37,10 @@ export class CellImgAnalyzed {
   pltPositionMargin: string;
 
   @Column()
-  @ApiProperty({ example: '100', description: 'PBS 분석 유형 2' })
-  pbsAnalysisType: string;
-
-  @Column()
   @ApiProperty({ example: '1', description: '스티치 카운트' })
   stitchCount: string;
 
-  @Column()
-  @ApiProperty({ example: '100', description: 'BF 분석 유형' })
-  bfAnalysisType: string;
+  
 
   @Column()
   @ApiProperty({ example: '', description: 'IA 루트 경로' })
