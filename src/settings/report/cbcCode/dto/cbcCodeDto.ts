@@ -25,7 +25,7 @@ export class CbcCodeItems {
   classCd: string;
 
   @IsString()
-  classNm: string;
+  fullNm: string;
 
   @IsBoolean()
   isSelected: boolean;

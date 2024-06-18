@@ -12,7 +12,7 @@ export class CbcCodeEntity {
   classCd: string;
 
   @Column({ default: '' })
-  classNm: string;
+  fullNm: string;
 
   @Column({ default: false })
   isSelected: boolean;
