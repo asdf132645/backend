@@ -27,8 +27,8 @@ export class ListCodeRbcDto {
   classId: string;
 
   @IsString()
-  classNm: string;
+  fullNm: string;
 
   @IsString()
-  code: string;
+  key: string;
 }

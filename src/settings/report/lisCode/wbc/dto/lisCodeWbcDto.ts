@@ -18,11 +18,11 @@ export class ListCodeDto {
   id: number;
 
   @IsString()
-  classNm: string;
+  fullNm: string;
 
   @IsString()
-  value: string;
+  classId: string;
 
   @IsString()
-  code: string;
+  key: string;
 }

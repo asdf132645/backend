@@ -16,8 +16,8 @@ export class LisCodeRbcEntity {
   classId: string;
 
   @Column({ default: '' })
-  classNm: string;
+  fullNm: string;
 
   @Column({ default: '0' })
-  code: string;
+  key: string;
 }

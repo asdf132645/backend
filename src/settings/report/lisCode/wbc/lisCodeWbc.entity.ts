@@ -6,11 +6,11 @@ export class LisCodeWbcEntity {
   id: number;
 
   @Column({ default: '' })
-  classNm: string;
+  fullNm: string;
 
   @Column({ default: '' })
-  value: string;
+  classId: string;
 
   @Column({ default: '' })
-  code: string;
+  key: string;
 }
