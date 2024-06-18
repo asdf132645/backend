@@ -15,7 +15,7 @@ export class WbcCustomClass {
   abbreviation: string;
 
   @Column()
-  className: string;
+  fullNm: string;
 
   @Column()
   customNum: number;

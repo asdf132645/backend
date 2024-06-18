@@ -8,7 +8,7 @@ export class CreateWbcCustomClassDto {
 export class classArr {
   customNum: number;
   abbreviation: string;
-  className: string;
+  fullNm: string;
   id: any;
 }
 

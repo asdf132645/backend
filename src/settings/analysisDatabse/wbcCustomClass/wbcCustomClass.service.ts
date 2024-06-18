@@ -24,7 +24,7 @@ export class WbcCustomClassService {
     for (const classItem of classArr) {
       const wbcCustomClass = this.wbcCustomClassRepository.create({
         abbreviation: classItem.abbreviation,
-        className: classItem.className,
+        fullNm: classItem.fullNm,
         customNum: classItem.customNum,
       });
       const createdClass =
@@ -42,7 +42,7 @@ export class WbcCustomClassService {
     for (const classItem of classArr) {
       const wbcCustomClass = this.wbcCustomClassRepository.create({
         abbreviation: classItem.abbreviation,
-        className: classItem.className,
+        fullNm: classItem.fullNm,
         customNum: classItem.customNum,
       });
 
