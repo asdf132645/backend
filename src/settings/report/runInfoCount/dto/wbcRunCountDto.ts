@@ -23,5 +23,5 @@ export class WbcRunCountItems {
   max: number;
 
   @IsInt()
-  wbcCount: number;
+  wbcConditionCount: number;
 }

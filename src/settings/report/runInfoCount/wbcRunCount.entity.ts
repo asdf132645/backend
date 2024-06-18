@@ -12,5 +12,5 @@ export class WbcRunCountEntity {
   max: number;
 
   @Column({ default: 0 })
-  wbcCount: number;
+  wbcConditionCount: number;
 }
