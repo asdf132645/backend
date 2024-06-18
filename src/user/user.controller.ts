@@ -85,31 +85,31 @@ export class UserController {
     }
   }
 
-  @Put('/update')
-  @ApiOperation({ summary: 'Update user information' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiBody({ description: 'Updated user data', type: CreateUserDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User information updated successfully',
-    type: UserResponse,
-  })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  async updateUser(
-    @Body() { pcIp, userId }: Partial<CreateUserDto>,
-  ) {
-    try {
-      const updatedUser = await this.userService.update(userId, {
-        pcIp,
-      });
+  // @Put('/update')
+  // @ApiOperation({ summary: 'Update user information' })
+  // @ApiParam({ name: 'userId', description: 'User ID' })
+  // @ApiBody({ description: 'Updated user data', type: CreateUserDto })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'User information updated successfully',
+  //   type: UserResponse,
+  // })
+  // @ApiResponse({ status: 404, description: 'User not found' })
+  // async updateUser(
+  //   @Body() { pcIp, userId }: Partial<CreateUserDto>,
+  // ) {
+  //   try {
+  //     const updatedUser = await this.userService.update(userId, {
+  //       pcIp,
+  //     });
 
-      if (updatedUser === undefined) {
-        return { success: false, error: 'User not found' };
-      }
+  //     if (updatedUser === undefined) {
+  //       return { success: false, error: 'User not found' };
+  //     }
 
-      return { user: updatedUser, code: 200 };
-    } catch (error) {
-      return { success: false, error: error.message || 'Error updating user' };
-    }
-  }
+  //     return { user: updatedUser, code: 200 };
+  //   } catch (error) {
+  //     return { success: false, error: error.message || 'Error updating user' };
+  //   }
+  // }
 }

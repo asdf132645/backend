@@ -17,4 +17,7 @@ export class DeviceDto {
 
   @IsString()
   deviceSerialNm: string;
+
+  @IsString()
+  pcIp: string;
 }

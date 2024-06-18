@@ -10,4 +10,7 @@ export class DeviceEntity {
 
   @Column({default: '2024050000000'})
   deviceSerialNm: string;
+
+  @Column()
+  pcIp: string;
 }

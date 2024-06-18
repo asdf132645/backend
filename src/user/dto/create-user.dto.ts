@@ -28,8 +28,8 @@ export class CreateUserDto {
   })
   latestDate: Date;
 
-  @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
-  pcIp?: string;
+  // @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
+  // pcIp?: string;
 }
 
 
@@ -61,8 +61,8 @@ export class UserResponse {
   })
   latestDate: Date;
 
-  @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
-  pcIp?: string;
+  // @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
+  // pcIp?: string;
 }
 
 export class LoginDto {
