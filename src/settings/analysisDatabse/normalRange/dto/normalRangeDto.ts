@@ -23,10 +23,10 @@ export class normalRangeItems {
   classId: string;
 
   @IsString()
-  min: string;
+  min: number;
 
   @IsInt()
-  max: string;
+  max: number;
 
   @IsInt()
   unit: string;
