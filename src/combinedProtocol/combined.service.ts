@@ -30,6 +30,7 @@ export class CombinedService
   public reqArr: any = [];
   public prevReqDttm: string | null = null; // 직전 요청의 reqDttm 저장
   clients: Socket[] = [];
+  public notRes: boolean = false;
 
   constructor(
     private readonly logger: LoggerService,
@@ -102,8 +103,12 @@ export class CombinedService
       try {
         if (this.wss) {
           if (clientOrigin.includes('127.0.0.1')) {
-            this.logger.log(`정상 수신 데이터 ${message}`);
-            this.webSocketGetData(message);
+            this.logger.log(
+              `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
+            );
+            if (!this.notRes) {
+              this.webSocketGetData(message);
+            }
           }
         }
       } catch (e) {
@@ -163,6 +168,8 @@ export class CombinedService
         jsonData = data;
       }
       this.wss.emit('chat', jsonData);
+      this.notRes = false;
+      this.logger.log(`tcp 응답 받은 후 웹소켓 전송 ${this.notRes}`);
     } else {
       this.logger.warn('웹소켓 전송 실패..');
     }
@@ -174,7 +181,9 @@ export class CombinedService
         const seData = [data.payload];
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
+          this.notRes = true;
           this.connectedClient.write(serializedData);
+          this.logger.log(`tcp 응답 받기전 ${this.notRes}`);
         }
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
