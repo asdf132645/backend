@@ -32,7 +32,9 @@ export class ClassOrderService {
         classOrderEntity.id = Number(dto.id);
         classOrderEntity.abbreviation = dto.abbreviation;
         classOrderEntity.fullNm = dto.fullNm;
+        classOrderEntity.key = dto.key;
         classOrderEntity.orderIdx = dto.orderIdx;
+        classOrderEntity.classId = dto.classId;
 
         newClassOrders.push(classOrderEntity);
       }
@@ -72,22 +74,26 @@ export class ClassOrderService {
   }
 
   private entityToDto(classOrder: ClassOrder): ClassOrderDto {
-    const { id, abbreviation, fullNm, orderIdx } = classOrder;
+    const { id, abbreviation, fullNm, key, orderIdx, classId } = classOrder;
     return {
       id: Number(id),
       abbreviation,
       fullNm,
+      key,
       orderIdx,
+      classId,
     };
   }
 
   private dtoToEntity(dto: ClassOrderDto): ClassOrder {
-    const { id, abbreviation, fullNm, orderIdx } = dto;
+    const { id, abbreviation, fullNm, key, orderIdx, classId } = dto;
     const classOrderEntity = new ClassOrder();
     classOrderEntity.id = Number(id);
     classOrderEntity.abbreviation = abbreviation;
     classOrderEntity.fullNm = fullNm;
+    classOrderEntity.key = key;
     classOrderEntity.orderIdx = orderIdx;
+    classOrderEntity.classId = classId;
     return classOrderEntity;
   }
 }
