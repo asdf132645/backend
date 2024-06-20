@@ -6,16 +6,10 @@ export class ClassOrder {
   id?: number;
 
   @Column()
-  classId?: string;
-
-  @Column()
   abbreviation?: string;
 
   @Column()
   fullNm?: string;
-
-  @Column()
-  key?: string;
 
   @Column()
   orderIdx?: string;
