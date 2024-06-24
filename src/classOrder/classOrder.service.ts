@@ -29,7 +29,7 @@ export class ClassOrderService {
       if (existingOrder.length === 0 || !existingOrder) {
         // 존재하지 않는 경우 새로운 주문 생성
         const classOrderEntity = new ClassOrder();
-        classOrderEntity.id = Number(dto.id);
+        classOrderEntity.classId = dto.classId;
         classOrderEntity.abbreviation = dto.abbreviation;
         classOrderEntity.fullNm = dto.fullNm;
         classOrderEntity.orderIdx = dto.orderIdx;
@@ -51,7 +51,7 @@ export class ClassOrderService {
     for (const dto of newData) {
       // id를 이용하여 기존 레코드를 찾음
       const existingRecord = await this.classOrderRepository.findOne({
-        where: { id: Number(dto.id) },
+        where: { classId: dto.classId },
       });
 
       if (existingRecord) {
@@ -72,22 +72,22 @@ export class ClassOrderService {
   }
 
   private entityToDto(classOrder: ClassOrder): ClassOrderDto {
-    const { id, abbreviation, fullNm, orderIdx } = classOrder;
+    const { abbreviation, fullNm, orderIdx, classId } = classOrder;
     return {
-      id: Number(id),
       abbreviation,
       fullNm,
       orderIdx,
+      classId
     };
   }
 
   private dtoToEntity(dto: ClassOrderDto): ClassOrder {
-    const { id, abbreviation, fullNm, orderIdx } = dto;
+    const { id, abbreviation, fullNm, orderIdx, classId } = dto;
     const classOrderEntity = new ClassOrder();
-    classOrderEntity.id = Number(id);
     classOrderEntity.abbreviation = abbreviation;
     classOrderEntity.fullNm = fullNm;
     classOrderEntity.orderIdx = orderIdx;
+    classOrderEntity.classId = classId;
     return classOrderEntity;
   }
 }

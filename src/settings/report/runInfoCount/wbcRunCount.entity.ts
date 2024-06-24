@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('wbc_run_count_setting')
+@Entity('wbc_count_by_condition_setting')
 export class WbcRunCountEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -12,5 +12,5 @@ export class WbcRunCountEntity {
   max: number;
 
   @Column({ default: 0 })
-  wbcConditionCount: number;
+  wbcTargetCount: number;
 }
