@@ -26,15 +26,15 @@ export class CellImgAnalyzed {
 
   @Column()
   @ApiProperty({ example: '0', description: 'WBC 위치 여백' })
-  wbcPositionMargin: string;
+  diffWbcPositionMargin: string;
 
   @Column()
   @ApiProperty({ example: '0', description: 'RBC 위치 여백' })
-  rbcPositionMargin: string;
+  diffRbcPositionMargin: string;
 
   @Column()
   @ApiProperty({ example: '0', description: 'PLT 위치 여백' })
-  pltPositionMargin: string;
+  diffPltPositionMargin: string;
 
   @Column()
   @ApiProperty({ example: '1', description: '스티치 카운트' })

@@ -5,9 +5,9 @@ export class CellImgAnalyzedDto {
   diffCellAnalyzingCount: string;
   pbsCellAnalyzingCount: string;
   bfCellAnalyzingCount: string;
-  wbcPositionMargin: string;
-  rbcPositionMargin: string;
-  pltPositionMargin: string;
+  diffWbcPositionMargin: string;
+  diffRbcPositionMargin: string;
+  diffPltPositionMargin: string;
   stitchCount: string;
   iaRootPath: string;
   isNsNbIntegration: boolean;
