@@ -47,24 +47,30 @@ export class ClassOrderService {
   async updateClassOrders(newData: ClassOrderDto[]): Promise<ClassOrderDto[]> {
     const updatedData: ClassOrderDto[] = [];
 
-    // 새로운 데이터를 하나씩 처리하여 업데이트 또는 생성
     for (const dto of newData) {
-      // id를 이용하여 기존 레코드를 찾음
-      const existingRecord = await this.classOrderRepository.findOne({
-        where: { classId: dto.classId },
-      });
+      try {
+        const existingRecord = await this.classOrderRepository.findOne({
+          where: { abbreviation: dto.abbreviation },
+        });
 
-      if (existingRecord) {
-        // 레코드가 존재하면 업데이트
-        existingRecord.orderIdx = dto.orderIdx;
-        await this.classOrderRepository.save(existingRecord);
-        updatedData.push(this.entityToDto(existingRecord));
-      } else {
-        // 레코드가 존재하지 않으면 생성
-        const createdRecord = await this.createClassOrder([dto]);
-        if (createdRecord && createdRecord.length > 0) {
-          updatedData.push(createdRecord[0]);
+        if (existingRecord) {
+          console.log(existingRecord);
+          // 기존 레코드가 있으면 업데이트
+          existingRecord.orderIdx = String(dto.orderIdx);
+          existingRecord.abbreviation = dto.abbreviation;
+          existingRecord.fullNm = dto.fullNm;
+          existingRecord.classId = dto.classId;
+          await this.classOrderRepository.save(existingRecord);
+          updatedData.push(this.entityToDto(existingRecord));
+        } else {
+          // 기존 레코드가 없으면 새로 생성
+          const createdRecord = await this.createClassOrder([dto]);
+          if (createdRecord && createdRecord.length > 0) {
+            updatedData.push(createdRecord[0]);
+          }
         }
+      } catch (error) {
+        console.error(`Failed to process dto with id ${dto.id}:`, error);
       }
     }
 
@@ -77,17 +83,7 @@ export class ClassOrderService {
       abbreviation,
       fullNm,
       orderIdx,
-      classId
+      classId,
     };
-  }
-
-  private dtoToEntity(dto: ClassOrderDto): ClassOrder {
-    const { id, abbreviation, fullNm, orderIdx, classId } = dto;
-    const classOrderEntity = new ClassOrder();
-    classOrderEntity.abbreviation = abbreviation;
-    classOrderEntity.fullNm = fullNm;
-    classOrderEntity.orderIdx = orderIdx;
-    classOrderEntity.classId = classId;
-    return classOrderEntity;
   }
 }
