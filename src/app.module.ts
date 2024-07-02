@@ -43,6 +43,8 @@ import { DeviceModule } from './device/device.module';
 import { BackupModule } from './backup/backup.module';
 import { RemainingCountController } from "./settings/analysisDatabse/deviceController/remaining-count.controller";
 import { RemainingCountService } from "./settings/analysisDatabse/deviceController/remaining-count.service";
+import { QualityCheckService } from "./settings/qualityCheck/qualityCheck.service";
+import { QualityCheckController } from "./settings/qualityCheck/qualityCheck.controller";
 
 @Module({
   imports: [
@@ -85,6 +87,7 @@ import { RemainingCountService } from "./settings/analysisDatabse/deviceControll
     PdfController,
     FileSystemController,
     RemainingCountController,
+    QualityCheckController,
   ],
   providers: [
     CacheService,
@@ -93,6 +96,7 @@ import { RemainingCountService } from "./settings/analysisDatabse/deviceControll
     FileSystemService,
     ImagesService,
     RemainingCountService,
+    QualityCheckService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,
