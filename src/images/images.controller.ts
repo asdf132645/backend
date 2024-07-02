@@ -60,6 +60,31 @@ export class ImagesController {
     }
   }
 
+  @Get('print')
+  async getPrintImage(
+    @Query('folder') folder: string,
+    @Query('imageName') imageName: string,
+    @Res() res: Response,
+  ) {
+    if (!folder || !imageName) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
+    }
+
+
+    const absoluteImagePath = path.join(folder, imageName);
+    try {
+      // 파일 접근 - 1차 코드(되는 코드)
+      fs.accessSync(absoluteImagePath, fs.constants.R_OK);
+      const fileStream = fs.createReadStream(absoluteImagePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Image processing error');
+    }
+  }
+
   @Get('getImageRealTime')
   getImageRealTime(
     @Query('folder') folder: string,
