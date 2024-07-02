@@ -23,8 +23,8 @@ export class CellImgAnalyzedService {
 
   async find(): Promise<CellImgAnalyzed | undefined> {
     try {
-      const queryBuilder = this.cellImgAnalyzedRepository
-        .createQueryBuilder('cellImgAnalyzed')
+      const queryBuilder =
+        this.cellImgAnalyzedRepository.createQueryBuilder('cellImgAnalyzed');
       return await queryBuilder.getOne();
     } catch (error) {
       console.error('Error:', error);

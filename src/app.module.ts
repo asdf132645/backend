@@ -40,7 +40,9 @@ import { FileModule } from './file/file.module';
 import { ImagesService } from './images/images.service';
 import { Hl7Module } from './hl7/hl7.module';
 import { DeviceModule } from './device/device.module';
-import { BackupModule } from "./backup/backup.module";
+import { BackupModule } from './backup/backup.module';
+import { RemainingCountController } from "./settings/analysisDatabse/deviceController/remaining-count.controller";
+import { RemainingCountService } from "./settings/analysisDatabse/deviceController/remaining-count.service";
 
 @Module({
   imports: [
@@ -82,6 +84,7 @@ import { BackupModule } from "./backup/backup.module";
     FoldersController,
     PdfController,
     FileSystemController,
+    RemainingCountController,
   ],
   providers: [
     CacheService,
@@ -89,6 +92,7 @@ import { BackupModule } from "./backup/backup.module";
     AppService,
     FileSystemService,
     ImagesService,
+    RemainingCountService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,

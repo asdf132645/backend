@@ -40,8 +40,6 @@ export class CellImgAnalyzed {
   @ApiProperty({ example: '1', description: '스티치 카운트' })
   stitchCount: string;
 
-  
-
   @Column()
   @ApiProperty({ example: '', description: 'IA 루트 경로' })
   iaRootPath: string;
