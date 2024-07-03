@@ -65,10 +65,18 @@ export class CellImgAnalyzed {
   backupPath: string;
 
   @Column({ type: 'date' })
-  @ApiProperty({ example: '2024-02-20', description: '백업 시작 날짜' })
+  @ApiProperty({ example: '0000-00-00', description: '백업 시작 날짜' })
   backupStartDate: Date;
 
   @Column({ type: 'date' })
-  @ApiProperty({ example: '2024-02-20', description: '백업 종료 날짜' })
+  @ApiProperty({ example: '0000-00-00', description: '백업 종료 날짜' })
   backupEndDate: Date;
+
+  @Column()
+  @ApiProperty({ example: '1', description: '자동 백업 날짜' })
+  autoBackUpMonth: string;
+
+  @Column({ type: 'date' })
+  @ApiProperty({ example: '0000-00-00', description: '자동 저장 시작 날짜' })
+  autoBackUpStartDate: Date;
 }

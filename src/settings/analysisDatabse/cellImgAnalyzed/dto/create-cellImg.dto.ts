@@ -17,4 +17,6 @@ export class CellImgAnalyzedDto {
   backupPath: string;
   backupStartDate: Date;
   backupEndDate: Date;
+  autoBackUpMonth: string;
+  autoBackUpStartDate: Date;
 }
