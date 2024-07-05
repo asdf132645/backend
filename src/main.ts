@@ -15,7 +15,7 @@ async function bootstrap() {
   const corsOptions: CorsOptions = {
     origin: [
       'http://127.0.0.1:8080',
-      'http://192.168.0.147:8080',
+      'http://192.168.0.131:8080',
       'http://localhost:8080',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

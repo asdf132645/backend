@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
@@ -118,6 +118,7 @@ export class RuningInfoService {
       return false; // 삭제 실패
     }
   }
+
   private deleteFolderRecursive(folderPath: string) {
     if (fs.existsSync(folderPath)) {
       fs.readdirSync(folderPath).forEach((file) => {
@@ -130,6 +131,7 @@ export class RuningInfoService {
       });
     }
   }
+
   async findAllWithPagingAndFilter(
     page: number,
     pageSize: number,
@@ -187,18 +189,61 @@ export class RuningInfoService {
       queryBuilder.andWhere('runInfo.testType = :testType', { testType });
     }
 
-    if (nrCount !== '0') {
-      queryBuilder.andWhere('runInfo.wbcCount LIKE :nrCount', {
-        nrCount: `%{"title": "NR", "count": "${nrCount}"}%`,
+    if (nrCount !== '0' && nrCount !== '') {
+      const query = `
+    JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :titlePath, NULL, '$[*].title') IS NOT NULL
+    AND (
+      SELECT COUNT(*)
+      FROM JSON_TABLE(
+        runInfo.wbcInfoAfter,
+        '$[*]' COLUMNS(
+          title VARCHAR(255) PATH '$.title',
+          count INT PATH '$.count'
+        )
+      ) AS jt
+      WHERE jt.title = :titleParam
+        AND jt.count = :nrCount
+    ) > 0
+  `;
+      queryBuilder.andWhere(query, {
+        titlePath: 'NR',
+        titleParam: 'NR',
+        nrCount: parseInt(nrCount, 10),
       });
     }
 
     if (titles && titles.length > 0) {
-      titles.forEach((title, index) => {
-        queryBuilder.andWhere(`runInfo.wbcCount LIKE :title${index}`, {
-          [`title${index}`]: `%{"title": "${title}"%`,
-        });
-      });
+      const orConditions = titles
+        .map((title, index) => {
+          const titleParam = `title${index}`;
+          return `
+            (JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+            AND (
+              SELECT COUNT(*)
+              FROM JSON_TABLE(
+                runInfo.wbcInfoAfter,
+                '$[*]' COLUMNS(
+                  title VARCHAR(255) PATH '$.title',
+                  count INT PATH '$.count'
+                )
+              ) AS jt
+              WHERE jt.title = :${titleParam}
+                AND jt.count > 0
+            ) > 0)
+          `;
+        })
+        .join(' OR ');
+
+      const params = titles.reduce((acc, title, index) => {
+        acc[`title${index}`] = title;
+        return acc;
+      }, {});
+
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where(orConditions, params);
+        }),
+      );
     }
 
     // eslint-disable-next-line prefer-const
@@ -248,6 +293,7 @@ export class RuningInfoService {
       );
     }
   }
+
   async getRunningInfoById(id: number): Promise<RuningInfoEntity | null> {
     const entity = await this.runingInfoEntityRepository.findOne({
       where: { id },
