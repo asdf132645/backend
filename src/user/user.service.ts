@@ -13,7 +13,12 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.userRepository.create(createUserDto);
-    return this.userRepository.save(user);
+    try {
+      const savedUser = await this.userRepository.save(user);
+      return savedUser;
+    } catch (e) {
+      return e.sqlMessage;
+    }
   }
 
   async findOne(userId: string, password: string): Promise<User | undefined> {
@@ -91,27 +96,38 @@ export class UserService {
     return users;
   }
 
-  // async update(
-  //   userId: string,
-  //   { pcIp }: Partial<CreateUserDto>,
-  // ): Promise<User | undefined> {
-  //   try {
-  //     const user = await this.userRepository.findOne({ where: { userId } });
+  async update(
+    userId: string,
+    { userType, name, employeeNo }: Partial<CreateUserDto>,
+  ): Promise<User | undefined> {
+    try {
+      const user = await this.userRepository.findOne({ where: { userId } });
 
-  //     if (!user) {
-  //       console.error('User not found');
-  //       return undefined;
-  //     }
+      if (!user) {
+        console.error('User not found');
+        return undefined;
+      }
 
-  //     await this.userRepository.update(user.id, { pcIp });
-  //     const updatedUser = await this.userRepository.findOne({
-  //       where: { userId },
-  //     });
+      await this.userRepository.update(user.id, {
+        userType,
+        name,
+        employeeNo,
+      });
+      const updatedUser = await this.userRepository.findOne({
+        where: { userId },
+      });
 
-  //     return updatedUser;
-  //   } catch (error) {
-  //     console.error('Error updating user:', error);
-  //     return undefined;
-  //   }
-  // }
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return undefined;
+    }
+  }
+
+  async delete(userId: string): Promise<boolean> {
+    const result = await this.userRepository.delete({ userId });
+
+    if (result.affected > 0) return true;
+    return false;
+  }
 }

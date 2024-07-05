@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UserResponse, LoginDto } from './dto/create-user.dto';
 import {
@@ -19,7 +27,8 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User registered successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    const result = await this.userService.create(createUserDto);
+    return result;
   }
 
   @Get(':userId')
@@ -29,7 +38,6 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async getUser(@Param('userId') userId: string) {
     try {
-      console.log(userId);
       const user = await this.userService.findOneById(userId);
 
       if (user === undefined) {
@@ -85,31 +93,47 @@ export class UserController {
     }
   }
 
-  // @Put('/update')
-  // @ApiOperation({ summary: 'Update user information' })
-  // @ApiParam({ name: 'userId', description: 'User ID' })
-  // @ApiBody({ description: 'Updated user data', type: CreateUserDto })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'User information updated successfully',
-  //   type: UserResponse,
-  // })
-  // @ApiResponse({ status: 404, description: 'User not found' })
-  // async updateUser(
-  //   @Body() { pcIp, userId }: Partial<CreateUserDto>,
-  // ) {
-  //   try {
-  //     const updatedUser = await this.userService.update(userId, {
-  //       pcIp,
-  //     });
+  @Put('/update/:userId')
+  @ApiOperation({ summary: 'Update user information' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiBody({ description: 'Updated user data', type: CreateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User information updated successfully',
+    type: UserResponse,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() { userType, name, employeeNo }: Partial<CreateUserDto>,
+  ) {
+    try {
+      const updatedUser = await this.userService.update(userId, {
+        userType,
+        name,
+        employeeNo,
+      });
 
-  //     if (updatedUser === undefined) {
-  //       return { success: false, error: 'User not found' };
-  //     }
+      if (updatedUser === undefined) {
+        return { success: false, error: 'User not found' };
+      }
+      return { user: updatedUser, code: 200 };
+    } catch (error) {
+      return { success: false, error: error.message || 'Error updating user' };
+    }
+  }
 
-  //     return { user: updatedUser, code: 200 };
-  //   } catch (error) {
-  //     return { success: false, error: error.message || 'Error updating user' };
-  //   }
-  // }
+  @Delete('/delete')
+  async deleteUser(@Body() { userId }: Pick<CreateUserDto, 'userId'>) {
+    try {
+      const isUserDeleted = await this.userService.delete(userId);
+
+      if (isUserDeleted) {
+        return { success: true, code: 200 };
+      }
+      return { success: false, error: 'User not found' };
+    } catch (error) {
+      return { success: false, error: error.message || 'Error deleting user' };
+    }
+  }
 }
