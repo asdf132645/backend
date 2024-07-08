@@ -70,7 +70,6 @@ export class ImagesController {
       return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
     }
 
-
     const absoluteImagePath = path.join(folder, imageName);
     try {
       // 파일 접근 - 1차 코드(되는 코드)

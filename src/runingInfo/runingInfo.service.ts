@@ -108,7 +108,6 @@ export class RuningInfoService {
             console.log(`Folder at ${rootPath} has been deleted successfully`);
           } catch (error) {
             console.error(`Failed to delete folder at ${rootPath}:`, error);
-            // throw new Error('Folder deletion failed');
           }
         }
       }
