@@ -62,12 +62,24 @@ export class FoldersController {
           )
         ) {
           // 이미지 파일인 경우, sharp를 사용하여 최적화합니다.
-          const optimizedStream = sharp(fullPath)
-            .toFormat('webp') // 이미지를 WebP 형식으로 변환
-            .jpeg({ quality: 30 });
+          try {
+            const optimizedStream = sharp(fullPath, { limitInputPixels: false })
+              .toFormat('webp') // 이미지를 WebP 형식으로 변환
+              .jpeg({ quality: 30 });
 
-          // 최적화된 이미지를 스트림으로 반환합니다.
-          optimizedStream.pipe(res);
+            // 최적화된 이미지를 스트림으로 반환합니다.
+            optimizedStream
+              .on('error', () => {
+                res
+                  .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                  .send('이미지 처리 중 오류가 발생했습니다.');
+              })
+              .pipe(res);
+          } catch (sharpError) {
+            res
+              .status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .send('이미지 처리 중 오류가 발생했습니다.');
+          }
         } else {
           // 이미지 파일이 아닌 경우 원본 파일을 스트림으로 반환합니다.
           const fileStream = fs.createReadStream(fullPath);
