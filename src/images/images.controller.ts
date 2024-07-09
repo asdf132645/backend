@@ -45,7 +45,7 @@ export class ImagesController {
     try {
       const imageBuffer = await sharp(absoluteImagePath)
         .toFormat('webp')
-        .jpeg({ quality: 60 })
+        .jpeg({ quality: 40 })
         .toBuffer();
 
       // this.cacheService.set(cacheKey, imageBuffer);
