@@ -177,7 +177,9 @@ export class RuningInfoService {
     }
 
     if (patientId) {
-      queryBuilder.andWhere('runInfo.patientId = :patientId', { patientId });
+      queryBuilder.andWhere('runInfo.patientId LIKE :patientId', {
+        patientId: `%${patientId}%`,
+      });
     }
 
     if (patientNm) {
