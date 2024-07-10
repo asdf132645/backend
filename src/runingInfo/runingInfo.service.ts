@@ -171,7 +171,9 @@ export class RuningInfoService {
     queryBuilder.orderBy('runInfo.analyzedDttm', 'DESC');
 
     if (barcodeNo) {
-      queryBuilder.andWhere('runInfo.barcodeNo = :barcodeNo', { barcodeNo });
+      queryBuilder.andWhere('runInfo.barcodeNo LIKE :barcodeNo', {
+        barcodeNo: `%${barcodeNo}%`,
+      });
     }
 
     if (patientId) {
