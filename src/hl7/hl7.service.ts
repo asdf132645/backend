@@ -6,7 +6,7 @@ import * as fs from 'fs';
 @Injectable()
 export class HL7Service {
   parseHL7Message(data: Buffer): any {
-    const parser = new hl7.Parser({ segmentSeperator: '\n' });
+    const parser = new hl7.Parser();
     return parser.parse(data.toString());
   }
 
@@ -23,78 +23,49 @@ export class HL7Service {
     wbcInfo: any[],
     result: any[],
   ): string {
-    const msg = new hl7.Message(
-      sendingApp, // sending application
-      sendingFacility, // sending facility
-      receivingApp, // receiving application
-      receivingFacility, // receiving facility
-      dateTime, // date/time of message
-      '', // security
-      messageType, // message type
-      messageControlId, // message control ID
-      processingId, // Processing ID
-      hl7VersionId, // HL7 version ID
-    );
+    // MSH 세그먼트 생성
+    const mshSegment = `MSH|^~\\&|${sendingApp}|${sendingFacility}|${receivingApp}|${receivingFacility}|${dateTime}||${messageType.join('^')}|${messageControlId}|${processingId}|${hl7VersionId}\r`;
 
+    const segments = [mshSegment];
     let seq = 0;
 
+    if (result === undefined) {
+      return '';
+    }
     result.forEach((lisCode) => {
       if (lisCode.LIS_CD !== '') {
         wbcInfo.forEach((wbcItem) => {
           if (
-            wbcItem.id === lisCode.IA_CD &&
+            Number(wbcItem.id) === Number(lisCode.IA_CD) &&
             (Number(wbcItem.percent) > 0 || Number(wbcItem.count))
           ) {
-            msg.addSegment(
-              'OBX', // ID
-              seq++, // sequence
-              'NM', // value type
-              lisCode.LIS_CD, // observation identifier
-              '', // observation Sub-ID
-              wbcItem.count, // observation Value
-              '', // units
-              '', // references range
-              '', // abnormal flags
-              '', // probability
-              '', // nature of abnormal test
-              'P\n', // observation result status
-            );
-
-            // percent
-            msg.addSegment(
-              'OBX', // ID
-              seq++, // sequence
-              'NM', // value type
-              lisCode.LIS_CD + '%', // observation identifier
-              '', // observation Sub-ID
-              wbcItem.percent, // observation Value
-              '%', // units
-              '', // references range
-              '', // abnormal flags
-              '', // probability
-              '', // nature of abnormal test
-              'P\n', // observation result status
-            );
+            const obxSegmentCount = `OBX|${seq++}|NM|${lisCode.LIS_CD}||${wbcItem.count}|||N|||P\r`;
+            const obxSegmentPercent = `OBX|${seq++}|NM|${lisCode.LIS_CD}%||${wbcItem.percent}|%|N|||P\r`;
+            segments.push(obxSegmentCount, obxSegmentPercent);
           }
         });
       }
     });
 
-    return msg.toString();
+    return segments.join('');
   }
 
-  async sendHl7Message(filepath: string, msg: string): Promise<void> {
+  async sendHl7Message(filepath: string, msg: any): Promise<void> {
     const directory = path.dirname(filepath);
 
     return new Promise((resolve, reject) => {
       fs.mkdir(directory, { recursive: true }, (err) => {
         if (err) {
-          return reject('Failed to create directory');
+          console.error('Failed to create directory:', err.message);
+          return reject(`Failed to create directory: ${err.message}`);
         }
-
-        fs.writeFile(filepath, msg, (err) => {
+        // console.log(msg.data)
+        fs.writeFile(filepath, msg.data, (err) => {
           if (err) {
-            return reject('Failed to write HL7 message to file');
+            console.error('Failed to write HL7 message to file:', err.message);
+            return reject(
+              `Failed to write HL7 message to file: ${err.message}`,
+            );
           }
 
           resolve();
