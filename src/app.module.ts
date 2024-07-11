@@ -21,6 +21,8 @@ import { JsonReaderModule } from './jsonReader/jsonReader.module';
 import { MinCountModule } from './settings/report/minCount/minCount.module';
 import { RuningInfoModule } from './runingInfo/runingInfo.module';
 import { ImagesController } from './images/images.controller';
+import { ExcelService } from './excel/excel.service';
+import { ExcelController } from './excel/excel.controller';
 
 import { HttpExceptionFilter } from './utils/http-exception.filter';
 import { ResponseInterceptor } from './utils/response.interceptor';
@@ -41,10 +43,10 @@ import { ImagesService } from './images/images.service';
 import { Hl7Module } from './hl7/hl7.module';
 import { DeviceModule } from './device/device.module';
 import { BackupModule } from './backup/backup.module';
-import { RemainingCountController } from "./settings/analysisDatabse/deviceController/remaining-count.controller";
-import { RemainingCountService } from "./settings/analysisDatabse/deviceController/remaining-count.service";
-import { QualityCheckService } from "./settings/qualityCheck/qualityCheck.service";
-import { QualityCheckController } from "./settings/qualityCheck/qualityCheck.controller";
+import { RemainingCountController } from './settings/analysisDatabse/deviceController/remaining-count.controller';
+import { RemainingCountService } from './settings/analysisDatabse/deviceController/remaining-count.service';
+import { QualityCheckService } from './settings/qualityCheck/qualityCheck.service';
+import { QualityCheckController } from './settings/qualityCheck/qualityCheck.controller';
 
 @Module({
   imports: [
@@ -88,6 +90,7 @@ import { QualityCheckController } from "./settings/qualityCheck/qualityCheck.con
     FileSystemController,
     RemainingCountController,
     QualityCheckController,
+    ExcelController,
   ],
   providers: [
     CacheService,
@@ -97,6 +100,7 @@ import { QualityCheckController } from "./settings/qualityCheck/qualityCheck.con
     ImagesService,
     RemainingCountService,
     QualityCheckService,
+    ExcelService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,
