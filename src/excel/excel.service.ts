@@ -9,7 +9,6 @@ export class ExcelService {
         'D:\\UIMD_get_confusion_matrix\\Get_Confusion_Matrix\\Get_Confusion_Matrix.exe';
       const execDir = 'D:/UIMD_get_confusion_matrix/Get_Confusion_Matrix';
       const filesUrl = filesPath.join(' ');
-      console.log('URL', `${baseUrl} ${filesUrl}`);
       exec(
         `${baseUrl} ${filesUrl}`,
         { cwd: execDir },
