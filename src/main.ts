@@ -5,11 +5,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser'; // body-parser import 추가
 
 async function bootstrap() {
-  const httpApp = await NestFactory.create(AppModule);
+  const httpApp = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
 
   // body-parser 미들웨어 추가
   httpApp.use(bodyParser.json({ limit: '50mb' }));
   httpApp.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  httpApp.use(bodyParser.text({ limit: '50mb', type: 'text/plain' }));
 
   // CORS 에러 이슈로 프론트 8080 허용
   const corsOptions: CorsOptions = {
