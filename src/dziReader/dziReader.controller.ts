@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 @Controller('dzi')
 export class DziController {
-  @Post()
+  @Post('send')
   async getDziFile(@Body('filePath') filePath: string, @Res() res: Response) {
     try {
       // 파일 경로 생성
