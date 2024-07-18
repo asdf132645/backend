@@ -5,6 +5,7 @@ import { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as sharp from 'sharp';
+import * as Jimp from 'jimp';
 
 @Injectable()
 export class ImagesService {
@@ -28,7 +29,9 @@ export class ImagesService {
       res.setHeader('Content-Type', 'image/jpeg');
       res.send(jpegImageBuffer);
     } catch (error) {
-      res.status(HttpStatus.NOT_FOUND).send('File not found or permission issue');
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .send('File not found or permission issue');
     }
   }
 
@@ -45,5 +48,11 @@ export class ImagesService {
           }
         });
     });
+  }
+
+  async convertImageToJPEG(imagePath: string): Promise<Buffer> {
+    const image = await Jimp.read(imagePath);
+    const buffer = await image.quality(60).getBufferAsync(Jimp.MIME_JPEG); // JPEG로 변환, 품질 설정 예시로 80%
+    return buffer;
   }
 }

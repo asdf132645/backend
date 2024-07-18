@@ -103,7 +103,6 @@ export class CombinedService
       try {
         if (this.wss) {
           if (clientOrigin.includes('127.0.0.1') || message.payload?.anyWay) {
-            console.log('ssssssssssssssss', message.payload?.anyWay === 'true');
             delete message.payload?.anyWay;
             this.logger.log(
               `정상 수신 데이터 ${JSON.stringify(message.payload)}`,

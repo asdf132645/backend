@@ -94,13 +94,18 @@ export class ImagesController {
       return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
     }
 
-    // 이미지 경로를 받아와서 절대 경로로 조합
-    const absoluteImagePath = path.join(folder, imageName);
+    // 파일 경로를 절대 경로로 조합
+    const absoluteImagePath = path.join(folder.replace(/\//g, '\\'), imageName);
 
     try {
+      // 파일 접근 권한 확인
       fs.accessSync(absoluteImagePath, fs.constants.R_OK);
-      const fileStream = fs.createReadStream(absoluteImagePath);
-      fileStream.pipe(res);
+
+      // 이미지 변환 및 응답 설정
+      const imageBuffer = fs.readFileSync(absoluteImagePath);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.contentType('image/bmp'); // BMP 이미지라면 Content-Type을 'image/bmp'로 설정
+      res.send(imageBuffer);
     } catch (error) {
       res
         .status(HttpStatus.NOT_FOUND)
