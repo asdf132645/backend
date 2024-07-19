@@ -118,6 +118,7 @@ export class CombinedService
     });
 
     client.on('state', (state: any) => {
+      // console.log('state');
       try {
         if (this.wss) {
           this.wss.emit('stateVal', state);
