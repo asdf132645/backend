@@ -47,6 +47,7 @@ import { RemainingCountController } from './settings/analysisDatabse/deviceContr
 import { RemainingCountService } from './settings/analysisDatabse/deviceController/remaining-count.service';
 import { QualityCheckService } from './settings/qualityCheck/qualityCheck.service';
 import { QualityCheckController } from './settings/qualityCheck/qualityCheck.controller';
+import { BrowserModule } from "./browserExit/browser.module";
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { QualityCheckController } from './settings/qualityCheck/qualityCheck.con
     Hl7Module,
     DeviceModule,
     BackupModule,
+    BrowserModule,
   ],
   controllers: [
     AppController,
