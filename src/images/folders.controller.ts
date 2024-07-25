@@ -66,11 +66,11 @@ export class FoldersController {
             const optimizedStream = sharp(fullPath, { limitInputPixels: false })
               .toFormat('webp') // 이미지를 WebP 형식으로 변환
               .jpeg({ quality: 15 });
+            res.setHeader('Cache-Control', 'public, max-age=86400');
 
             // 최적화된 이미지를 스트림으로 반환합니다.
             optimizedStream
               .on('error', () => {
-                res.setHeader('Cache-Control', 'public, max-age=86400');
                 res
                   .status(HttpStatus.INTERNAL_SERVER_ERROR)
                   .send('이미지 처리 중 오류가 발생했습니다.');
