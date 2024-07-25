@@ -32,14 +32,6 @@ export class ImagesController {
       return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
     }
 
-    // const cacheKey = `${folder}-${imageName}`;
-    // const cachedImageData = this.cacheService.get(cacheKey);
-    //
-    // if (cachedImageData) {
-    //   console.log('Image found in cache:', cacheKey);
-    //   return res.status(HttpStatus.OK).send(cachedImageData);
-    // }
-
     const absoluteImagePath = path.join(folder, imageName);
 
     try {
