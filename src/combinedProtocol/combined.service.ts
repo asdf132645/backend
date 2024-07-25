@@ -97,7 +97,6 @@ export class CombinedService
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
     // 클라이언트의 Origin 헤더 가져오기
     const clientOrigin = client.handshake.headers['origin'];
-    console.log(clientIpAddress.includes('127.0.0.1'));
     client.on('message', (message) => {
       try {
         if (this.wss) {

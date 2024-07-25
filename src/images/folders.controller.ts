@@ -65,7 +65,7 @@ export class FoldersController {
           try {
             const optimizedStream = sharp(fullPath, { limitInputPixels: false })
               .toFormat('webp') // 이미지를 WebP 형식으로 변환
-              .jpeg({ quality: 30 });
+              .jpeg({ quality: 15 });
 
             // 최적화된 이미지를 스트림으로 반환합니다.
             optimizedStream

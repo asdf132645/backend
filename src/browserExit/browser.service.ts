@@ -3,16 +3,18 @@ import { exec } from 'child_process';
 
 @Injectable()
 export class BrowserService {
-  closeEdgeBrowser(): Promise<void> {
+  closeEdgeBrowser(): Promise<string> {
     return new Promise((resolve, reject) => {
-      const command = 'taskkill /IM msedge.exe /F';
+      const appPath = `"D:\\kill_edge.exe"`;
 
-      exec(command, (error, stdout, stderr) => {
+      exec(appPath, (error, stdout, stderr) => {
         if (error) {
-          return reject(error);
+          reject(`Error: ${error.message}`);
+        } else if (stderr) {
+          reject(`Stderr: ${stderr}`);
+        } else {
+          resolve(`Stdout: ${stdout}`);
         }
-        console.log(stdout);
-        resolve();
       });
     });
   }
