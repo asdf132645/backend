@@ -70,6 +70,7 @@ export class FoldersController {
             // 최적화된 이미지를 스트림으로 반환합니다.
             optimizedStream
               .on('error', () => {
+                res.setHeader('Cache-Control', 'public, max-age=86400');
                 res
                   .status(HttpStatus.INTERNAL_SERVER_ERROR)
                   .send('이미지 처리 중 오류가 발생했습니다.');
