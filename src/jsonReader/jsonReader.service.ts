@@ -7,7 +7,6 @@ import * as fs from 'fs-extra';
 export class JsonReaderService {
   async readJsonFile(fullPath: string): Promise<any> {
     try {
-      console.log(fullPath);
       const fileContent = await fs.readJson(fullPath);
       return fileContent;
     } catch (error) {
