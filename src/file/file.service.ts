@@ -4,7 +4,13 @@ import { promises as fs } from 'fs';
 
 @Injectable()
 export class FileService {
-  private readonly possibleExtensions = ['.txt', '.json', '.csv', '.hl7']; // 시도할 확장자 목록
+  private readonly possibleExtensions = [
+    '.txt',
+    '.json',
+    '.csv',
+    '.hl7',
+    '.ini',
+  ]; // 시도할 확장자 목록
 
   async readFile(filePath: string): Promise<any> {
     for (const extension of this.possibleExtensions) {
