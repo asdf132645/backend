@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import * as path from 'path';
-import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as sharp from 'sharp';
 import { CacheService } from '../cache/CacheService';
 import { ImagesService } from './images.service';
+import * as fs from 'fs-extra';
 
 @Controller('images')
 export class ImagesController {
@@ -201,27 +201,69 @@ export class ImagesController {
       failed: [],
     };
 
-    // 이미지 이동 처리
-    for (let i = 0; i < imageNamesArray.length; i++) {
-      const imageName = imageNamesArray[i];
-      const absoluteSourcePath = path.join(sourceFoldersArray[i], imageName);
-      const absoluteDestinationPath = path.join(
-        destinationFoldersArray[i],
-        imageName,
-      );
+    // 비동기 큐 설정
+    const concurrency = 10; // 동시에 처리할 파일 이동 작업 수
+    const queue = [];
+    let activeTasks = 0;
 
+    const moveFile = async (
+      source: string,
+      destination: string,
+      imageName: string,
+    ) => {
       try {
+        // 파일 접근 가능 확인
+        await fs.access(source, fs.constants.R_OK);
         // 파일 이동
-        fs.accessSync(absoluteSourcePath, fs.constants.R_OK);
-        fs.renameSync(absoluteSourcePath, absoluteDestinationPath);
-
+        await fs.move(source, destination, { overwrite: true });
         // 성공 목록에 추가
         moveResults.success.push(imageName);
       } catch (error) {
         // 실패 목록에 추가
         moveResults.failed.push({ imageName, error: error.message });
       }
+    };
+
+    const processQueue = async () => {
+      while (queue.length > 0 && activeTasks < concurrency) {
+        const { source, destination, imageName } = queue.shift();
+        activeTasks++;
+        moveFile(source, destination, imageName).finally(() => {
+          activeTasks--;
+          processQueue();
+        });
+      }
+    };
+
+    // 파일 이동 작업 큐에 추가
+    for (let i = 0; i < imageNamesArray.length; i++) {
+      const absoluteSourcePath = path.join(
+        sourceFoldersArray[i],
+        imageNamesArray[i],
+      );
+      const absoluteDestinationPath = path.join(
+        destinationFoldersArray[i],
+        imageNamesArray[i],
+      );
+      queue.push({
+        source: absoluteSourcePath,
+        destination: absoluteDestinationPath,
+        imageName: imageNamesArray[i],
+      });
     }
+
+    // 큐 처리 시작
+    await processQueue();
+
+    // 모든 파일 이동 작업이 완료될 때까지 대기
+    await new Promise<void>((resolve) => {
+      const checkCompletion = setInterval(() => {
+        if (activeTasks === 0 && queue.length === 0) {
+          clearInterval(checkCompletion);
+          resolve();
+        }
+      }, 100);
+    });
 
     // 이동 처리 결과를 응답으로 반환
     return res.status(HttpStatus.OK).json(moveResults);
