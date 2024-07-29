@@ -95,7 +95,7 @@ export class ImagesController {
 
       // 이미지 변환 및 응답 설정
       const imageBuffer = fs.readFileSync(absoluteImagePath);
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      // res.setHeader('Cache-Control', 'public, max-age=86400');
       res.contentType('image/bmp'); // BMP 이미지라면 Content-Type을 'image/bmp'로 설정
       res.send(imageBuffer);
     } catch (error) {
@@ -104,7 +104,30 @@ export class ImagesController {
         .send('File not found or permission issue');
     }
   }
+  @Get('checkImageExists')
+  checkImageExists(
+    @Query('folder') folder: string,
+    @Query('imageName') imageName: string,
+    @Res() res: Response,
+  ) {
+    if (!folder || !imageName) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
+    }
 
+    // 파일 경로를 절대 경로로 조합
+    const absoluteImagePath = path.join(folder.replace(/\//g, '\\'), imageName);
+
+    try {
+      // 파일 접근 권한 확인
+      fs.accessSync(absoluteImagePath, fs.constants.R_OK);
+
+      // 파일이 존재할 경우 200 OK 반환
+      res.status(HttpStatus.OK).send('File exists');
+    } catch (error) {
+      // 파일이 없거나 권한 문제로 접근 불가할 경우 404 Not Found 반환
+      res.status(HttpStatus.NOT_FOUND).send('File not found or permission issue');
+    }
+  }
   @Get('getImageWbc')
   async getImageWbc(
     @Query('folder') folder: string,
