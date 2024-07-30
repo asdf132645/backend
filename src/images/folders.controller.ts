@@ -121,38 +121,58 @@ export class FoldersController {
           console.log(
             `Source folder ${folderName} does not exist at path ${sourceFolderPath}.`,
           );
-          continue; // 폴더가 존재하지 않으면 현재 항목을 건너뜁니다.
+          continue;
         }
 
         // 폴더 내의 파일 목록 가져오기
         const files = await readdir(sourceFolderPath);
-        console.log(`Files in folder ${folderName}:`, files);
 
         // 배열에 명시된 파일 목록
         const validFileNames = new Set(
           item.images.map((img: { fileName: string }) => img.fileName),
         );
-        console.log('Valid file names:', Array.from(validFileNames));
 
         for (const fileName of files) {
           const sourceFilePath = path.join(sourceFolderPath, fileName);
 
           // 배열에 명시된 파일 목록에 파일이 포함되어 있는지 확인
           if (!validFileNames.has(fileName)) {
-            const destinationFolderPath = sourceFolderPath; // 이동할 폴더는 원래의 폴더
-            const destinationFilePath = path.join(
-              destinationFolderPath,
-              fileName,
-            );
-            console.log(
-              `File ${fileName} is not in the valid list. Moving to the original folder.`,
+            // 목적지 폴더 찾기
+            const destinationFolder = wbcInfo.find((info) =>
+              info.images.some(
+                (img: { fileName: string }) => img.fileName === fileName,
+              ),
             );
 
-            // 파일 이동
-            await rename(sourceFilePath, destinationFilePath);
-            console.log(`File ${fileName} moved to ${destinationFolderPath}`);
+            if (destinationFolder) {
+              const destinationFolderName = `${destinationFolder.id}_${destinationFolder.title}`;
+              const destinationFolderPath = path.join(
+                folderPath,
+                destinationFolderName,
+              );
+
+              if (!fs.existsSync(destinationFolderPath)) {
+                await mkdir(destinationFolderPath, { recursive: true });
+              }
+
+              const destinationFilePath = path.join(
+                destinationFolderPath,
+                fileName,
+              );
+              console.log(
+                `Moving file from ${sourceFilePath} to ${destinationFilePath}`,
+              );
+
+              // 파일 이동
+              await rename(sourceFilePath, destinationFilePath);
+              console.log(`File ${fileName} moved to ${destinationFolderPath}`);
+            } else {
+              // console.log(`No valid destination found for file ${fileName}.`);
+            }
           } else {
-            console.log(`File ${fileName} is valid. No action needed.`);
+            // console.log(
+            //   `File ${fileName} is valid in ${folderName}. No action needed.`,
+            // );
           }
         }
       }
