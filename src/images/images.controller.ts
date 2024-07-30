@@ -37,7 +37,7 @@ export class ImagesController {
     try {
       const imageBuffer = await sharp(absoluteImagePath)
         .toFormat('webp')
-        .jpeg({ quality: 10 })
+        .jpeg({ quality: 20 })
         .toBuffer();
       // res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Content-Type', 'image/webp');
