@@ -304,7 +304,39 @@ export class RuningInfoService {
     return entity || null;
   }
 
-  async getRunningInfoByIdDetail(id: number): Promise<RuningInfoEntity | null> {
+  async getRunningInfoClassDetail(
+    id: number,
+  ): Promise<RuningInfoEntity | null> {
+    const entity = await this.runingInfoEntityRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'slotId',
+        'wbcInfoAfter',
+        'testType',
+        'barcodeNo',
+        'patientId',
+        'cbcPatientNo',
+        'cbcPatientNm',
+        'cbcSex',
+        'cbcAge',
+        'analyzedDttm',
+      ],
+    });
+    return entity || null;
+  }
+
+  async getRunningInfoClassInfo(id: number): Promise<RuningInfoEntity | null> {
+    const entity = await this.runingInfoEntityRepository.findOne({
+      where: { id },
+      select: ['wbcInfoAfter', 'wbcInfo', 'testType'],
+    });
+    return entity || null;
+  }
+
+  async getRunningInfoClassInfoMenu(
+    id: number,
+  ): Promise<RuningInfoEntity | null> {
     const entity = await this.runingInfoEntityRepository.findOne({
       where: { id },
       select: ['id', 'lock_status', 'wbcInfoAfter', 'wbcInfo', 'testType'],

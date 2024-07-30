@@ -79,11 +79,25 @@ export class RuningInfoController {
     return this.runingInfoService.getRunningInfoById(Number(id));
   }
 
-  @Get('classDetailSelectQuery/:id')
-  async getRunningInfoByIdDetail(
+  @Get('classInfoDetail/:id')
+  async getRunningInfoDetailById(
     @Param('id') id: string,
   ): Promise<RuningInfoEntity | null> {
-    return this.runingInfoService.getRunningInfoById(Number(id));
+    return this.runingInfoService.getRunningInfoClassDetail(Number(id));
+  }
+
+  @Get('classInfoDetailSelectQuery/:id')
+  async getRunningInfoClassInfoByIdDetail(
+    @Param('id') id: string,
+  ): Promise<RuningInfoEntity | null> {
+    return this.runingInfoService.getRunningInfoClassInfo(Number(id));
+  }
+
+  @Get('classInfoMenuDetailSelectQuery/:id')
+  async getRunningInfoClassInfoMenuByIdDetail(
+    @Param('id') id: string,
+  ): Promise<RuningInfoEntity | null> {
+    return this.runingInfoService.getRunningInfoClassInfoMenu(Number(id));
   }
 
   @Get('getAll')
