@@ -23,9 +23,9 @@ export class RuningInfoController {
   @Get('pageUpDown')
   async getPageUpDown(
     @Query('id') id: string,
-    @Query('step') step: number,
+    @Query('step') step: string,
     @Query('type') type: string,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<Partial<RuningInfoEntity> | null> {
     return this.runingInfoService.getUpDownRunnInfo(
       Number(id),
       Number(step),

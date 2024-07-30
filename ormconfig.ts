@@ -50,7 +50,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       DeviceEntity,
     ],
     extra: {
-      connectionLimit: 10,
+      connectionLimit: 20, // 커넥션 풀 크기 설정
       multipleStatements: true,
     },
   };

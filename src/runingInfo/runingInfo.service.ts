@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, In, Repository } from 'typeorm';
+import { Brackets, In, Repository, EntityManager } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
@@ -307,79 +307,162 @@ export class RuningInfoService {
   async getRunningInfoClassDetail(
     id: number,
   ): Promise<RuningInfoEntity | null> {
-    const entity = await this.runingInfoEntityRepository.findOne({
-      where: { id },
-      select: [
-        'id',
-        'slotId',
-        'wbcInfoAfter',
-        'testType',
-        'barcodeNo',
-        'patientId',
-        'cbcPatientNo',
-        'cbcPatientNm',
-        'cbcSex',
-        'cbcAge',
-        'analyzedDttm',
-      ],
-    });
-    return entity || null;
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+
+    const query = `
+      SELECT 
+        id,
+        slotId,
+        wbcInfoAfter,
+        testType,
+        barcodeNo,
+        patientId,
+        cbcPatientNo,
+        cbcPatientNm,
+        cbcSex,
+        cbcAge,
+        analyzedDttm,
+        wbcInfo
+      FROM 
+        runing_info_entity
+      WHERE 
+        id = ?`;
+
+    const result = await entityManager.query(query, [id]);
+
+    if (result.length > 0) {
+      return result[0] as RuningInfoEntity;
+    } else {
+      return null;
+    }
   }
 
   async getRunningInfoClassInfo(id: number): Promise<RuningInfoEntity | null> {
-    const entity = await this.runingInfoEntityRepository.findOne({
-      where: { id },
-      select: ['id', 'wbcInfoAfter', 'wbcInfo', 'testType'],
-    });
-    return entity || null;
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+
+    const query = `
+      SELECT 
+        id,
+        wbcInfoAfter,
+        wbcInfo,
+        testType
+      FROM 
+        runing_info_entity
+      WHERE 
+        id = ?`;
+
+    const result = await entityManager.query(query, [id]);
+
+    if (result.length > 0) {
+      return result[0] as RuningInfoEntity;
+    } else {
+      return null;
+    }
   }
 
   async getRunningInfoClassInfoMenu(
     id: number,
   ): Promise<RuningInfoEntity | null> {
-    const entity = await this.runingInfoEntityRepository.findOne({
-      where: { id },
-      select: ['id', 'lock_status', 'wbcInfoAfter', 'wbcInfo', 'testType'],
-    });
-    return entity || null;
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+
+    const query = `
+      SELECT 
+        id,
+        lock_status,
+        wbcInfoAfter,
+        wbcInfo,
+        testType
+      FROM 
+        runing_info_entity
+      WHERE 
+        id = ?`;
+
+    const result = await entityManager.query(query, [id]);
+
+    if (result.length > 0) {
+      return result[0] as RuningInfoEntity;
+    } else {
+      return null;
+    }
   }
 
   async getUpDownRunnInfo(
     id: number,
     step: number,
     type: string,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<Partial<RuningInfoEntity> | null> {
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+
     // 현재 엔티티를 찾기
-    const currentEntity = await this.runingInfoEntityRepository.findOne({
-      where: { id },
-    });
-    if (!currentEntity) {
+    const currentEntityQuery = `
+      SELECT 
+        id
+      FROM 
+        runing_info_entity
+      WHERE 
+        id = ?`;
+
+    const currentEntityResult = await entityManager.query(currentEntityQuery, [
+      id,
+    ]);
+
+    if (currentEntityResult.length === 0) {
       return null;
     }
 
-    let newEntity: RuningInfoEntity | null = null;
-
+    let newEntityQuery = '';
     if (type === 'up') {
       // 현재 id보다 큰 id를 가진 항목 중 step번째 항목 찾기
-      newEntity = await this.runingInfoEntityRepository
-        .createQueryBuilder('entity')
-        .where('entity.id > :id', { id })
-        .orderBy('entity.id', 'ASC')
-        .offset(step - 1) // step 만큼 건너뜀
-        .limit(1) // 하나의 항목만 가져옴
-        .getOne();
+      newEntityQuery = `
+        SELECT 
+          id,
+          wbcInfoAfter,
+          wbcInfo,
+          lock_status
+        FROM 
+          runing_info_entity
+        WHERE 
+          id > ?
+        ORDER BY 
+          id ASC
+        LIMIT 1 OFFSET ?`;
     } else if (type === 'down') {
       // 현재 id보다 작은 id를 가진 항목 중 step번째 항목 찾기
-      newEntity = await this.runingInfoEntityRepository
-        .createQueryBuilder('entity')
-        .where('entity.id < :id', { id })
-        .orderBy('entity.id', 'DESC')
-        .offset(step - 1) // step 만큼 건너뜀
-        .limit(1) // 하나의 항목만 가져옴
-        .getOne();
+      newEntityQuery = `
+        SELECT 
+          id,
+          wbcInfoAfter,
+          wbcInfo,
+          lock_status
+        FROM 
+          runing_info_entity
+        WHERE 
+          id < ?
+        ORDER BY 
+          id DESC
+        LIMIT 1 OFFSET ?`;
     }
 
-    return newEntity || null;
+    const newEntityResult = await entityManager.query(newEntityQuery, [
+      id,
+      step - 1,
+    ]);
+
+    if (newEntityResult.length > 0) {
+      const result = newEntityResult[0];
+      return {
+        id: result.id,
+        wbcInfoAfter: result.wbcInfoAfter,
+        wbcInfo: result.wbcInfo,
+        lock_status: result.lock_status,
+      } as Partial<RuningInfoEntity>;
+    } else {
+      return null;
+    }
   }
 
   async updatePcIpAndState(
