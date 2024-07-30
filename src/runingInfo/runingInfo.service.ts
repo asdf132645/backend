@@ -329,7 +329,7 @@ export class RuningInfoService {
   async getRunningInfoClassInfo(id: number): Promise<RuningInfoEntity | null> {
     const entity = await this.runingInfoEntityRepository.findOne({
       where: { id },
-      select: ['wbcInfoAfter', 'wbcInfo', 'testType'],
+      select: ['id', 'wbcInfoAfter', 'wbcInfo', 'testType'],
     });
     return entity || null;
   }
