@@ -304,6 +304,14 @@ export class RuningInfoService {
     return entity || null;
   }
 
+  async getRunningInfoByIdDetail(id: number): Promise<RuningInfoEntity | null> {
+    const entity = await this.runingInfoEntityRepository.findOne({
+      where: { id },
+      select: ['id', 'lock_status', 'wbcInfoAfter', 'wbcInfo', 'testType'],
+    });
+    return entity || null;
+  }
+
   async getUpDownRunnInfo(
     id: number,
     step: number,

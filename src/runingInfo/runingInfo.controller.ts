@@ -79,6 +79,13 @@ export class RuningInfoController {
     return this.runingInfoService.getRunningInfoById(Number(id));
   }
 
+  @Get('classDetailSelectQuery/:id')
+  async getRunningInfoByIdDetail(
+    @Param('id') id: string,
+  ): Promise<RuningInfoEntity | null> {
+    return this.runingInfoService.getRunningInfoById(Number(id));
+  }
+
   @Get('getAll')
   async findAllWithPagingAndFilter(
     @Query('page') page: number = 1,
