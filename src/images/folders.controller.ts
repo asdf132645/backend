@@ -1,8 +1,17 @@
-import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Res,
+  HttpStatus,
+  Post,
+  Body,
+} from '@nestjs/common';
 import { Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs'; // path 모듈 추가
 import * as sharp from 'sharp';
+import { mkdir, readdir, rename } from 'fs-extra';
 
 @Controller('folders')
 export class FoldersController {
@@ -94,6 +103,64 @@ export class FoldersController {
       res
         .status(HttpStatus.NOT_FOUND)
         .send('파일 또는 폴더를 찾을 수 없습니다.');
+    }
+  }
+  @Post('check-and-move-images')
+  async checkAndMoveImages(
+    @Body() body: { folderPath: string; wbcInfo: any[] },
+  ) {
+    const { folderPath, wbcInfo } = body;
+
+    try {
+      for (const item of wbcInfo) {
+        const folderName = `${item.id}_${item.title}`;
+        const sourceFolderPath = path.join(folderPath, folderName);
+
+        // 폴더가 존재하는지 확인
+        if (!fs.existsSync(sourceFolderPath)) {
+          console.log(
+            `Source folder ${folderName} does not exist at path ${sourceFolderPath}.`,
+          );
+          continue; // 폴더가 존재하지 않으면 현재 항목을 건너뜁니다.
+        }
+
+        // 폴더 내의 파일 목록 가져오기
+        const files = await readdir(sourceFolderPath);
+        console.log(`Files in folder ${folderName}:`, files);
+
+        // 배열에 명시된 파일 목록
+        const validFileNames = new Set(
+          item.images.map((img: { fileName: string }) => img.fileName),
+        );
+        console.log('Valid file names:', Array.from(validFileNames));
+
+        for (const fileName of files) {
+          const sourceFilePath = path.join(sourceFolderPath, fileName);
+
+          // 배열에 명시된 파일 목록에 파일이 포함되어 있는지 확인
+          if (!validFileNames.has(fileName)) {
+            const destinationFolderPath = sourceFolderPath; // 이동할 폴더는 원래의 폴더
+            const destinationFilePath = path.join(
+              destinationFolderPath,
+              fileName,
+            );
+            console.log(
+              `File ${fileName} is not in the valid list. Moving to the original folder.`,
+            );
+
+            // 파일 이동
+            await rename(sourceFilePath, destinationFilePath);
+            console.log(`File ${fileName} moved to ${destinationFolderPath}`);
+          } else {
+            console.log(`File ${fileName} is valid. No action needed.`);
+          }
+        }
+      }
+
+      return { message: 'Files checked and moved successfully.' };
+    } catch (error) {
+      console.log('Error:', error.message);
+      // throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

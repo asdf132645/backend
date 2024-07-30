@@ -40,7 +40,7 @@ export class ImagesController {
         .jpeg({ quality: 30 })
         .toBuffer();
 
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      // res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Content-Type', 'image/webp');
       res.send(imageBuffer);
     } catch (error) {
@@ -94,7 +94,7 @@ export class ImagesController {
 
       // 이미지 변환 및 응답 설정
       const imageBuffer = fs.readFileSync(absoluteImagePath);
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      // res.setHeader('Cache-Control', 'public, max-age=86400');
       res.contentType('image/bmp'); // BMP 이미지라면 Content-Type을 'image/bmp'로 설정
       res.send(imageBuffer);
     } catch (error) {
