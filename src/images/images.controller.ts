@@ -40,7 +40,6 @@ export class ImagesController {
         .jpeg({ quality: 30 })
         .toBuffer();
 
-
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Content-Type', 'image/webp');
       res.send(imageBuffer);
@@ -125,7 +124,9 @@ export class ImagesController {
       res.status(HttpStatus.OK).send('File exists');
     } catch (error) {
       // 파일이 없거나 권한 문제로 접근 불가할 경우 404 Not Found 반환
-      res.status(HttpStatus.NOT_FOUND).send('File not found or permission issue');
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .send('File not found or permission issue');
     }
   }
   @Get('getImageWbc')
@@ -226,9 +227,10 @@ export class ImagesController {
 
     // 비동기 큐 설정
     const concurrency = 10; // 동시에 처리할 파일 이동 작업 수
-    const queue = [];
     let activeTasks = 0;
+    const queue = [];
 
+    // 파일 이동 함수
     const moveFile = async (
       source: string,
       destination: string,
@@ -236,59 +238,52 @@ export class ImagesController {
     ) => {
       try {
         // 파일 접근 가능 확인
-        await fs.access(source, fs.constants.R_OK);
+        await fs.promises.access(source, fs.constants.R_OK);
         // 파일 이동
-        await fs.move(source, destination, { overwrite: true });
+        await fs.promises.rename(source, destination);
         // 성공 목록에 추가
         moveResults.success.push(imageName);
       } catch (error) {
         // 실패 목록에 추가
         moveResults.failed.push({ imageName, error: error.message });
+      } finally {
+        activeTasks--;
+        processQueue(); // 큐 처리 재개
       }
     };
 
-    const processQueue = async () => {
-      while (queue.length > 0 && activeTasks < concurrency) {
+    // 큐 처리 함수
+    const processQueue = () => {
+      while (activeTasks < concurrency && queue.length > 0) {
         const { source, destination, imageName } = queue.shift();
         activeTasks++;
-        moveFile(source, destination, imageName).finally(() => {
-          activeTasks--;
-          processQueue();
-        });
+        moveFile(source, destination, imageName);
       }
     };
 
-    // 파일 이동 작업 큐에 추가
-    for (let i = 0; i < imageNamesArray.length; i++) {
-      const absoluteSourcePath = path.join(
-        sourceFoldersArray[i],
-        imageNamesArray[i],
-      );
-      const absoluteDestinationPath = path.join(
+    // 큐에 작업 추가
+    for (let i = 0; i < sourceFoldersArray.length; i++) {
+      const source = path.join(sourceFoldersArray[i], imageNamesArray[i]);
+      const destination = path.join(
         destinationFoldersArray[i],
         imageNamesArray[i],
       );
-      queue.push({
-        source: absoluteSourcePath,
-        destination: absoluteDestinationPath,
-        imageName: imageNamesArray[i],
-      });
+      queue.push({ source, destination, imageName: imageNamesArray[i] });
     }
 
     // 큐 처리 시작
-    await processQueue();
+    processQueue();
 
-    // 모든 파일 이동 작업이 완료될 때까지 대기
-    await new Promise<void>((resolve) => {
+    // 모든 작업이 완료될 때까지 기다림
+    await new Promise((resolve) => {
       const checkCompletion = setInterval(() => {
         if (activeTasks === 0 && queue.length === 0) {
           clearInterval(checkCompletion);
-          resolve();
+          resolve(null);
         }
       }, 100);
     });
 
-    // 이동 처리 결과를 응답으로 반환
     return res.status(HttpStatus.OK).json(moveResults);
   }
 
