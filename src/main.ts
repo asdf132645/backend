@@ -16,7 +16,11 @@ async function bootstrap() {
 
   // CORS 에러 이슈로 프론트 8080 허용
   const corsOptions: CorsOptions = {
-    origin: ['http://192.168.0.131:8080', 'http://192.168.0.131'],
+    origin: [
+      'http://192.168.0.131:8080',
+      'http://192.168.0.131',
+      'http://127.0.0.1:8080',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   };
@@ -24,7 +28,7 @@ async function bootstrap() {
   httpApp.enableCors(corsOptions);
 
   // 전역 프리픽스 설정
-  // httpApp.setGlobalPrefix('api');
+  httpApp.setGlobalPrefix('api');
 
   // Swagger 설정
   const config = new DocumentBuilder()
