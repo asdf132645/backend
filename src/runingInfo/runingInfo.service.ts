@@ -320,6 +320,7 @@ export class RuningInfoService {
         patientId,
         cbcPatientNo,
         cbcPatientNm,
+        submitState,
         cbcSex,
         cbcAge,
         analyzedDttm,
@@ -347,7 +348,8 @@ export class RuningInfoService {
         id,
         wbcInfoAfter,
         wbcInfo,
-        testType
+        testType,
+        submitState
       FROM 
         runing_info_entity
       WHERE 
@@ -551,7 +553,7 @@ export class RuningInfoService {
         wbcCount: result.wbcCount,
         wbcInfoAfter: result.wbcInfoAfter,
         wbcInfo: result.wbcInfo,
-        wbcMemo: result.wbcMemo
+        wbcMemo: result.wbcMemo,
       } as Partial<RuningInfoEntity>;
     } else {
       return null;
