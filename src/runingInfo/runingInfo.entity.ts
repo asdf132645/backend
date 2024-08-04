@@ -128,6 +128,9 @@ export class RuningInfoEntity {
   @Column()
   submitUserId?: string;
 
+  @Column('json')
+  rbcInfoPosAfter: any[];
+
   // @Column('json')
   // classificationResult?: any[];
 

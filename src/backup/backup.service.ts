@@ -15,11 +15,15 @@ export class BackupService {
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
   ) {}
 
-  private formatDateToString(date: Date): string {
+  private formatDateToString(date: Date, time): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    return `${year}${month}${day}000000000`;
+    if (time === 'start') {
+      return `${year}${month}${day}000000000`;
+    } else {
+      return `${year}${month}${day}999999999`;
+    }
   }
 
   async backupData(backupDto: BackupDto): Promise<void> {
@@ -29,8 +33,8 @@ export class BackupService {
     const endDateObj = new Date(endDate);
 
     // 시작 및 종료 날짜를 YYYYMMDD 형식의 문자열로 변환
-    const formattedStartDate = this.formatDateToString(startDateObj);
-    const formattedEndDate = this.formatDateToString(endDateObj);
+    const formattedStartDate = this.formatDateToString(startDateObj, 'start');
+    const formattedEndDate = this.formatDateToString(endDateObj, 'end');
     // 백업 폴더가 존재하는지 확인하고 없으면 생성
     if (!(await fs.pathExists(backupPath))) {
       await fs.ensureDir(backupPath);
@@ -72,16 +76,18 @@ export class BackupService {
 
     await Promise.all(
       dataToBackup.map(async (item: any) => {
-        item.rootPath = dateFolder;
+        item.img_drive_root_path = dateFolder;
         await this.runningInfoRepository.save(item);
       }),
     );
 
     // MySQL 데이터베이스 특정 테이블 백업
-    const backupFileName = `backup-${startDate}-${endDate}.sql`;
+    const backupFileName = `backup-${startDate}_${endDate}.sql`;
     const sqlBackupFilePath = path.join(dateFolder, backupFileName);
+    const databaseSchema =
+      sourceFolderPath === 'D:\\PBIA_proc' ? 'pb_db_web' : 'bm_db_web';
 
-    const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 pb_db runing_info_entity --where="createDate BETWEEN '${startDate}' AND '${endDate}'" > ${sqlBackupFilePath}`;
+    const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${databaseSchema} runing_info_entity --where="analyzedDttm BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'" > ${sqlBackupFilePath}`;
 
     exec(dumpCommand, (error, stdout, stderr) => {
       if (error) {

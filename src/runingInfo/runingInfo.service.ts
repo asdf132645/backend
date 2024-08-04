@@ -324,7 +324,8 @@ export class RuningInfoService {
         cbcSex,
         cbcAge,
         analyzedDttm,
-        wbcInfo
+        wbcInfo,
+        img_drive_root_path
       FROM 
         runing_info_entity
       WHERE 
@@ -349,7 +350,8 @@ export class RuningInfoService {
         wbcInfoAfter,
         wbcInfo,
         testType,
-        submitState
+        submitState,
+        img_drive_root_path
       FROM 
         runing_info_entity
       WHERE 
@@ -376,7 +378,8 @@ export class RuningInfoService {
         lock_status,
         wbcInfoAfter,
         wbcInfo,
-        testType
+        testType,
+        img_drive_root_path
       FROM 
         runing_info_entity
       WHERE 

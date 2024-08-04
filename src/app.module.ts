@@ -47,7 +47,8 @@ import { RemainingCountController } from './settings/analysisDatabse/deviceContr
 import { RemainingCountService } from './settings/analysisDatabse/deviceController/remaining-count.service';
 import { QualityCheckService } from './settings/qualityCheck/qualityCheck.service';
 import { QualityCheckController } from './settings/qualityCheck/qualityCheck.controller';
-import { BrowserModule } from "./browserExit/browser.module";
+import { BrowserModule } from './browserExit/browser.module';
+import { RestoreModule } from './restore/restore.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { BrowserModule } from "./browserExit/browser.module";
     // }),
     UserModule,
     CellImgAnalyzedModule,
+    RestoreModule,
     RbcDegreeModule,
     WbcCustomClassModule,
     WbcHotKeysModule,
@@ -82,6 +84,7 @@ import { BrowserModule } from "./browserExit/browser.module";
     DeviceModule,
     BackupModule,
     BrowserModule,
+    RestoreModule,
   ],
   controllers: [
     AppController,
