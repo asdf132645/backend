@@ -38,14 +38,6 @@ export class RestoreService {
     }
   };
 
-  private getMaxId = async (): Promise<number> => {
-    const maxId = await this.runningInfoRepository
-      .createQueryBuilder('runing_info_entity')
-      .select('Max(runing_info_entity.id)', 'max')
-      .getRawOne();
-    return Number(maxId.max);
-  };
-
   private getInsertStatement = (filePath: string) => {
     const sql = fs.readFileSync(filePath, 'utf8');
     const statements = sql
@@ -107,75 +99,50 @@ export class RestoreService {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
 
     const items = await this.dataSource.query(restoreSql);
-    const isOldTable = items[0].userId;
-    let maxId = await this.getMaxId();
-    if (isOldTable) {
-      for (const item of items) {
-        const isExistingItem = await this.runningInfoRepository.findOne({
-          where: { slotId: item.slotId },
-        });
-        if (isExistingItem) continue;
 
-        const savingItem: any = {
-          id: maxId++,
-          lock_status: 0,
-          slotNo: item.slotNo,
-          traySlot: item.traySlot,
-          testType: item.testType,
-          barcodeNo: item.barcodeNo,
-          patientId: item.patientId,
-          patientNm: item.patientNm,
-          gender: item.gender,
-          birthDay: item.birthDay,
-          wbcCount: item.wbcCount,
-          slotId: item.slotId,
-          orderDttm: item.orderDttm,
-          analyzedDttm: item.createDate,
-          tactTime: item.tactTime,
-          isNormal: item.isNormal,
-          cassetId: item.cassetId,
-          wbcMemo: item.memo,
-          rbcMemo: item.rbcMemo,
-          wbcInfo: {
-            wbcInfo: item.wbcInfo.wbcInfo[0],
-            totalCount: item.wbcInfo.totalCount,
-            maxWbcCount: item.maxWbcCount,
-          },
-          wbcInfoAfter: item.wbcInfoAfter,
-          rbcInfo: {
-            pltCount: item.pltCount,
-            rbcClass: item.rbcInfo,
-            maxRbcCount: item.maxRbcCount,
-            malariaCount: item.malariaCount,
-          },
-          rbcInfoAfter: [],
-          rbcInfoPosAfter: null,
-          maxWbcCount: item.maxWbcCount,
-          bf_lowPowerPath: item.lowPowerPath,
-          submitState: item.signedState,
-          submitOfDate: item.signedOfDate,
-          submitUserId: item.signedUserId,
-          isNsNbIntegration: item.isNsNbIntegration,
-          pcIp: item.pcIp,
-          cbcPatientNo: '',
-          cbcPatientNm: '',
-          cbcSex: '',
-          cbcAge: '',
-          img_drive_root_path: null,
-        };
-        await this.runningInfoRepository.save({ ...savingItem });
-      }
-    } else {
-      for (const item of items) {
-        const isExistingItem = await this.runningInfoRepository.findOne({
-          where: { slotId: item.slotId },
-        });
-        if (isExistingItem) continue;
-        item.id = maxId++;
-        item.img_drive_root_path = null;
-        item.lock_status = 0;
-        await this.runningInfoRepository.save({ ...item });
-      }
+    for (const item of items) {
+      const isExistingItem = await this.runningInfoRepository.findOne({
+        where: { slotId: item.slotId },
+      });
+      if (isExistingItem) continue;
+      const savingItem = {
+        slotNo: item.slotNo,
+        traySlot: item.traySlot,
+        testType: item.testType,
+        barcodeNo: item.barcodeNo,
+        patientId: item.patientId,
+        patientNm: item.patientNm,
+        gender: item.gender,
+        birthDay: item.birthDay,
+        wbcCount: item.wbcCount,
+        slotId: item.slotId,
+        orderDttm: item.orderDttm,
+        analyzedDttm: item.analyzedDttm,
+        tactTime: item.tactTime,
+        isNormal: item.isNormal,
+        cassetId: item.cassetId,
+        wbcMemo: item.wbcMemo,
+        rbcMemo: item.rbcMemo,
+        wbcInfo: item.wbcInfo,
+        wbcInfoAfter: item.wbcInfoAfter,
+        rbcInfo: item.rbcInfo,
+        rbcInfoAfter: item.rbcInfoAfter,
+        rbcInfoPosAfter: item.rbcInfoPosAfter,
+        maxWbcCount: item.maxWbcCount,
+        bf_lowPowerPath: item.bf_lowPowerPath,
+        submitState: item.submitState,
+        submitOfDate: item.submitOfDate,
+        submitUserId: item.submitUserId,
+        isNsNbIntegration: item.isNsNbIntegration,
+        pcIp: item.pcIp,
+        cbcPatientNo: item.cbcPatientNo,
+        cbcPatientNm: item.cbcPatientNm,
+        cbcSex: item.cbcSex,
+        cbcAge: item.cbcAge,
+        img_drive_root_path: null,
+      };
+      savingItem['lock_status'] = 0;
+      await this.runningInfoRepository.save({ ...savingItem });
     }
   };
 
