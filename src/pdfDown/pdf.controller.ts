@@ -2,6 +2,8 @@ import { Controller, Post, Body, Res, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
 import * as htmlToPdf from 'html-pdf';
 import * as zlib from 'zlib';
+import axios from 'axios';
+import * as sharp from 'sharp';
 
 @Controller('pdf')
 export class PdfController {
@@ -27,16 +29,47 @@ export class PdfController {
               decompressed += chunk.toString();
             })
             .on('end', () => {
-              // 압축 해제된 데이터를 HTML로 사용
               resolve(decompressed);
             })
             .on('error', reject);
         });
       }
 
+      // 이미지 URL을 찾아서 미리 로드 및 압축
+      const imgTagRegex = /<img[^>]+src="([^">]+)"/g;
+      let match;
+      const promises = [];
+
+      while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+        const imageUrl = match[1];
+        promises.push(
+          axios
+            .get(imageUrl, { responseType: 'arraybuffer' })
+            .then((response) =>
+              sharp(response.data).resize(800).jpeg({ quality: 80 }).toBuffer(),
+            )
+            .then((buffer) => {
+              const base64Image = buffer.toString('base64');
+              htmlContent = htmlContent.replace(
+                imageUrl,
+                `data:image/jpeg;base64,${base64Image}`,
+              );
+            })
+            .catch((error) => {
+              console.error(`Error loading image ${imageUrl}:`, error);
+            }),
+        );
+      }
+
+      await Promise.all(promises);
+
       // HTML 콘텐츠를 PDF로 변환
+      const pdfOptions = {
+        format: 'A4',
+      };
+
       const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-        htmlToPdf.create(htmlContent).toBuffer((error, buffer) => {
+        htmlToPdf.create(htmlContent, pdfOptions).toBuffer((error, buffer) => {
           if (error) {
             reject(error);
           } else {
