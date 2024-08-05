@@ -1,6 +1,8 @@
 // src/file/file.service.ts
 import { Injectable } from '@nestjs/common';
 import { promises as fs } from 'fs';
+import { writeFile, mkdir, access, constants } from 'fs/promises';
+import * as path from 'path';
 
 @Injectable()
 export class FileService {
@@ -31,5 +33,31 @@ export class FileService {
       success: false,
       message: `File not found with any of the extensions: ${this.possibleExtensions.join(', ')}`,
     };
+  }
+
+  async cbcSaveDataService(filePath: string, data: any): Promise<void> {
+    // 클라이언트가 제공한 파일 경로를 직접 사용
+    const directory = path.dirname(filePath);
+
+    // 디렉토리 존재 확인 및 생성
+    await this.ensureDirectoryExistence(directory);
+
+    try {
+      // 파일이 아닌 디렉토리인지 확인
+      await access(filePath, constants.F_OK);
+      console.log(`File or directory exists at ${filePath}`);
+    } catch {
+      // 파일이 없으면 새로 생성
+      await writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    }
+  }
+
+  private async ensureDirectoryExistence(directory: string): Promise<any> {
+    try {
+      await mkdir(directory, { recursive: true });
+    } catch (error) {
+      console.error('Error creating directory:', error);
+      throw error;
+    }
   }
 }

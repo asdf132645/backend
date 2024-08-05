@@ -52,4 +52,17 @@ export class FileController {
       return { success: false, error: error.message };
     }
   }
+
+  @Post('cbcSaveData')
+  async cbcSaveData(@Body() body: { data: any; filePath: string }) {
+    const { data, filePath } = body;
+
+    try {
+      await this.fileService.cbcSaveDataService(filePath, data);
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving data:', error);
+      return { success: false, error: error };
+    }
+  }
 }
