@@ -168,10 +168,10 @@ export class CombinedService
         jsonData = data;
       }
       this.wss.emit('chat', jsonData);
+      this.logger.log(`프론트엔드로 전송 ${jsonData}`);
       this.notRes = false;
-      this.logger.log(`tcp 응답 받은 후 웹소켓 전송 ${this.notRes}`);
     } else {
-      this.logger.warn('웹소켓 전송 실패..');
+      this.logger.error('웹소켓 전송 실패..');
     }
   }
 
@@ -183,14 +183,14 @@ export class CombinedService
           const serializedData = JSON.stringify(seData[seDataKey]);
           this.notRes = true;
           this.connectedClient.write(serializedData);
-          this.logger.log(`tcp 응답 받기전 ${this.notRes}`);
+          this.logger.log(`tcp로 전송 ${serializedData}`);
         }
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
       }
     } else {
       this.logger.warn(
-        '활성화된 TCP 클라이언트 연결 없음. 데이터 전송되지 않았습니다.???',
+        '활성화된 TCP 클라이언트 연결 없음. 데이터 전송 안됨 tcp 연결 확인 필요.',
       );
     }
   }
