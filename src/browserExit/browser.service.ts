@@ -5,7 +5,7 @@ import { exec } from 'child_process';
 export class BrowserService {
   closeEdgeBrowser(): Promise<string> {
     return new Promise((resolve, reject) => {
-      const appPath = `"D:\\kill_edge.exe"`;
+      const appPath = `"D:\\UIMD_Data\\UI_KILL\\kill_edge.exe"`;
 
       exec(appPath, (error, stdout, stderr) => {
         if (error) {
