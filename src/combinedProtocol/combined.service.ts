@@ -54,7 +54,7 @@ export class CombinedService
     if (ipAddress) {
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
-    if (clientIpAddress.includes('127.0.0.1')) {
+    if (clientIpAddress.includes('192.168.0.65')) {
       this.logger.log(`clientExit 누름`);
       this.webSocketGetData({
         type: 'SEND_DATA',
@@ -100,7 +100,10 @@ export class CombinedService
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          if (clientOrigin.includes('127.0.0.1') || message.payload?.anyWay) {
+          if (
+            clientOrigin.includes('192.168.0.65') ||
+            message.payload?.anyWay
+          ) {
             delete message.payload?.anyWay;
             this.logger.log(
               `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
@@ -129,7 +132,7 @@ export class CombinedService
     client.on('viewerCheck', () => {
       try {
         if (this.wss) {
-          if (clientIpAddress.includes('127.0.0.1')) {
+          if (clientIpAddress.includes('192.168.0.65')) {
             this.wss.emit('viewerCheck', ipAddress);
           }
         }
