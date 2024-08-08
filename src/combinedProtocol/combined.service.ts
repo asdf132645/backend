@@ -189,6 +189,7 @@ export class CombinedService
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
       }
     } else {
+      this.notRes = false;
       this.logger.warn(
         '활성화된 TCP 클라이언트 연결 없음. 데이터 전송 안됨 tcp 연결 확인 필요.',
       );
