@@ -200,7 +200,9 @@ export class CombinedService
         const seData = [data.payload];
         for (const seDataKey in seData) {
           const serializedData = JSON.stringify(seData[seDataKey]);
-          this.notRes = true;
+          if (data.payload.jobCmd !== 'INIT') {
+            this.notRes = true;
+          }
           this.connectedClient.write(serializedData);
           this.logger.log(`tcp로 전송 ${serializedData}`);
         }
@@ -235,6 +237,9 @@ export class CombinedService
 
         if (this.wss) {
           this.sendDataToWebSocketClients(chunk);
+          this.sendDataToWebSocketClients('tcpConnected');
+          this.notRes = false;
+          console.log('TCP 연결 됐음');
         } else {
           this.logger.error('WebSocketService가 초기화되지 않았습니다.');
         }
