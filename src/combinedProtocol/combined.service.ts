@@ -12,6 +12,7 @@ import {
 import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
 import { RuningInfoService } from '../runingInfo/runingInfo.service';
+import { isServerRunningLocally } from '../utils/network';
 
 dotenv.config(); // dotenv 설정 추가
 
@@ -31,6 +32,7 @@ export class CombinedService
   public prevReqDttm: string | null = null; // 직전 요청의 reqDttm 저장
   clients: Socket[] = [];
   public notRes: boolean = false;
+  private serverIp: any; // 서버의 IP 주소 저장
 
   constructor(
     private readonly logger: LoggerService,
@@ -49,22 +51,24 @@ export class CombinedService
   async handleDisconnect(client: Socket) {
     const clientIpAddress =
       client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
+
     const ipAddress = this.extractIPAddress(clientIpAddress);
     // PC IP 확인 후 처리
     if (ipAddress) {
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
-    if (clientIpAddress.includes('192.168.0.65')) {
-      this.logger.log(`clientExit 누름`);
-      this.webSocketGetData({
-        type: 'SEND_DATA',
-        payload: {
-          jobCmd: 'clientExit',
-          reqUserId: '',
-          reqDttm: '',
-        },
-      });
-    }
+
+    // if (clientIpAddress.includes('127.0.0.1')) {
+    this.logger.log(`clientExit 누름`);
+    this.webSocketGetData({
+      type: 'SEND_DATA',
+      payload: {
+        jobCmd: 'clientExit',
+        reqUserId: '',
+        reqDttm: '',
+      },
+    });
+    // }
     const clientIndex = this.clients.findIndex((c) => c.id === client.id);
     if (clientIndex !== -1) {
       await this.broadcastDisconnectedClient();
@@ -87,31 +91,43 @@ export class CombinedService
     const ipAddressMatch = inputString.match(ipAddressRegex);
     return ipAddressMatch ? ipAddressMatch[0] : null;
   }
+  extractIPv4Address(remoteAddress: string): string | null {
+    // IPv6-mapped IPv4 주소에서 IPv4 주소를 추출하기 위한 정규 표현식
+    const ipv4Regex = /::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+
+    // 정규 표현식으로 주소를 검색
+    const matches = remoteAddress.match(ipv4Regex);
+
+    // IPv4 주소가 발견되면 반환, 그렇지 않으면 null 반환
+    return matches ? matches[1] : null;
+  }
 
   // 웹소켓 통신
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const clientIpAddress =
       client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
     const ipAddress = this.extractIPAddress(clientIpAddress);
     this.clients.push(client);
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
+    const ipv4Address = this.extractIPv4Address(client.conn.remoteAddress);
+    // console.log(ipv4Address);
+
+    this.serverIp = await isServerRunningLocally(ipv4Address);
+    this.logger.log(`Server IP address: ${this.serverIp}`);
     // 클라이언트의 Origin 헤더 가져오기
-    const clientOrigin = client.handshake.headers['origin'];
+    // const clientOrigin = client.handshake.headers['origin'];
     client.on('message', (message) => {
       try {
         if (this.wss) {
-          if (
-            clientOrigin.includes('192.168.0.65') ||
-            message.payload?.anyWay
-          ) {
-            delete message.payload?.anyWay;
-            this.logger.log(
-              `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
-            );
-            if (!this.notRes) {
-              this.webSocketGetData(message);
-            }
+          // if (clientOrigin.includes('127.0.0.1') || message.payload?.anyWay) {
+          delete message.payload?.anyWay;
+          this.logger.log(
+            `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
+          );
+          if (!this.notRes) {
+            this.webSocketGetData(message);
           }
+          // }
         }
       } catch (e) {
         this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
@@ -132,9 +148,9 @@ export class CombinedService
     client.on('viewerCheck', () => {
       try {
         if (this.wss) {
-          if (clientIpAddress.includes('192.168.0.65')) {
-            this.wss.emit('viewerCheck', ipAddress);
-          }
+          // if (clientIpAddress.includes('127.0.0.1')) {
+          this.wss.emit('viewerCheck', ipAddress);
+          // }
         }
       } catch (e) {
         this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
