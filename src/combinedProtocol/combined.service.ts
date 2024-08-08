@@ -109,11 +109,13 @@ export class CombinedService
     const ipAddress = this.extractIPAddress(clientIpAddress);
     this.clients.push(client);
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
-    const ipv4Address = this.extractIPv4Address(client.conn.remoteAddress);
+    // const ipv4Address = this.extractIPv4Address(client.conn.remoteAddress);
     // console.log(ipv4Address);
 
-    this.serverIp = await isServerRunningLocally(ipv4Address);
-    this.logger.log(`Server IP address: ${this.serverIp}`);
+    this.serverIp = await isServerRunningLocally();
+    // this.logger.log(`Server IP address: ${this.serverIp}`);
+    this.wss.emit('multiViewer', client.conn.remoteAddress);
+
     // 클라이언트의 Origin 헤더 가져오기
     // const clientOrigin = client.handshake.headers['origin'];
     client.on('message', (message) => {
