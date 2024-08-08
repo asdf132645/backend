@@ -31,15 +31,15 @@ export class ImagesController {
     if (!folder || !imageName) {
       return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
     }
-
     const absoluteImagePath = path.join(folder, imageName);
 
     try {
       const imageBuffer = await sharp(absoluteImagePath)
+        .resize({ width: 290, height: 290, fit: 'inside' }) // 필요에 따라 크기 조정
         .toFormat('webp')
-        .jpeg({ quality: 20 })
+        .webp({ quality: 10 }) // WebP 포맷으로 설정
         .toBuffer();
-      // res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Content-Type', 'image/webp');
       res.send(imageBuffer);
     } catch (error) {
