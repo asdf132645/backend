@@ -28,7 +28,7 @@ async function bootstrap() {
   httpApp.enableCors(corsOptions);
 
   // 전역 프리픽스 설정
-  httpApp.setGlobalPrefix('api');
+  // httpApp.setGlobalPrefix('api');
 
   // Swagger 설정
   const config = new DocumentBuilder()
