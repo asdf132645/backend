@@ -59,15 +59,15 @@ export class CombinedService
     }
 
     // if (clientIpAddress.includes('127.0.0.1')) {
-    this.logger.log(`clientExit 누름`);
-    this.webSocketGetData({
-      type: 'SEND_DATA',
-      payload: {
-        jobCmd: 'clientExit',
-        reqUserId: '',
-        reqDttm: '',
-      },
-    });
+    // this.logger.log(`clientExit 누름`);
+    // this.webSocketGetData({
+    //   type: 'SEND_DATA',
+    //   payload: {
+    //     jobCmd: 'clientExit',
+    //     reqUserId: '',
+    //     reqDttm: '',
+    //   },
+    // });
     // }
     const clientIndex = this.clients.findIndex((c) => c.id === client.id);
     if (clientIndex !== -1) {

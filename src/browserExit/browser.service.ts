@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
+import * as os from 'os';
 
 @Injectable()
 export class BrowserService {
   closeEdgeBrowser(): Promise<string> {
     return new Promise((resolve, reject) => {
-      const appPath = `"D:\\UIMD_Data\\UI_KILL\\kill_edge.exe"`;
+      const userHomeDir = os.homedir();
+      const appPath = `"${userHomeDir}\\AppData\\Local\\Programs\\UIMD\\web\\viewer\\kill_edge.exe"`;
+      // const appPath = `"D:\\UIMD_Data\\UI_KILL\\kill_edge.exe"`;
 
       exec(appPath, (error, stdout, stderr) => {
         if (error) {
