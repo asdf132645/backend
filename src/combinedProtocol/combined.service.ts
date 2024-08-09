@@ -48,6 +48,7 @@ export class CombinedService
     this.wss = server;
   }
 
+  // ai tcp 연결 끊길경우 동작 코드
   async handleDisconnect(client: Socket) {
     const clientIpAddress =
       client.handshake.headers['x-real-ip'] || client.conn.remoteAddress;
@@ -69,6 +70,7 @@ export class CombinedService
     //   },
     // });
     // }
+
     const clientIndex = this.clients.findIndex((c) => c.id === client.id);
     if (clientIndex !== -1) {
       await this.broadcastDisconnectedClient();
