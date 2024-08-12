@@ -6,10 +6,20 @@ import { Response } from 'express';
 export class CbcController {
   constructor(private readonly cbcService: CbcService) {}
 
-  @Get('/live')
+  @Get('/liveTest')
   getCbcWorkList(@Query() spcParams: any, @Res() res: Response): void {
     const xmlData = this.cbcService.getMockCbcWorkList();
     res.set('Content-Type', 'application/xml');
     res.send(xmlData);
+  }
+
+  @Get('/lisCbcMarys')
+  async getData(
+    @Query() query: { [key: string]: string },
+    // @Res() res: Response,
+  ) {
+    const data = await this.cbcService.fetchExternalData(query);
+    // res.send(data)
+    return data;
   }
 }

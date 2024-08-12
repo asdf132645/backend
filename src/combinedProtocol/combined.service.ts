@@ -58,7 +58,7 @@ export class CombinedService
     if (ipAddress) {
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
-
+    this.logger.log(`WebSocket 클라이언트 정보: ${client.conn}`);
     // if (clientIpAddress.includes('127.0.0.1')) {
     // this.logger.log(`clientExit 누름`);
     // this.webSocketGetData({
