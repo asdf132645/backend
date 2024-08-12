@@ -201,14 +201,19 @@ export class CombinedService
   sendDataToEmbeddedServer(data: any): void {
     if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
-        const seData = [data.payload];
-        for (const seDataKey in seData) {
-          const serializedData = JSON.stringify(seData[seDataKey]);
-          if (data.payload.jobCmd !== 'INIT') {
-            this.notRes = true;
-          }
+        const serializedData = JSON.stringify(data.payload);
+
+        // 데이터 전송 속도 조절을 위한 지연 추가
+        const throttleDelay = 100; // 100ms 지연
+
+        setTimeout(() => {
           this.connectedClient.write(serializedData);
-          this.logger.log(`tcp로 전송 ${serializedData}`);
+          this.logger.log(`TCP로 전송: ${serializedData}`);
+        }, throttleDelay);
+
+        // 연결 상태에 따라 `notRes` 플래그 설정
+        if (data.payload.jobCmd !== 'INIT') {
+          this.notRes = true;
         }
       } catch (error) {
         this.logger.error(`데이터 직렬화 오류: ${error.message}`);
@@ -228,39 +233,59 @@ export class CombinedService
   }
 
   setupTcpClient(newAddress: string, newPort: number): void {
-    if (!this.connectedClient || this.connectedClient.destroyed) {
-      const newClient = new net.Socket();
-      newClient.connect(newPort, newAddress, () => {
-        this.connectedClient = newClient;
-      });
+    const connectClient = () => {
+      if (!this.connectedClient || this.connectedClient.destroyed) {
+        const newClient = new net.Socket();
 
-      const partialData: Buffer[] = []; // 부분적인 데이터를 저장할 배열
+        // 타임아웃 설정: 연결 시도에 대한 타임아웃 (밀리초 단위)
+        newClient.setTimeout(10000); // 10초
 
-      newClient.on('data', (chunk) => {
-        partialData.push(chunk);
+        newClient.connect(newPort, newAddress, () => {
+          this.logger.log('TCP 클라이언트 연결 성공');
+          this.connectedClient = newClient;
+        });
 
-        if (this.wss) {
-          this.sendDataToWebSocketClients(chunk);
-          this.sendDataToWebSocketClients('tcpConnected');
-          this.notRes = false;
-          console.log('TCP 연결 됐음');
-        } else {
-          this.logger.error('WebSocketService가 초기화되지 않았습니다.');
-        }
-      });
+        // 연결 타임아웃 발생 시의 이벤트 핸들러
+        newClient.on('timeout', () => {
+          this.logger.error('TCP 클라이언트 연결 타임아웃');
+          newClient.destroy(); // 타임아웃 시 소켓 종료
+          this.connectedClient = null;
+          // 재연결 시도
+          setTimeout(() => connectClient(), 5000);
+        });
 
-      newClient.on('end', () => {
-        this.logger.log('TCP 클라이언트 연결 종료');
-        this.sendDataToWebSocketClients({ err: true });
-        this.connectedClient = null;
-      });
+        // 데이터 수신 타임아웃 설정 (밀리초 단위)
+        newClient.setTimeout(30000); // 30초
 
-      newClient.on('error', (err) => {
-        this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
-        this.sendDataToWebSocketClients({ err: true });
-      });
-    } else {
-      this.logger.warn('이미 클라이언트 연결이 활성화되어 있습니다.');
-    }
+        newClient.on('data', (chunk) => {
+          if (this.wss) {
+            this.sendDataToWebSocketClients(chunk);
+            this.sendDataToWebSocketClients('tcpConnected');
+            this.notRes = false;
+          } else {
+            this.logger.error('WebSocketService가 초기화되지 않았습니다.');
+          }
+        });
+
+        newClient.on('end', () => {
+          this.logger.log('TCP 클라이언트 연결 종료');
+          this.sendDataToWebSocketClients({ err: true });
+          this.connectedClient = null;
+          // 재연결 시도
+          setTimeout(() => connectClient(), 5000);
+        });
+
+        newClient.on('error', (err) => {
+          this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
+          this.sendDataToWebSocketClients({ err: true });
+          // 재연결 시도
+          setTimeout(() => connectClient(), 5000);
+        });
+      } else {
+        this.logger.warn('이미 클라이언트 연결이 활성화되어 있습니다.');
+      }
+    };
+
+    connectClient();
   }
 }
