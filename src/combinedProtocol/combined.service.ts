@@ -121,17 +121,6 @@ export class CombinedService
       await this.runingInfoService.clearPcIpAndSetStateFalse(ipAddress);
     }
     this.logger.log(`WebSocket 클라이언트 정보: ${client.conn}`);
-    // if (clientIpAddress.includes('127.0.0.1')) {
-    // this.logger.log(`clientExit 누름`);
-    // this.webSocketGetData({
-    //   type: 'SEND_DATA',
-    //   payload: {
-    //     jobCmd: 'clientExit',
-    //     reqUserId: '',
-    //     reqDttm: '',
-    //   },
-    // });
-    // }
 
     const clientIndex = this.clients.findIndex((c) => c.id === client.id);
     if (clientIndex !== -1) {
@@ -322,7 +311,7 @@ export class CombinedService
         newClient.on('timeout', () => {
           this.logger.error('🚨 TCP 클라이언트 연결 타임아웃');
           newClient.destroy(); // 타임아웃 시 소켓 종료
-          this.connectedClient = null;
+          this.connectedClient = null; // <- 연결이 종료되었으므로 null로 설정
           // 재연결 시도
           setTimeout(() => connectClient(), 5000);
         });
@@ -343,7 +332,7 @@ export class CombinedService
         newClient.on('end', () => {
           this.logger.log('TCP 클라이언트 연결 종료');
           this.sendDataToWebSocketClients({ err: true });
-          this.connectedClient = null;
+          this.connectedClient = null; // <- 연결이 종료되었으므로 null로 설정
           // 재연결 시도
           setTimeout(() => connectClient(), 5000);
         });
@@ -351,6 +340,7 @@ export class CombinedService
         newClient.on('error', (err: any) => {
           this.logger.error(`🚨[${err.code}] TCP 클라이언트 오류: ${err.syscall} ${err.address} ${err.port}`);
           this.sendDataToWebSocketClients({ err: true });
+          this.connectedClient = null; // <- 오류 발생 시에도 null로 설정
           // 재연결 시도
           setTimeout(() => connectClient(), 5000);
         });
