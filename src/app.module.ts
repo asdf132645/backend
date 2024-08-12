@@ -49,6 +49,7 @@ import { QualityCheckService } from './settings/qualityCheck/qualityCheck.servic
 import { QualityCheckController } from './settings/qualityCheck/qualityCheck.controller';
 import { BrowserModule } from './browserExit/browser.module';
 import { RestoreModule } from './restore/restore.module';
+import { CbcModule } from './lisDakeData/cbc.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { RestoreModule } from './restore/restore.module';
     BackupModule,
     BrowserModule,
     RestoreModule,
+    CbcModule,
   ],
   controllers: [
     AppController,
