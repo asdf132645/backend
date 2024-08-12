@@ -3,6 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import * as net from 'net';
 import { Server, Socket } from 'socket.io';
+import * as os from 'os';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -33,6 +34,9 @@ export class CombinedService
   clients: Socket[] = [];
   public notRes: boolean = false;
   private serverIp: any; // 서버의 IP 주소 저장
+  private previousCpuUsage;
+  private previousTime;
+  private frontendToBackendText = '';
 
   constructor(
     private readonly logger: LoggerService,
@@ -46,6 +50,64 @@ export class CombinedService
 
   afterInit(server: Server) {
     this.wss = server;
+  }
+
+  private logMemoryUsage = () => {
+    const memoryUsage = process.memoryUsage();
+    const formatMemory = (bytes) => `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+
+    // 전체 시스템 메모리 대비 프로세스 메모리 사용량 비율 계산
+    const totalMemory = os.totalmem();
+    const memoryPercent = ((memoryUsage.rss / totalMemory) * 100).toFixed(2);
+
+    // CPU 사용량 계산을 위해 이전 값 저장
+    if (!this.previousCpuUsage) {
+      this.previousCpuUsage = process.cpuUsage();
+      this.previousTime = process.hrtime();
+      return;
+    }
+
+    const currentCpuUsage = process.cpuUsage(this.previousCpuUsage);
+    const currentTime = process.hrtime(this.previousTime);
+
+    // CPU 사용량 계산 (백분율로)
+    const elapsedTimeInSeconds = currentTime[0] + currentTime[1] / 1e9;
+    const cpuPercent = ((currentCpuUsage.user + currentCpuUsage.system) / (elapsedTimeInSeconds * 1e6 * os.cpus().length)).toFixed(2);
+
+    // 현재 값을 이전 값으로 업데이트
+    this.previousCpuUsage = process.cpuUsage();
+    this.previousTime = process.hrtime();
+
+    this.logger.memory(`
+      [Memory Usage]\n
+      RSS: ${formatMemory(memoryUsage.rss)} (${memoryPercent}% of total system memory)\n
+      Heap Total: ${formatMemory(memoryUsage.heapTotal)}\n
+      Heap Used: ${formatMemory(memoryUsage.heapUsed)}\n
+      External: ${formatMemory(memoryUsage.external)}\n
+      Array Buffers: ${formatMemory(memoryUsage.arrayBuffers)}\n
+      CPU Usage: ${cpuPercent}% of total CPU\\n
+    `)
+    /**
+     * RSS 전체 메모리 사용량 (Heap + 코드 영역 + 외부 메모리)
+     * Heap Total 할당된 힙의 전체 크기
+     * Heap Used 사용 중인 힙 메모리의 양
+     * External Node.js 외부에서 사용하는 메모리 (V8에 의해 관리되지 않음)
+     * Array Buffers ArrayBuffer 및 SharedArrayBuffer에 의해 사용된 메모리
+     * CPU Usage: 프로세스가 사용하는 CPU의 퍼센트
+     * */
+  }
+
+  private isSameMessage = (oldMsg, newMsg) => {
+    if (newMsg.reqDttm && oldMsg.reqDttm) {
+      delete oldMsg.reqDttm;
+      delete newMsg.reqDttm;
+      console.log(oldMsg, newMsg)
+      console.log(JSON.stringify(newMsg) === JSON.stringify(oldMsg))
+
+      if (JSON.stringify(newMsg) === JSON.stringify(oldMsg)) return true;
+    }
+
+    return false;
   }
 
   // ai tcp 연결 끊길경우 동작 코드
@@ -113,6 +175,7 @@ export class CombinedService
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
     // const ipv4Address = this.extractIPv4Address(client.conn.remoteAddress);
     // console.log(ipv4Address);
+    this.logMemoryUsage();
 
     this.serverIp = await isServerRunningLocally();
     // this.logger.log(`Server IP address: ${this.serverIp}`);
@@ -125,16 +188,24 @@ export class CombinedService
         if (this.wss) {
           // if (clientOrigin.includes('127.0.0.1') || message.payload?.anyWay) {
           delete message.payload?.anyWay;
-          this.logger.log(
-            `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
-          );
+
+          if (!this.isSameMessage(this.frontendToBackendText, message.payload)) {
+            this.logger.log(
+                `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
+            );
+          }
+          this.frontendToBackendText = message.payload;
+
+          // this.logger.log(
+          //   `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
+          // );
           if (!this.notRes) {
             this.webSocketGetData(message);
           }
           // }
         }
       } catch (e) {
-        this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
+        this.logger.error(`🚨 WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
       }
     });
 
@@ -145,7 +216,7 @@ export class CombinedService
           this.wss.emit('stateVal', state);
         }
       } catch (e) {
-        this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
+        this.logger.error(`🚨 WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
       }
     });
 
@@ -157,7 +228,7 @@ export class CombinedService
           // }
         }
       } catch (e) {
-        this.logger.error(`WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
+        this.logger.error(`🚨 WebSocket 메시지 처리 중 오류 발생: ${e.message}`);
       }
     });
 
@@ -166,7 +237,7 @@ export class CombinedService
     });
 
     client.on('error', (error) => {
-      this.logger.error(`WebSocket 클라이언트 오류: ${error.message}`);
+      this.logger.error(`🚨 WebSocket 클라이언트 오류: ${error.message}`);
     });
   }
 
@@ -191,10 +262,12 @@ export class CombinedService
         jsonData = data;
       }
       this.wss.emit('chat', jsonData);
+
+
       this.logger.log(`프론트엔드로 전송 ${jsonData}`);
       this.notRes = false;
     } else {
-      this.logger.error('웹소켓 전송 실패..');
+      this.logger.error('🚨 웹소켓 전송 실패..');
     }
   }
 
@@ -216,7 +289,7 @@ export class CombinedService
           this.notRes = true;
         }
       } catch (error) {
-        this.logger.error(`데이터 직렬화 오류: ${error.message}`);
+        this.logger.error(`🚨 데이터 직렬화 오류: ${error.message}`);
       }
     } else {
       this.notRes = false;
@@ -247,7 +320,7 @@ export class CombinedService
 
         // 연결 타임아웃 발생 시의 이벤트 핸들러
         newClient.on('timeout', () => {
-          this.logger.error('TCP 클라이언트 연결 타임아웃');
+          this.logger.error('🚨 TCP 클라이언트 연결 타임아웃');
           newClient.destroy(); // 타임아웃 시 소켓 종료
           this.connectedClient = null;
           // 재연결 시도
@@ -263,7 +336,7 @@ export class CombinedService
             this.sendDataToWebSocketClients('tcpConnected');
             this.notRes = false;
           } else {
-            this.logger.error('WebSocketService가 초기화되지 않았습니다.');
+            this.logger.error('🚨 WebSocketService가 초기화되지 않았습니다.');
           }
         });
 
@@ -275,8 +348,8 @@ export class CombinedService
           setTimeout(() => connectClient(), 5000);
         });
 
-        newClient.on('error', (err) => {
-          this.logger.error(`TCP 클라이언트 오류: ${err.message}`);
+        newClient.on('error', (err: any) => {
+          this.logger.error(`🚨[${err.code}] TCP 클라이언트 오류: ${err.syscall} ${err.address} ${err.port}`);
           this.sendDataToWebSocketClients({ err: true });
           // 재연결 시도
           setTimeout(() => connectClient(), 5000);
