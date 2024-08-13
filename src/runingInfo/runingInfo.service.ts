@@ -1,8 +1,8 @@
 // runing-info.service.ts
 
 import { Injectable } from '@nestjs/common';
-import {InjectDataSource, InjectRepository} from '@nestjs/typeorm';
-import {Brackets, In, Repository, EntityManager, DataSource} from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Brackets, In, Repository, EntityManager, DataSource } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
 import {
@@ -11,10 +11,13 @@ import {
 } from './dto/runingInfoDtoItems';
 import * as fs from 'fs';
 import * as path from 'path';
+import { run } from 'jest';
+import { LoggerService } from '../logger.service';
 
 @Injectable()
 export class RuningInfoService {
   constructor(
+    private readonly logger: LoggerService,
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(RuningInfoEntity)
     private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
@@ -24,19 +27,19 @@ export class RuningInfoService {
     const { runingInfoDtoItems } = createDto;
 
     // 동일한 slotId가 존재하는지 확인
-    const findDuplicatedSlotId = `SELECT slotId, slotNo FROM runing_info_entity`;
-    const existingEntity = await this.dataSource.query(findDuplicatedSlotId);
-
-    // const existingEntity = await this.runingInfoEntityRepository.findOne({
-    //   where: {
-    //     slotId: runingInfoDtoItems.slotId,
-    //     slotNo: runingInfoDtoItems.slotNo,
-    //   },
-    // });
+    const findDuplicatedSlotId = `
+    SELECT * 
+    FROM runing_info_entity 
+    WHERE slotId = ? 
+    OR slotNo = ?
+`;
+    const existingEntity = await this.dataSource.query(findDuplicatedSlotId, [
+      runingInfoDtoItems.slotId,
+      runingInfoDtoItems.slotNo,
+    ]);
 
     // 동일한 slotId가 존재하는 경우 아무 조치도 하지 않고 메서드를 종료
-    // if (existingEntity) {
-    if (existingEntity > 0) {
+    if (existingEntity || existingEntity.length > 0) {
       console.log('동일 슬롯아이디 존재 저장 x');
       return null;
     }

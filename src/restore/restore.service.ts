@@ -104,6 +104,7 @@ export class RestoreService {
       const isExistingItem = await this.runningInfoRepository.findOne({
         where: { slotId: item.slotId },
       });
+
       if (isExistingItem) continue;
       const savingItem = {
         slotNo: item.slotNo,
@@ -146,6 +147,30 @@ export class RestoreService {
     }
   };
 
+  private checkDuplicatedInDatabase = async () => {
+    const restoreSql = `SELECT * FROM restore_runing_info_entity`;
+    const duplicatedSlotIdArr = [];
+    const nonDuplicatedSlotIdArr = [];
+
+    const items = await this.dataSource.query(restoreSql);
+
+    for (const item of items) {
+      const isExistingItem = await this.runningInfoRepository.findOne({
+        where: { slotId: item.slotId },
+      });
+      if (isExistingItem) {
+        duplicatedSlotIdArr.push(item.slotId);
+      } else {
+        nonDuplicatedSlotIdArr.push(item.slotId);
+      }
+    }
+    const slotIdObj = {
+      duplicated: duplicatedSlotIdArr,
+      nonDuplicated: nonDuplicatedSlotIdArr,
+    };
+    return slotIdObj;
+  };
+
   private deleteTemporaryTable = async () => {
     const deleteTableSql = 'DROP TABLE IF EXISTS `restore_runing_info_entity`';
     await this.dataSource.query(deleteTableSql);
@@ -163,6 +188,8 @@ export class RestoreService {
 
   async changeDatabaseAndExecute(fileInfo: any): Promise<string> {
     const { fileName, filePath } = fileInfo;
+
+    await this.deleteTemporaryTable();
 
     const match = fileName.match(
       /^backup-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.sql$/,
@@ -222,6 +249,52 @@ export class RestoreService {
       return 'Restoration completed successfully';
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  async checkDuplicatedData(fileInfo: any): Promise<any> {
+    const { fileName, filePath } = fileInfo;
+
+    await this.deleteTemporaryTable();
+
+    const match = fileName.match(
+      /^backup-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.sql$/,
+    );
+
+    if (!match) {
+      return 'Invalid backup file name';
+    }
+
+    const dateFolderPath = `${match[1]}_${match[2]}`;
+    const folderPath = `${filePath}\\${dateFolderPath}`;
+    const sqlFilePath = `${filePath}\\${dateFolderPath}\\${fileName}`;
+    const destinationFolderPath =
+      filePath === 'D:\\PB_backup' ? 'D:\\PBIA_proc' : 'D:\\BMIA_proc';
+    const databaseName =
+      filePath === 'D:\\PB_backup' ? 'pb_db_web' : 'bm_db_web';
+
+    try {
+      if (!(await fs.pathExists(sqlFilePath))) {
+        return 'Backup file does not exist';
+      }
+
+      if (!(await fs.pathExists(folderPath))) {
+        return 'Backup folder does not exist';
+      }
+
+      if (!(await fs.pathExists(destinationFolderPath))) {
+        await fs.ensureDir(destinationFolderPath);
+      }
+
+      await this.dataSource.query(`USE ${databaseName}`);
+
+      await this.createTemporaryTable(sqlFilePath);
+
+      const duplicatedData = await this.checkDuplicatedInDatabase();
+
+      return duplicatedData;
+    } catch (e) {
+      return `Error: ${e}`;
     }
   }
 }

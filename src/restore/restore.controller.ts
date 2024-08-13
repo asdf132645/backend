@@ -10,4 +10,11 @@ export class RestoreController {
     await this.restoreService.changeDatabaseAndExecute(body);
     return { message: 'SQL file executed successfully' };
   }
+
+  @Post('checkDuplicatedData')
+  async checkDuplicatedData(
+    @Body() body: { filePath: string; fileName: string },
+  ) {
+    return await this.restoreService.checkDuplicatedData(body);
+  }
 }

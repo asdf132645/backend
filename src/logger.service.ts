@@ -51,11 +51,13 @@ export class LoggerService extends Logger {
     const now = new Date();
     const date = moment(now).toDate();
     const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD 형식으로 날짜 문자열 생성
-    const logDir = path.join(this.baseLogDir, level, dateString);
+    const logDir = path.join(this.baseLogDir, level);
 
     this.ensureDirectoryExists(logDir);
 
     const logFilePath = path.join(logDir, `${dateString}.txt`);
+
+    this.ensureFileExists(logFilePath);
 
     fs.appendFileSync(
       logFilePath,
@@ -71,6 +73,12 @@ export class LoggerService extends Logger {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
       console.log(`로그 디렉토리가 존재하지 않아서 생성되었습니다: ${dir}`);
+    }
+  }
+
+  private ensureFileExists(file: string) {
+    if (!fs.existsSync(file)) {
+      fs.writeFileSync(file, '');
     }
   }
 }
