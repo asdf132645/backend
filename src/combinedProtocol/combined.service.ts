@@ -248,6 +248,7 @@ export class CombinedService
         newClient.connect(newPort, newAddress, () => {
           this.logger.log('TCP 클라이언트 연결 성공');
           this.connectedClient = newClient;
+          this.wss.emit('isTcpConnected', true);
         });
 
         // 연결 타임아웃 발생 시의 이벤트 핸들러
@@ -265,7 +266,6 @@ export class CombinedService
         newClient.on('data', (chunk) => {
           if (this.wss) {
             this.sendDataToWebSocketClients(chunk);
-            this.sendDataToWebSocketClients('tcpConnected');
             this.notRes = false;
           } else {
             this.logger.error('🚨 WebSocketService가 초기화되지 않았습니다.');
