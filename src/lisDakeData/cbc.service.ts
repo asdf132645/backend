@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { LoggerService } from "../logger.service";
 
 const execPromise = promisify(exec);
 
 @Injectable()
 export class CbcService {
+  constructor(
+      private readonly logger: LoggerService,
+  ) {}
+
   getMockCbcWorkList(): string {
     // 가짜 XML 데이터를 생성
     return `
@@ -71,6 +76,8 @@ export class CbcService {
     // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
     const queryString = new URLSearchParams(queryParams).toString();
     const url = `${baseUrl}?${queryString}`;
+
+    this.logger.cbc(`cbc-service-fetchExternalData: ${url}`);
 
     const curlCommand = `curl -s "${url}"`; // -s 옵션을 사용하여 진행 상황 출력 숨김
 
