@@ -67,7 +67,7 @@ export class CbcService {
   async fetchExternalData(queryParams: {
     [key: string]: string;
   }): Promise<any> {
-    const baseUrl = 'https://emr012.cmcnu.or.kr/cmcnu/.live';
+    const baseUrl = 'https://emr012edu.cmcnu.or.kr/cmcnu/.live';
     // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
     const queryString = new URLSearchParams(queryParams).toString();
     const url = `${baseUrl}?${queryString}`;
