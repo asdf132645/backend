@@ -190,6 +190,10 @@ export class CombinedService
         const throttleDelay = 100; // 100ms 지연
 
         setTimeout(() => {
+          // console.log('serializedData', serializedData);
+          if (!serializedData) {
+            return;
+          }
           this.connectedClient.write(serializedData);
           this.logger.log(`TCP로 전송: ${serializedData}`);
         }, throttleDelay);
