@@ -100,10 +100,11 @@ export class CombinedService
       try {
         if (this.wss) {
           delete message.payload?.anyWay;
-
-          this.logger.log(
-            `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
-          );
+          if (!client.conn.remoteAddress.includes('192.168.0.131')) {
+            this.logger.log(
+              `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
+            );
+          }
           if (!this.notRes) {
             this.webSocketGetData(message);
           }

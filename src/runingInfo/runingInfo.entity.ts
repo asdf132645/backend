@@ -1,8 +1,9 @@
 // runing-info.entity.ts
 
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity()
+@Unique(['slotId']) // Unique 제약 조건 추가
 export class RuningInfoEntity {
   @PrimaryGeneratedColumn()
   id: number;

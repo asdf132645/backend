@@ -1,7 +1,7 @@
 // runing-info.service.ts
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, In, Repository, EntityManager, DataSource } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 
@@ -11,14 +11,13 @@ import {
 } from './dto/runingInfoDtoItems';
 import * as fs from 'fs';
 import * as path from 'path';
-import { run } from 'jest';
 import { LoggerService } from '../logger.service';
 
 @Injectable()
 export class RuningInfoService {
   constructor(
     private readonly logger: LoggerService,
-    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly dataSource: DataSource, // 트랜잭션을 사용 하여 비동기 작업의 타이밍 문제를 해결
     @InjectRepository(RuningInfoEntity)
     private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
   ) {}
@@ -26,25 +25,24 @@ export class RuningInfoService {
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
     const { runingInfoDtoItems } = createDto;
 
-    // 동일한 slotId가 존재하는지 확인
-    const existingEntity = await this.runingInfoEntityRepository.findOne({
-      where: {
-        slotId: runingInfoDtoItems.slotId,
-      },
+    return await this.dataSource.transaction(async (manager) => {
+      const existingEntity = await manager.findOne(RuningInfoEntity, {
+        where: {
+          slotId: runingInfoDtoItems.slotId,
+        },
+      });
+
+      if (existingEntity) {
+        console.log('동일 슬롯아이디 존재 저장 x');
+        return null;
+      }
+
+      const entity = manager.create(RuningInfoEntity, {
+        ...runingInfoDtoItems,
+      });
+
+      return await manager.save(entity);
     });
-
-    // 동일한 slotId가 존재하는 경우 아무 조치도 하지 않고 메서드를 종료
-    if (existingEntity) {
-      console.log('동일 슬롯아이디 존재 저장 x');
-      return null;
-    }
-
-    // 동일한 slotId가 존재하지 않는 경우 엔티티를 생성
-    const entity = this.runingInfoEntityRepository.create({
-      ...runingInfoDtoItems,
-    });
-
-    return await this.runingInfoEntityRepository.save(entity);
   }
 
   async update(updateDto: UpdateRuningInfoDto): Promise<RuningInfoEntity[]> {
