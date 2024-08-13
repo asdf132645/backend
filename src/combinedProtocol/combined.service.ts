@@ -190,7 +190,6 @@ export class CombinedService
         const throttleDelay = 100; // 100ms 지연
 
         setTimeout(() => {
-          // console.log('serializedData', serializedData);
           if (!serializedData) {
             return;
           }
@@ -199,16 +198,16 @@ export class CombinedService
         }, throttleDelay);
 
         // 연결 상태에 따라 `notRes` 플래그 설정
-        if (data.payload.jobCmd !== 'INIT') {
-          this.notRes = true;
-        }
+        // if (data.payload.jobCmd !== 'INIT') {
+        //   this.notRes = true;
+        // }
       } catch (error) {
         this.logger.error(`🚨 데이터 직렬화 오류: ${error.message}`);
       }
     } else {
       this.notRes = false;
       this.logger.warn(
-        '활성화된 TCP 클라이언트 연결 없음. 데이터 전송 안됨 tcp 연결 확인 필요.',
+        '⚠️ 활성화된 TCP 클라이언트 연결 없음. 데이터 전송 안됨 tcp 연결 확인 필요.',
       );
     }
   }
@@ -272,7 +271,7 @@ export class CombinedService
           setTimeout(() => connectClient(), 5000);
         });
       } else {
-        this.logger.warn('이미 클라이언트 연결이 활성화되어 있습니다.');
+        this.logger.warn('⚠️ 이미 클라이언트 연결이 활성화되어 있습니다.');
       }
     };
 
