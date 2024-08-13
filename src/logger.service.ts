@@ -45,7 +45,7 @@ export class LoggerService extends Logger {
 
     const formattedTimeStr = `[${hours}:${minutes}:${seconds}.${milliseconds}]`;
     return formattedTimeStr;
-  }
+  };
 
   private writeLog(level: string, message: string) {
     const now = new Date();
@@ -57,7 +57,10 @@ export class LoggerService extends Logger {
 
     const logFilePath = path.join(logDir, `${dateString}.txt`);
 
-    fs.appendFileSync(logFilePath, `${this.formattedTime(date)} - ${message}\n`);
+    fs.appendFileSync(
+      logFilePath,
+      `${this.formattedTime(date)} - ${message}\n`,
+    );
   }
 
   private ensureBaseLogDirectoryExists() {
