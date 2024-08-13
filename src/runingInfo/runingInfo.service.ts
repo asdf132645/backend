@@ -27,19 +27,14 @@ export class RuningInfoService {
     const { runingInfoDtoItems } = createDto;
 
     // 동일한 slotId가 존재하는지 확인
-    const findDuplicatedSlotId = `
-    SELECT * 
-    FROM runing_info_entity 
-    WHERE slotId = ? 
-    OR slotNo = ?
-`;
-    const existingEntity = await this.dataSource.query(findDuplicatedSlotId, [
-      runingInfoDtoItems.slotId,
-      runingInfoDtoItems.slotNo,
-    ]);
+    const existingEntity = await this.runingInfoEntityRepository.findOne({
+      where: {
+        slotId: runingInfoDtoItems.slotId,
+      },
+    });
 
     // 동일한 slotId가 존재하는 경우 아무 조치도 하지 않고 메서드를 종료
-    if (existingEntity || existingEntity.length > 0) {
+    if (existingEntity) {
       console.log('동일 슬롯아이디 존재 저장 x');
       return null;
     }
