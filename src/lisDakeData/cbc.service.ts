@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { LoggerService } from "../logger.service";
+import { LoggerService } from '../logger.service';
 
 const execPromise = promisify(exec);
 
 @Injectable()
 export class CbcService {
-  constructor(
-      private readonly logger: LoggerService,
-  ) {}
+  constructor(private readonly logger: LoggerService) {}
 
   getMockCbcWorkList(): string {
     // 가짜 XML 데이터를 생성
@@ -73,7 +71,7 @@ export class CbcService {
     [key: string]: string;
   }): Promise<any> {
     // 운영 http://emr012.cmcnu.or.kr/cmcnu/.live
-    // 개발 http://emr012.cmcnu.or.kr/cmcnu/.live
+    // 개발 http://emr012edu.cmcnu.or.kr/cmcnu/.live
     // UIMD 테스트 http://192.168.0.131/api/cbc/liveTest
     const baseUrl = 'http://emr012edu.cmcnu.or.kr/cmcnu/.live';
     // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
