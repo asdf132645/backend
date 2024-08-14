@@ -105,7 +105,6 @@ export class RestoreService {
         where: { slotId: item.slotId },
       });
 
-      if (isExistingItem) continue;
       const savingItem = {
         slotNo: item.slotNo,
         traySlot: item.traySlot,
@@ -143,7 +142,16 @@ export class RestoreService {
         img_drive_root_path: null,
       };
       savingItem['lock_status'] = 0;
-      await this.runningInfoRepository.save({ ...savingItem });
+
+      if (isExistingItem) {
+        await this.runningInfoRepository.update(
+          { slotId: item.slotId },
+          savingItem,
+        );
+        continue;
+      } else {
+        await this.runningInfoRepository.save({ ...savingItem });
+      }
     }
   };
 
@@ -159,22 +167,32 @@ export class RestoreService {
         where: { slotId: item.slotId },
       });
       if (isExistingItem) {
-        duplicatedSlotIdArr.push(item.slotId);
+        duplicatedSlotIdArr.push(isExistingItem.barcodeNo);
       } else {
-        nonDuplicatedSlotIdArr.push(item.slotId);
+        nonDuplicatedSlotIdArr.push(item.barcodeNo);
       }
     }
-    const slotIdObj = {
+    const barcodeNoObj = {
       duplicated: duplicatedSlotIdArr,
       nonDuplicated: nonDuplicatedSlotIdArr,
     };
-    return slotIdObj;
+    return barcodeNoObj;
   };
 
   private deleteTemporaryTable = async () => {
     const deleteTableSql = 'DROP TABLE IF EXISTS `restore_runing_info_entity`';
     await this.dataSource.query(deleteTableSql);
   };
+
+  private deleteImageFolder = async (folderPath) => {
+    if (fs.pathExists(folderPath)) {
+      try {
+        await fs.removeSync(folderPath);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
 
   private updateImgDriveRootPath = async (fileNames: string[]) => {
     for (const fileName of fileNames) {
@@ -245,6 +263,8 @@ export class RestoreService {
       await this.updateImgDriveRootPath(folderNamesArr);
 
       await this.deleteTemporaryTable();
+
+      await this.deleteImageFolder(folderPath);
 
       return 'Restoration completed successfully';
     } catch (e) {
