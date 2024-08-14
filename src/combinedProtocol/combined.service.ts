@@ -199,9 +199,9 @@ export class CombinedService
         }, throttleDelay);
 
         // 연결 상태에 따라 `notRes` 플래그 설정
-        // if (data.payload.jobCmd !== 'INIT') {
-        //   this.notRes = true;
-        // }
+        if (data.payload.jobCmd === 'INIT') {
+          this.notRes = false;
+        }
       } catch (error) {
         this.logger.error(`🚨 데이터 직렬화 오류: ${error.message}`);
       }
