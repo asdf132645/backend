@@ -95,6 +95,9 @@ export class RestoreService {
     await this.dataSource.query(insertStatement);
   };
 
+  /** Restore Logic
+   * if Existing Item continue
+   * */
   private moveDataToDatabase = async () => {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
 
@@ -104,6 +107,10 @@ export class RestoreService {
       const isExistingItem = await this.runningInfoRepository.findOne({
         where: { slotId: item.slotId },
       });
+
+      if (isExistingItem) {
+        continue;
+      }
 
       const savingItem = {
         slotNo: item.slotNo,
@@ -143,15 +150,7 @@ export class RestoreService {
       };
       savingItem['lock_status'] = 0;
 
-      if (isExistingItem) {
-        await this.runningInfoRepository.update(
-          { slotId: item.slotId },
-          savingItem,
-        );
-        continue;
-      } else {
-        await this.runningInfoRepository.save({ ...savingItem });
-      }
+      await this.runningInfoRepository.save({ ...savingItem });
     }
   };
 
@@ -192,7 +191,7 @@ export class RestoreService {
         console.log(e);
       }
     }
-  }
+  };
 
   private updateImgDriveRootPath = async (fileNames: string[]) => {
     for (const fileName of fileNames) {
