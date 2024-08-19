@@ -200,7 +200,16 @@ export class CombinedService
         }, throttleDelay);
 
         // 연결 상태에 따라 `notRes` 플래그 설정
-        if (data.payload.jobCmd === 'INIT') {
+        if (
+          data.payload.jobCmd === 'INIT' ||
+          data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
+          data.payload.jobCmd === 'START' ||
+          data.payload.jobCmd === 'STOP' ||
+          data.payload.jobCmd === 'RUNNING_COMP' ||
+          data.payload.jobCmd === 'PAUSE' ||
+          data.payload.jobCmd === 'RESTART' ||
+          data.payload.jobCmd === 'RECOVERY'
+        ) {
           this.notRes = false;
         }
       } catch (error) {
