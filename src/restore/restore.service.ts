@@ -216,12 +216,12 @@ export class RestoreService {
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${sourceFolderPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${sourceFolderPath}\\${dateFolderPath}\\${fileName}`;
+    const folderPath = `${filePath}\\${dateFolderPath}`;
+    const sqlFilePath = `${filePath}\\${dateFolderPath}\\${fileName}`;
     const destinationFolderPath =
-      sourceFolderPath === 'D:\\PB_backup' ? 'D:\\PBIA_proc' : 'D:\\BMIA_proc';
+        filePath === 'D:\\PB_backup' ? 'D:\\PBIA_proc' : 'D:\\BMIA_proc';
     const databaseName =
-      sourceFolderPath === 'D:\\PB_backup' ? 'pb_db_web' : 'bm_db_web';
+        filePath === 'D:\\PB_backup' ? 'pb_db_web' : 'bm_db_web';
 
     try {
       if (!(await fs.pathExists(sqlFilePath))) {
@@ -271,7 +271,7 @@ export class RestoreService {
   }
 
   async checkDuplicatedData(fileInfo: any): Promise<any> {
-    const { fileName, filePath } = fileInfo;
+    const { fileName, sourceFolderPath } = fileInfo;
 
     await this.deleteTemporaryTable();
 
@@ -284,12 +284,12 @@ export class RestoreService {
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${filePath}\\${dateFolderPath}`;
-    const sqlFilePath = `${filePath}\\${dateFolderPath}\\${fileName}`;
-    const destinationFolderPath =
-      filePath === 'D:\\PB_backup' ? 'D:\\PBIA_proc' : 'D:\\BMIA_proc';
+    const backupFolderPath =
+      sourceFolderPath === 'D:\\PBIA_proc' ? 'D:\\PB_backup' : 'D:\\BM_backup';
     const databaseName =
-      filePath === 'D:\\PB_backup' ? 'pb_db_web' : 'bm_db_web';
+      sourceFolderPath === 'D:\\PBIA_proc' ? 'pb_db_web' : 'bm_db_web';
+    const folderPath = `${backupFolderPath}\\${dateFolderPath}`;
+    const sqlFilePath = `${backupFolderPath}\\${dateFolderPath}\\${fileName}`;
 
     try {
       if (!(await fs.pathExists(sqlFilePath))) {
@@ -300,8 +300,8 @@ export class RestoreService {
         return 'Backup folder does not exist';
       }
 
-      if (!(await fs.pathExists(destinationFolderPath))) {
-        await fs.ensureDir(destinationFolderPath);
+      if (!(await fs.pathExists(sourceFolderPath))) {
+        await fs.ensureDir(sourceFolderPath);
       }
 
       await this.dataSource.query(`USE ${databaseName}`);
@@ -310,6 +310,7 @@ export class RestoreService {
 
       const duplicatedData = await this.checkDuplicatedInDatabase();
 
+      console.log('duplicatedData', duplicatedData);
       return duplicatedData;
     } catch (e) {
       return `Error: ${e}`;
