@@ -121,6 +121,7 @@ export class CombinedService
       // console.log('state');
       try {
         if (this.wss) {
+          console.log('state', state);
           this.wss.emit('stateVal', state);
         }
       } catch (e) {
