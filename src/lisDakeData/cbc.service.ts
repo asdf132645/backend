@@ -86,12 +86,13 @@ export class CbcService {
       const { stdout, stderr } = await execPromise(curlCommand);
 
       if (stderr) {
-        console.error('Curl stderr lis err:', stderr); // stderr를 로그에 기록
+        this.logger.cbc(`Curl stderr lis err:, ${stderr}`); // stderr를 로그에 기록
       }
 
       return stdout; // 응답 데이터는 stdout에서 반환
     } catch (error) {
-      throw new Error(`Error fetching data: ${error.message}`);
+      this.logger.cbc(`cbc error.message:, ${error.message}`); // stderr를 로그에 기록
+      // throw new Error(`Error fetching data: ${error.message}`);
     }
   }
 }
