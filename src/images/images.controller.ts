@@ -39,7 +39,7 @@ export class ImagesController {
         .toFormat('webp')
         .webp({ quality: 10 }) // WebP 포맷으로 설정
         .toBuffer();
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      // res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Content-Type', 'image/webp');
       res.send(imageBuffer);
     } catch (error) {

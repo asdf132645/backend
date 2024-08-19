@@ -70,12 +70,12 @@ export class FoldersController {
             fileExtension,
           )
         ) {
-          // 이미지 파일인 경우, sharp를 사용하여 최적화합니다.
+          // 이미지 파일인 경우, sharp를 사용하여 최적화
           try {
             const optimizedStream = sharp(fullPath, { limitInputPixels: false })
               .toFormat('webp') // 이미지를 WebP 형식으로 변환
               .jpeg({ quality: 30 });
-            res.setHeader('Cache-Control', 'public, max-age=86400');
+            // res.setHeader('Cache-Control', 'public, max-age=86400');
 
             // 최적화된 이미지를 스트림으로 반환합니다.
             optimizedStream
