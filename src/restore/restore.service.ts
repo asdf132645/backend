@@ -44,9 +44,7 @@ export class RestoreService {
       .split(';')
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    return statements.filter((s) =>
-      s.toUpperCase().startsWith('INSERT INTO'),
-    )[0];
+    return statements.filter((s) => s.toUpperCase().startsWith('INSERT INTO'));
   };
 
   private getCreateTableStatement = (sql: string) => {
@@ -84,15 +82,16 @@ export class RestoreService {
       /CREATE TABLE `runing_info_entity`/,
       'CREATE TABLE IF NOT EXISTS `restore_runing_info_entity`',
     );
-    let insertStatement = this.getInsertStatement(filePath);
-
-    insertStatement = insertStatement.replace(
-      /INSERT INTO `runing_info_entity`/,
-      'INSERT INTO `restore_runing_info_entity`',
-    );
-
     await this.dataSource.query(createTableStatement);
-    await this.dataSource.query(insertStatement);
+
+    const insertStatements = this.getInsertStatement(filePath);
+    for (let insertStatement of insertStatements) {
+      insertStatement = insertStatement.replace(
+        /INSERT INTO `runing_info_entity`/,
+        'INSERT INTO `restore_runing_info_entity`',
+      );
+      await this.dataSource.query(insertStatement);
+    }
   };
 
   /** Restore Logic
@@ -204,7 +203,7 @@ export class RestoreService {
   };
 
   async changeDatabaseAndExecute(fileInfo: any): Promise<string> {
-    const { fileName, filePath } = fileInfo;
+    const { fileName, filePath, sourceFolderPath } = fileInfo;
 
     await this.deleteTemporaryTable();
 
@@ -217,12 +216,12 @@ export class RestoreService {
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${filePath}\\${dateFolderPath}`;
-    const sqlFilePath = `${filePath}\\${dateFolderPath}\\${fileName}`;
+    const folderPath = `${sourceFolderPath}\\${dateFolderPath}`;
+    const sqlFilePath = `${sourceFolderPath}\\${dateFolderPath}\\${fileName}`;
     const destinationFolderPath =
-      filePath === 'D:\\PB_backup' ? 'D:\\PBIA_proc' : 'D:\\BMIA_proc';
+      sourceFolderPath === 'D:\\PB_backup' ? 'D:\\PBIA_proc' : 'D:\\BMIA_proc';
     const databaseName =
-      filePath === 'D:\\PB_backup' ? 'pb_db_web' : 'bm_db_web';
+      sourceFolderPath === 'D:\\PB_backup' ? 'pb_db_web' : 'bm_db_web';
 
     try {
       if (!(await fs.pathExists(sqlFilePath))) {
