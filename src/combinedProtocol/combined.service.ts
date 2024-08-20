@@ -36,7 +36,7 @@ export class CombinedService
   private reconnectAttempts: number = 0; // 재연결 시도 횟수
   private maxReconnectAttempts: number = 10; // 최대 재연결 시도 횟수
   private reconnectDelay: number = 5000; // 재연결 시도 지연 (밀리초 단위)
-  private mainPc: boolean = false;
+  private mainPc: boolean = true;
 
   constructor(
     private readonly logger: LoggerService,
