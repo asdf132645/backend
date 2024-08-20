@@ -33,8 +33,10 @@ export class CombinedService
   clients: Socket[] = [];
   public notRes: boolean = false;
   private serverIp: any; // 서버의 IP 주소 저장
-  private previousCpuUsage;
-  private previousTime;
+  private reconnectAttempts: number = 0; // 재연결 시도 횟수
+  private maxReconnectAttempts: number = 10; // 최대 재연결 시도 횟수
+  private reconnectDelay: number = 5000; // 재연결 시도 지연 (밀리초 단위)
+  private mainPc: boolean = false;
 
   constructor(
     private readonly logger: LoggerService,
@@ -102,7 +104,7 @@ export class CombinedService
           delete message.payload?.anyWay;
           if (!client.conn.remoteAddress.includes('192.168.0.131')) {
             this.logger.log(
-              `정상 수신 데이터 ${JSON.stringify(message.payload)}`,
+              `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
             );
           }
           if (!this.notRes) {
@@ -112,7 +114,7 @@ export class CombinedService
         }
       } catch (e) {
         this.logger.error(
-          `🚨 WebSocket 메시지 처리 중 오류 발생: ${e.message}`,
+          `🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`,
         );
       }
     });
@@ -126,7 +128,7 @@ export class CombinedService
         }
       } catch (e) {
         this.logger.error(
-          `🚨 WebSocket 메시지 처리 중 오류 발생: ${e.message}`,
+          `🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`,
         );
       }
     });
@@ -140,7 +142,7 @@ export class CombinedService
         }
       } catch (e) {
         this.logger.error(
-          `🚨 WebSocket 메시지 처리 중 오류 발생: ${e.message}`,
+          `🚨 WebSocket 프론트(viewerCheck) 메시지 처리 중 오류 발생: ${e.message}`,
         );
       }
     });
@@ -158,13 +160,16 @@ export class CombinedService
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
-      this.setupTcpClient('localhost', 11235);
+      this.setupTcpServer('localhost', 11235);
     }
   }
 
   sendDataToWebSocketClients(data: any) {
     if (!this.wss) {
       console.log('없다는데..?');
+      this.logger.error(
+        `🚨 WebSocket 서버 연결 끊김 클라이언트 서버 확인 필요`,
+      );
     }
 
     if (this.wss) {
@@ -176,7 +181,9 @@ export class CombinedService
       }
       this.wss.emit('chat', jsonData);
 
-      this.logger.log(`프론트엔드로 전송 ${jsonData}`);
+      this.logger.log(
+        `코어 데이터 -> 웹 백엔드 -> 프론트엔드로 전송 ${jsonData}`,
+      );
       this.notRes = false;
     } else {
       this.logger.error('🚨 웹소켓 전송 실패..');
@@ -196,20 +203,22 @@ export class CombinedService
             return;
           }
           this.connectedClient.write(serializedData);
-          this.logger.log(`TCP로 전송: ${serializedData}`);
+          this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
         }, throttleDelay);
 
         // 연결 상태에 따라 `notRes` 플래그 설정
-        if (
-          data.payload.jobCmd === 'INIT' ||
-          data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
-          data.payload.jobCmd === 'START' ||
-          data.payload.jobCmd === 'STOP' ||
-          data.payload.jobCmd === 'RUNNING_COMP' ||
-          data.payload.jobCmd === 'PAUSE' ||
-          data.payload.jobCmd === 'RESTART' ||
-          data.payload.jobCmd === 'RECOVERY'
-        ) {
+        const validCommands = [
+          'INIT',
+          'RBC_RE_CLASSIFICATION',
+          'START',
+          'STOP',
+          'RUNNING_COMP',
+          'PAUSE',
+          'RESTART',
+          'RECOVERY',
+        ];
+
+        if (validCommands.includes(data.payload.jobCmd)) {
           this.notRes = false;
         }
       } catch (error) {
@@ -218,7 +227,7 @@ export class CombinedService
     } else {
       this.notRes = false;
       this.logger.warn(
-        '⚠️ 활성화된 TCP 클라이언트 연결 없음. 데이터 전송 안됨 tcp 연결 확인 필요.',
+        '⚠️ 활성화된 코어 TCP 없음. 데이터 전송 안됨 코어 tcp 연결 확인 필요.',
       );
     }
   }
@@ -229,32 +238,24 @@ export class CombinedService
     }
   }
 
-  setupTcpClient(newAddress: string, newPort: number): void {
+  setupTcpServer(newAddress: string, newPort: number): void {
     const connectClient = () => {
       if (!this.connectedClient || this.connectedClient.destroyed) {
         const newClient = new net.Socket();
 
-        // 타임아웃 설정: 연결 시도에 대한 타임아웃 (밀리초 단위)
-        newClient.setTimeout(10000); // 10초
+        newClient.setTimeout(10000); // 10초 타임아웃
 
         newClient.connect(newPort, newAddress, () => {
-          this.logger.log('TCP 클라이언트 연결 성공');
-          // this.wss.emit('chat', jsonData);
+          this.logger.log('코어 TCP 웹 백엔드 연결 성공');
           this.connectedClient = newClient;
           this.wss.emit('isTcpConnected', true);
+          this.reconnectAttempts = 0; // 재연결 시도 횟수 초기화
         });
 
-        // 연결 타임아웃 발생 시의 이벤트 핸들러
         newClient.on('timeout', () => {
-          this.logger.error('🚨 TCP 클라이언트 연결 타임아웃');
-          newClient.destroy(); // 타임아웃 시 소켓 종료
-          this.connectedClient = null;
-          // 재연결 시도
-          setTimeout(() => connectClient(), 5000);
+          this.logger.error('🚨 코어 TCP 웹 백엔드 연결 타임아웃');
+          this.handleReconnectFailure(newClient);
         });
-
-        // 데이터 수신 타임아웃 설정 (밀리초 단위)
-        newClient.setTimeout(30000); // 30초
 
         newClient.on('data', (chunk) => {
           if (this.wss) {
@@ -266,26 +267,46 @@ export class CombinedService
         });
 
         newClient.on('end', () => {
-          this.logger.log('TCP 클라이언트 연결 종료');
+          this.logger.log('코어 TCP 클라이언트 연결 종료');
           this.sendDataToWebSocketClients({ err: true });
-          this.connectedClient = null;
-          // 재연결 시도
-          setTimeout(() => connectClient(), 5000);
+          this.handleReconnectFailure(newClient);
         });
 
         newClient.on('error', (err: any) => {
           this.logger.error(
-            `🚨[${err.code}] TCP 클라이언트 오류: ${err.syscall} ${err.address} ${err.port}`,
+            `🚨[${err.code}] 코어 TCP 연결 오류: ${err.syscall} ${err.address} ${err.port}`,
           );
           this.sendDataToWebSocketClients({ err: true });
-          // 재연결 시도
-          setTimeout(() => connectClient(), 5000);
+          this.handleReconnectFailure(newClient);
         });
       } else {
-        this.logger.warn('⚠️ 이미 클라이언트 연결이 활성화되어 있습니다.');
+        this.logger.warn(
+          '⚠️ 이미 클라이언트 연결이 활성화되어 있습니다. 연결 재활성화 시 문제 없음 정상 코드',
+        );
       }
     };
 
     connectClient();
+  }
+
+  private handleReconnectFailure(client: net.Socket) {
+    if (!this.mainPc) {
+      return;
+    }
+    this.reconnectAttempts++;
+    client.destroy(); // 기존 소켓 종료
+    this.connectedClient = null;
+
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.logger.warn(
+        `⚠️ 재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
+      );
+      setTimeout(
+        () => this.setupTcpServer('localhost', 11235),
+        this.reconnectDelay,
+      );
+    } else {
+      this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
+    }
   }
 }
