@@ -7,6 +7,7 @@ import { BackupDto } from './backup.dto';
 import { exec } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as moment from 'moment';
 
 @Injectable()
 export class BackupService {
@@ -29,8 +30,8 @@ export class BackupService {
   async backupData(backupDto: BackupDto): Promise<void> {
     const { startDate, endDate, backupPath, sourceFolderPath } = backupDto;
     // 날짜를 문자열로 변환
-    const startDateObj = new Date(startDate);
-    const endDateObj = new Date(endDate);
+    const startDateObj = startDate ? moment(startDate).toDate() : undefined;
+    const endDateObj = endDate ? moment(endDate).toDate() : undefined;
 
     // 시작 및 종료 날짜를 YYYYMMDD 형식의 문자열로 변환
     const formattedStartDate = this.formatDateToString(startDateObj, 'start');
