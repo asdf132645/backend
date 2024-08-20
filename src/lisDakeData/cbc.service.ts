@@ -88,7 +88,7 @@ export class CbcService {
       if (stderr) {
         this.logger.cbc(`Curl stderr lis err:, ${stderr}`); // stderr를 로그에 기록
       }
-
+      this.logger.cbc(`cbc 응답 값:, ${stdout}`); // stdout 로그에 기록
       return stdout; // 응답 데이터는 stdout에서 반환
     } catch (error) {
       this.logger.cbc(`cbc error.message:, ${error.message}`); // stderr를 로그에 기록
