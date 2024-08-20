@@ -203,7 +203,7 @@ export class CombinedService
             return;
           }
           this.connectedClient.write(serializedData);
-          this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+          // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
         }, throttleDelay);
 
         // 연결 상태에 따라 `notRes` 플래그 설정
