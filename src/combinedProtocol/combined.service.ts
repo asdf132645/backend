@@ -206,19 +206,16 @@ export class CombinedService
           // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
         }, throttleDelay);
 
-        // 연결 상태에 따라 `notRes` 플래그 설정
-        const validCommands = [
-          'INIT',
-          'RBC_RE_CLASSIFICATION',
-          'START',
-          'STOP',
-          'RUNNING_COMP',
-          'PAUSE',
-          'RESTART',
-          'RECOVERY',
-        ];
-
-        if (validCommands.includes(data.payload.jobCmd)) {
+        if (
+          data.payload.jobCmd === 'INIT' ||
+          data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
+          data.payload.jobCmd === 'START' ||
+          data.payload.jobCmd === 'STOP' ||
+          data.payload.jobCmd === 'RUNNING_COMP' ||
+          data.payload.jobCmd === 'PAUSE' ||
+          data.payload.jobCmd === 'RESTART' ||
+          data.payload.jobCmd === 'RECOVERY'
+        ) {
           this.notRes = false;
         }
       } catch (error) {
