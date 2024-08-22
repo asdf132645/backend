@@ -120,6 +120,28 @@ export class RuningInfoService {
     }
   }
 
+  async check(
+    checkDto: Pick<RuningInfoEntity, 'slotId' | 'analyzedDttm'>,
+  ): Promise<boolean> {
+    const { slotId, analyzedDttm } = checkDto;
+    try {
+      const result = await this.runingInfoEntityRepository.findOne({
+        where: {
+          slotId,
+          analyzedDttm,
+        },
+      });
+      if (!result) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   private deleteFolderRecursive(folderPath: string) {
     if (fs.existsSync(folderPath)) {
       fs.readdirSync(folderPath).forEach((file) => {

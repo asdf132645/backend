@@ -61,7 +61,10 @@ export class RuningInfoController {
   @Delete('delete')
   async deleteMultiple(@Body() req: any): Promise<{ success: boolean }> {
     console.log(req.ids);
-    const result = await this.runingInfoService.delete(req.ids, req.img_drive_root_path);
+    const result = await this.runingInfoService.delete(
+      req.ids,
+      req.img_drive_root_path,
+    );
     return { success: result };
   }
 
@@ -70,6 +73,13 @@ export class RuningInfoController {
     @Body() updateDto: UpdateRuningInfoDto,
   ): Promise<RuningInfoEntity[]> {
     return this.runingInfoService.update(updateDto);
+  }
+
+  @Post('checkDuplicate')
+  async checkDuplicateRunningInfo(
+    @Body() checkDto: Pick<RuningInfoEntity, 'slotId' | 'analyzedDttm'>,
+  ): Promise<boolean> {
+    return this.runingInfoService.check(checkDto);
   }
 
   @Get('detail/:id')
