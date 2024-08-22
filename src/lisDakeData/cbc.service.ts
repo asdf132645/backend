@@ -73,7 +73,7 @@ export class CbcService {
     // 운영 http://emr012.cmcnu.or.kr/cmcnu/.live
     // 개발 http://emr012edu.cmcnu.or.kr/cmcnu/.live
     // UIMD 테스트 http://192.168.0.131/api/cbc/liveTest
-    const baseUrl = 'http://emr012edu.cmcnu.or.kr/cmcnu/.live';
+    const baseUrl = 'http://emr012.cmcnu.or.kr/cmcnu/.live';
     // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
     const queryString = new URLSearchParams(queryParams).toString();
     const url = `${baseUrl}?${queryString}`;
