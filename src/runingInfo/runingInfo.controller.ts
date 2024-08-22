@@ -75,13 +75,6 @@ export class RuningInfoController {
     return this.runingInfoService.update(updateDto);
   }
 
-  @Post('checkDuplicate')
-  async checkDuplicateRunningInfo(
-    @Body() checkDto: Pick<RuningInfoEntity, 'slotId' | 'analyzedDttm'>,
-  ): Promise<boolean> {
-    return this.runingInfoService.check(checkDto);
-  }
-
   @Get('detail/:id')
   async getRunningInfoById(
     @Param('id') id: string,
