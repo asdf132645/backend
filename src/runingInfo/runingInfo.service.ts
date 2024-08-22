@@ -120,19 +120,6 @@ export class RuningInfoService {
     }
   }
 
-  private deleteFolderRecursive(folderPath: string) {
-    if (fs.existsSync(folderPath)) {
-      fs.readdirSync(folderPath).forEach((file) => {
-        const curPath = path.join(folderPath, file);
-        if (fs.lstatSync(curPath).isDirectory()) {
-          this.deleteFolderRecursive(curPath);
-        } else {
-          fs.unlinkSync(curPath);
-        }
-      });
-    }
-  }
-
   async findAllWithPagingAndFilter(
     page: number,
     pageSize: number,
