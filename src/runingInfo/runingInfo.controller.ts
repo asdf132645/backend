@@ -61,7 +61,10 @@ export class RuningInfoController {
   @Delete('delete')
   async deleteMultiple(@Body() req: any): Promise<{ success: boolean }> {
     console.log(req.ids);
-    const result = await this.runingInfoService.delete(req.ids, req.img_drive_root_path);
+    const result = await this.runingInfoService.delete(
+      req.ids,
+      req.img_drive_root_path,
+    );
     return { success: result };
   }
 
