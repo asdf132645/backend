@@ -314,7 +314,6 @@ export class RestoreService {
       await this.createTemporaryTable(sqlFilePath);
 
       const duplicatedData = await this.checkDuplicatedInDatabase();
-      console.log(2, duplicatedData);
       return duplicatedData;
     } catch (e) {
       return `Error: ${e}`;
