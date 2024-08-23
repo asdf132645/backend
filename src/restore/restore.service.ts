@@ -101,7 +101,7 @@ export class RestoreService {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
     const items = await this.dataSource.query(restoreSql);
 
-    const slotIds = items.map((item) => item.slotId);
+    const slotIds = items.map((item) => item?.slotId);
 
     const existingItems = await this.runningInfoRepository.find({
       where: { slotId: In(slotIds) },
@@ -111,7 +111,7 @@ export class RestoreService {
     const existingSlotIdSet = new Set(existingItems.map((item) => item.slotId));
 
     const itemsToSave = items
-      .filter((item) => !existingSlotIdSet.has(item.slotId))
+      .filter((item) => !existingSlotIdSet.has(item?.slotId))
       .map((item) => ({
         slotNo: item.slotNo,
         traySlot: item.traySlot,
