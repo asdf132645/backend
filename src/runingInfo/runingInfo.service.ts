@@ -45,6 +45,10 @@ export class RuningInfoService {
     });
   }
 
+  async findBySlotNo(slotId: string): Promise<RuningInfoEntity | undefined> {
+    return this.runingInfoEntityRepository.findOne({ where: { slotId } });
+  }
+
   async update(updateDto: UpdateRuningInfoDto): Promise<RuningInfoEntity[]> {
     const { runingInfoDtoItems } = updateDto;
 

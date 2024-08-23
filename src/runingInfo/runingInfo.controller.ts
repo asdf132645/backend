@@ -69,8 +69,25 @@ export class RuningInfoController {
   @Post('create')
   async create(
     @Body() createDto: CreateRuningInfoDto,
-  ): Promise<RuningInfoEntity> {
+  ): Promise<RuningInfoEntity | null> {
+    // 반환 타입에 null 추가
+    // runingInfoDtoItems가 객체일 경우, slotNo의 중복 확인 로직 (데이터베이스 조회)
+    const slotId = createDto.runingInfoDtoItems.slotId;
+
+    // slotNo로 기존 엔티티 조회
+    const existingEntity = await this.runingInfoService.findBySlotNo(slotId);
+
+    if (existingEntity) {
+      // 중복된 slotNo가 이미 존재하면 저장하지 않고 종료
+      console.log(
+        `중복된 slotId: ${slotId}가 이미 존재합니다. 저장하지 않습니다.`,
+      );
+      return null; // 저장하지 않고 null을 반환
+    }
+
+    // 중복이 없을 경우 엔티티 생성
     const createdEntity = await this.runingInfoService.create(createDto);
+    // console.log(createdEntity);
 
     // 캐시 갱신 로직 추가 (선택 사항)
     const cacheKey = `GET:/api/runningInfo/detail/${createdEntity.id}?`;
