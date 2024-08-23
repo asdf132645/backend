@@ -89,10 +89,6 @@ export class RuningInfoController {
     const createdEntity = await this.runingInfoService.create(createDto);
     // console.log(createdEntity);
 
-    // 캐시 갱신 로직 추가 (선택 사항)
-    const cacheKey = `GET:/api/runningInfo/detail/${createdEntity.id}?`;
-    await this.redis.set(cacheKey, JSON.stringify(createdEntity), 'EX', 1800); // 1시간 TTL로 캐싱
-
     return createdEntity;
   }
 
