@@ -94,6 +94,7 @@ export class RuningInfoController {
   async update(
     @Body() updateDto: UpdateRuningInfoDto,
   ): Promise<RuningInfoEntity[]> {
+    await this.redis.del(updateDto?.dayQuery);
     // 데이터베이스 업데이트 수행
     const updatedEntities = await this.runingInfoService.update(updateDto);
 
@@ -106,7 +107,6 @@ export class RuningInfoController {
           `GET:/api/runningInfo/classInfoDetail/${item.id}?`,
           `GET:/api/runningInfo/classInfoDetailSelectQuery/${item.id}?`,
           `GET:/api/runningInfo/classInfoMenuDetailSelectQuery/${item.id}?`,
-          'getAll',
         ];
 
         await Promise.all(relatedCacheKeys.map((key) => this.redis.del(key)));

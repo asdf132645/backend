@@ -109,6 +109,8 @@ export class UpdateRuningInfoDto {
   @IsInt()
   userId: number;
 
+  dayQuery: any;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RuningInfoDtoItems)

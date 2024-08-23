@@ -37,12 +37,11 @@ let RedisCacheInterceptor = class RedisCacheInterceptor {
         const { method, url, query } = request;
         let returnKey = '';
         if (url.includes('/api/runningInfo/getAll')) {
-            returnKey = query.startDay + query.endDay;
+            returnKey = query.startDay + query.endDay + query.page;
         }
         else {
             returnKey = `${method}:${url}?${new URLSearchParams(query).toString()}`;
         }
-        console.log(returnKey);
         return returnKey;
     }
 };
