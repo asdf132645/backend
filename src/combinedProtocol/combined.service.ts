@@ -123,7 +123,7 @@ export class CombinedService
       // console.log('state');
       try {
         if (this.wss) {
-          console.log('state', state);
+          // console.log('state', state);
           this.wss.emit('stateVal', state);
         }
       } catch (e) {
@@ -295,15 +295,15 @@ export class CombinedService
     this.connectedClient = null;
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.logger.warn(
-        `⚠️ 재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
-      );
+      // this.logger.warn(
+      //   `⚠️ 재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
+      // );
       setTimeout(
         () => this.setupTcpServer('localhost', 11235),
         this.reconnectDelay,
       );
     } else {
-      this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
+      // this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
     }
   }
 }

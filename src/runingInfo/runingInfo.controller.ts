@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   Param,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RuningInfoService } from './runingInfo.service';
 import {
@@ -15,17 +16,25 @@ import {
 } from './dto/runingInfoDtoItems';
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
+import { RedisCacheInterceptor } from '../cache/cache.interceptor';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 @Controller('runningInfo')
 export class RuningInfoController {
-  constructor(private readonly runingInfoService: RuningInfoService) {}
+  constructor(
+    private readonly runingInfoService: RuningInfoService,
+    @InjectRedis() private readonly redis: Redis, // Redis 인스턴스 주입
+  ) {}
 
   @Get('pageUpDown')
   async getPageUpDown(
     @Query('id') id: string,
     @Query('step') step: string,
     @Query('type') type: string,
+    @Query('dayQuery') dayQuery: string,
   ): Promise<Partial<RuningInfoEntity> | null> {
+    await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     return this.runingInfoService.getUpDownRunnInfo(
       Number(id),
       Number(step),
@@ -34,7 +43,11 @@ export class RuningInfoController {
   }
 
   @Get('clearPcIpState')
-  async clearPcIpAndState(@Query('oldPcIp') oldPcIp: string): Promise<void> {
+  async clearPcIpAndState(
+    @Query('oldPcIp') oldPcIp: string,
+    @Query('dayQuery') dayQuery: string,
+  ): Promise<void> {
+    await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     await this.runingInfoService.clearPcIpAndState(oldPcIp);
   }
 
@@ -43,7 +56,9 @@ export class RuningInfoController {
     @Query('oldPcIp') oldPcIp: string,
     @Query('newEntityId') newEntityId: number,
     @Query('newPcIp') newPcIp: string,
+    @Query('dayQuery') dayQuery: string,
   ): Promise<void> {
+    await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     await this.runingInfoService.updatePcIpAndState(
       oldPcIp,
       newEntityId,
@@ -55,12 +70,19 @@ export class RuningInfoController {
   async create(
     @Body() createDto: CreateRuningInfoDto,
   ): Promise<RuningInfoEntity> {
-    return this.runingInfoService.create(createDto);
+    const createdEntity = await this.runingInfoService.create(createDto);
+
+    // 캐시 갱신 로직 추가 (선택 사항)
+    const cacheKey = `GET:/api/runningInfo/detail/${createdEntity.id}?`;
+    await this.redis.set(cacheKey, JSON.stringify(createdEntity), 'EX', 1800); // 1시간 TTL로 캐싱
+
+    return createdEntity;
   }
 
   @Delete('delete')
   async deleteMultiple(@Body() req: any): Promise<{ success: boolean }> {
-    console.log(req.ids);
+    await this.redis.del(req?.dayQuery); // 해당 쿼리로 생성된 캐시 삭제
+
     const result = await this.runingInfoService.delete(
       req.ids,
       req.img_drive_root_path,
@@ -72,10 +94,30 @@ export class RuningInfoController {
   async update(
     @Body() updateDto: UpdateRuningInfoDto,
   ): Promise<RuningInfoEntity[]> {
-    return this.runingInfoService.update(updateDto);
+    // 데이터베이스 업데이트 수행
+    const updatedEntities = await this.runingInfoService.update(updateDto);
+
+    // 캐시 무효화
+    await Promise.all(
+      updateDto.runingInfoDtoItems.map(async (item: any) => {
+        // 관련된 다른 캐시 키도 무효화
+        const relatedCacheKeys = [
+          `GET:/api/runningInfo/detail/${item.id}?`,
+          `GET:/api/runningInfo/classInfoDetail/${item.id}?`,
+          `GET:/api/runningInfo/classInfoDetailSelectQuery/${item.id}?`,
+          `GET:/api/runningInfo/classInfoMenuDetailSelectQuery/${item.id}?`,
+          'getAll',
+        ];
+
+        await Promise.all(relatedCacheKeys.map((key) => this.redis.del(key)));
+      }),
+    );
+
+    return updatedEntities;
   }
 
   @Get('detail/:id')
+  @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoById(
     @Param('id') id: string,
   ): Promise<RuningInfoEntity | null> {
@@ -83,6 +125,7 @@ export class RuningInfoController {
   }
 
   @Get('classInfoDetail/:id')
+  @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoDetailById(
     @Param('id') id: string,
   ): Promise<RuningInfoEntity | null> {
@@ -90,6 +133,7 @@ export class RuningInfoController {
   }
 
   @Get('classInfoDetailSelectQuery/:id')
+  @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoClassInfoByIdDetail(
     @Param('id') id: string,
   ): Promise<RuningInfoEntity | null> {
@@ -97,6 +141,7 @@ export class RuningInfoController {
   }
 
   @Get('classInfoMenuDetailSelectQuery/:id')
+  @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoClassInfoMenuByIdDetail(
     @Param('id') id: string,
   ): Promise<RuningInfoEntity | null> {
@@ -104,6 +149,7 @@ export class RuningInfoController {
   }
 
   @Get('getAll')
+  @UseInterceptors(RedisCacheInterceptor)
   async findAllWithPagingAndFilter(
     @Query('page') page: number = 1,
     @Query('pageSize') pageSize: number = 10,
