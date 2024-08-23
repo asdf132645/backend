@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
@@ -99,19 +99,20 @@ export class RestoreService {
    * */
   private moveDataToDatabase = async () => {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
-
     const items = await this.dataSource.query(restoreSql);
 
-    for (const item of items) {
-      const isExistingItem = await this.runningInfoRepository.findOne({
-        where: { slotId: item.slotId },
-      });
+    const slotIds = items.map((item) => item.slotId);
 
-      if (isExistingItem) {
-        continue;
-      }
+    const existingItems = await this.runningInfoRepository.find({
+      where: { slotId: In(slotIds) },
+      select: ['slotId'],
+    });
 
-      const savingItem = {
+    const existingSlotIdSet = new Set(existingItems.map((item) => item.slotId));
+
+    const itemsToSave = items
+      .filter((item) => !existingSlotIdSet.has(item.slotId))
+      .map((item) => ({
         slotNo: item.slotNo,
         traySlot: item.traySlot,
         testType: item.testType,
@@ -146,35 +147,41 @@ export class RestoreService {
         cbcSex: item.cbcSex,
         cbcAge: item.cbcAge,
         img_drive_root_path: null,
-      };
-      savingItem['lock_status'] = 0;
+        lock_status: 0,
+      }));
 
-      await this.runningInfoRepository.save({ ...savingItem });
+    // 일괄 삽입 처리
+    if (itemsToSave.length > 0) {
+      await this.runningInfoRepository.save(itemsToSave);
     }
   };
 
   private checkDuplicatedInDatabase = async () => {
-    const restoreSql = `SELECT * FROM restore_runing_info_entity`;
+    const restoreSql = `SELECT slotId, barcodeNo FROM restore_runing_info_entity`;
+
+    const items = await this.dataSource.query(restoreSql);
+    const slotIds = items.map((item) => item.slotId);
+    const existingItems = await this.runningInfoRepository.find({
+      where: { slotId: In(slotIds) },
+    });
+
+    const existingSlotIdSet = new Set(existingItems.map((item) => item.slotId));
+
     const duplicatedSlotIdArr = [];
     const nonDuplicatedSlotIdArr = [];
 
-    const items = await this.dataSource.query(restoreSql);
-
     for (const item of items) {
-      const isExistingItem = await this.runningInfoRepository.findOne({
-        where: { slotId: item.slotId },
-      });
-      if (isExistingItem) {
-        duplicatedSlotIdArr.push(isExistingItem.barcodeNo);
+      if (existingSlotIdSet.has(item.slotId)) {
+        duplicatedSlotIdArr.push(item.barcodeNo);
       } else {
         nonDuplicatedSlotIdArr.push(item.barcodeNo);
       }
     }
-    const barcodeNoObj = {
+
+    return {
       duplicated: duplicatedSlotIdArr,
       nonDuplicated: nonDuplicatedSlotIdArr,
     };
-    return barcodeNoObj;
   };
 
   private deleteTemporaryTable = async () => {
@@ -214,7 +221,6 @@ export class RestoreService {
     if (!match) {
       return 'Invalid backup file name';
     }
-    console.log(fileName, saveFilePath, backupFilePath);
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
     const folderPath = `${backupFilePath}\\${dateFolderPath}`;
@@ -308,6 +314,7 @@ export class RestoreService {
       await this.createTemporaryTable(sqlFilePath);
 
       const duplicatedData = await this.checkDuplicatedInDatabase();
+      console.log(2, duplicatedData);
       return duplicatedData;
     } catch (e) {
       return `Error: ${e}`;

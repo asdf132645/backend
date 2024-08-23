@@ -55,8 +55,8 @@ export class BackupService {
 
     // 조회된 데이터에서 slotId를 추출
     const slotIds = dataToBackup.map((item: any) => item.slotId);
-    // slotId를 sourceFolderPath에 결합
-    for (const slotId of slotIds) {
+
+    const movePromises = slotIds.map(async (slotId) => {
       const sourcePath = path.join(sourceFolderPath, slotId);
       const targetFolderPath = path.join(dateFolder, slotId); // 변경된 부분
 
@@ -65,7 +65,6 @@ export class BackupService {
         await fs.ensureDir(targetFolderPath);
       }
 
-      // 대상 폴더가 존재할 때만 이동 수행
       await fs
         .move(sourcePath, targetFolderPath, { overwrite: true })
         .catch((err) => {
@@ -73,7 +72,29 @@ export class BackupService {
             `Error moving ${sourcePath} to ${targetFolderPath}: ${err}`,
           );
         });
-    }
+    });
+
+    // slotId를 sourceFolderPath에 결합
+    // for (const slotId of slotIds) {
+    //   const sourcePath = path.join(sourceFolderPath, slotId);
+    //   const targetFolderPath = path.join(dateFolder, slotId); // 변경된 부분
+    //
+    //   // 대상 폴더가 존재하지 않으면 생성
+    //   if (!(await fs.pathExists(targetFolderPath))) {
+    //     await fs.ensureDir(targetFolderPath);
+    //   }
+    //
+    //   console.log('moving');
+    //   // 대상 폴더가 존재할 때만 이동 수행
+    //   await fs
+    //     .move(sourcePath, targetFolderPath, { overwrite: true })
+    //     .catch((err) => {
+    //       console.error(
+    //         `Error moving ${sourcePath} to ${targetFolderPath}: ${err}`,
+    //       );
+    //     });
+    // }
+    await Promise.all(movePromises);
 
     await Promise.all(
       dataToBackup.map(async (item: any) => {
@@ -90,7 +111,7 @@ export class BackupService {
 
     const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${databaseSchema} runing_info_entity --where="analyzedDttm BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'" > ${sqlBackupFilePath}`;
 
-    exec(dumpCommand, (error, stdout, stderr) => {
+    exec(dumpCommand, async (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing dump command: ${error.message}`);
         return error.message;
@@ -98,6 +119,13 @@ export class BackupService {
       if (stderr) {
         console.error(`mysqldump stderr: ${stderr}`);
         return stderr;
+      }
+      if (stdout) {
+        const updateItems = dataToBackup.map((item) => ({
+          ...item,
+          img_drive_root_path: dateFolder,
+        }));
+        await this.runningInfoRepository.save(updateItems);
       }
       console.log(`Database backup saved to ${sqlBackupFilePath}`);
     });
