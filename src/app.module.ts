@@ -36,7 +36,6 @@ import { FileSystemService } from './fileSys/file-system.service';
 import { IpModule } from './ipService/ipService.module';
 import { ClassOrderModule } from './classOrder/classOrder.module';
 // import { CacheInterceptor } from './interceptors/cache-control.interceptor';
-import { CacheService } from './cache/CacheService';
 import { DziReaderModule } from './dziReader/dziReader.module';
 import { FileModule } from './file/file.module';
 import { ImagesService } from './images/images.service';
@@ -100,7 +99,6 @@ import { CbcModule } from './lisDakeData/cbc.module';
     ExcelController,
   ],
   providers: [
-    CacheService,
     LoggerService,
     AppService,
     FileSystemService,
