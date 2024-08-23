@@ -44,11 +44,20 @@ let RedisCacheInterceptor = class RedisCacheInterceptor {
             else if (query.patientId) {
                 searchText = query.patientId;
             }
-            else {
+            else if (query.patientNm) {
                 searchText = query.patientNm;
             }
-            returnKey =
-                query.startDay + query.endDay + query.page + searchText + query.nrCount;
+            if (searchText !== '') {
+                returnKey =
+                    query.startDay +
+                        query.endDay +
+                        query.page +
+                        searchText +
+                        query.nrCount;
+            }
+            else {
+                returnKey = query.startDay + query.endDay + query.page + query.nrCount;
+            }
         }
         else {
             returnKey = `${method}:${url}?${new URLSearchParams(query).toString()}`;

@@ -118,9 +118,9 @@ export class FoldersController {
 
         // 폴더가 존재하는지 확인
         if (!fs.existsSync(sourceFolderPath)) {
-          console.log(
-            `Source folder ${folderName} does not exist at path ${sourceFolderPath}.`,
-          );
+          // console.log(
+          //   `Source folder ${folderName} does not exist at path ${sourceFolderPath}.`,
+          // );
           continue;
         }
 

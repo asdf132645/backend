@@ -41,19 +41,31 @@ export class RedisCacheInterceptor implements NestInterceptor {
     const { method, url, query } = request;
     let returnKey = '';
     if (url.includes('/api/runningInfo/getAll')) {
+      // 전체 페이지 조회 - databaseList
       let searchText = '';
       if (query.barcodeNo) {
         searchText = query.barcodeNo;
       } else if (query.patientId) {
         searchText = query.patientId;
-      } else {
+      } else if (query.patientNm) {
         searchText = query.patientNm;
       }
-      returnKey =
-        query.startDay + query.endDay + query.page + searchText + query.nrCount;
+
+      if (searchText !== '') {
+        returnKey =
+          query.startDay +
+          query.endDay +
+          query.page +
+          searchText +
+          query.nrCount;
+      } else {
+        returnKey = query.startDay + query.endDay + query.page + query.nrCount;
+      }
     } else {
+      // database detail
       returnKey = `${method}:${url}?${new URLSearchParams(query).toString()}`;
     }
+    // console.log('returnKey', returnKey);
     return returnKey;
   }
 }

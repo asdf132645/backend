@@ -13,13 +13,11 @@ import { Response } from 'express';
 import * as path from 'path';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as sharp from 'sharp';
-import { CacheService } from '../cache/CacheService';
 import { ImagesService } from './images.service';
 import * as fs from 'fs-extra';
 
 @Controller('images')
 export class ImagesController {
-  private cacheService: CacheService; // Define cacheService property
   constructor(private readonly imagesService: ImagesService) {}
 
   @Get()

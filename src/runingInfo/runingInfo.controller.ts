@@ -34,6 +34,7 @@ export class RuningInfoController {
     @Query('type') type: string,
     @Query('dayQuery') dayQuery: string,
   ): Promise<Partial<RuningInfoEntity> | null> {
+    // console.log('pageUpDown', dayQuery);
     await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     return this.runingInfoService.getUpDownRunnInfo(
       Number(id),
@@ -79,9 +80,7 @@ export class RuningInfoController {
 
     if (existingEntity) {
       // 중복된 slotNo가 이미 존재하면 저장하지 않고 종료
-      console.log(
-        `중복된 slotId: ${slotId}가 이미 존재합니다. 저장하지 않습니다.`,
-      );
+      console.log(`중복된 slotId: ${slotId}가 이미 존재합니다..`);
       return null; // 저장하지 않고 null을 반환
     }
 
