@@ -21,7 +21,10 @@ export class UserService {
     }
   }
 
-  async findOne(userId: string, password: string): Promise<User | undefined> {
+  async findOne(
+    userId: string,
+    password: string,
+  ): Promise<User | string | undefined> {
     const user = await this.userRepository.findOne({
       where: { userId },
       select: [
@@ -41,15 +44,44 @@ export class UserService {
       return undefined;
     }
 
+    if (user.userType.includes('_')) {
+      return `UserId ${user.userId} is logged in already`;
+    }
+
     const passwordMatch = password === user.password;
 
     if (passwordMatch) {
       // Passwords match
-      return user;
+
+      const userTypeAndIsLoggedIn = user.userType + '_' + user.userId;
+      await this.userRepository.update(user.id, {
+        userType: userTypeAndIsLoggedIn,
+      });
+      const updatedUser = await this.userRepository.findOne({
+        where: { userId },
+      });
+      return updatedUser;
     } else {
       console.error('Password 틀림');
       return undefined;
     }
+  }
+
+  async logout(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { userId },
+    });
+
+    if (!user) {
+      console.log('User not found');
+      return false;
+    }
+
+    const logOutUserType = user.userType.split('_')[0];
+    await this.userRepository.update(user.id, {
+      userType: logOutUserType,
+    });
+    return true;
   }
 
   async findOneById(userId: string): Promise<User | undefined> {

@@ -93,6 +93,16 @@ export class UserController {
     }
   }
 
+  @Post('/logout')
+  @ApiOperation({ summary: 'Logout user' })
+  async logoutUser(@Body() { userId }: { userId: string }) {
+    try {
+      return await this.userService.logout(userId);
+    } catch (error) {
+      return false;
+    }
+  }
+
   @Put('/update/:userId')
   @ApiOperation({ summary: 'Update user information' })
   @ApiParam({ name: 'userId', description: 'User ID' })
