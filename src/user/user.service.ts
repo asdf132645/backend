@@ -69,7 +69,7 @@ export class UserService {
 
   async logout(userId: string): Promise<boolean> {
     const user = await this.userRepository.findOne({
-      where: { userId },
+      where: { id: Number(userId) },
     });
 
     if (!user) {
