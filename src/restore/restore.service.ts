@@ -94,9 +94,6 @@ export class RestoreService {
     }
   };
 
-  /** Restore Logic
-   * if Existing Item continue
-   * */
   private moveDataToDatabase = async () => {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
     const items = await this.dataSource.query(restoreSql);
