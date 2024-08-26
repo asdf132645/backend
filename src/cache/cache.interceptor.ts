@@ -43,6 +43,17 @@ export class RedisCacheInterceptor implements NestInterceptor {
     if (url.includes('/api/runningInfo/getAll')) {
       // 전체 페이지 조회 - databaseList
       let searchText = '';
+      let searchTOW = '';
+      if (query?.testType) {
+        searchTOW += query.testType;
+      }
+      if (query?.title) {
+        searchTOW += query.title;
+      }
+      if (query?.wbcCountOrder) {
+        searchTOW += query.wbcCountOrder;
+      }
+
       if (query.barcodeNo) {
         searchText = query.barcodeNo;
       } else if (query.patientId) {
@@ -57,9 +68,15 @@ export class RedisCacheInterceptor implements NestInterceptor {
           query.endDay +
           query.page +
           searchText +
-          query.nrCount;
+          query.nrCount +
+          searchTOW;
       } else {
-        returnKey = query.startDay + query.endDay + query.page + query.nrCount;
+        returnKey =
+          query.startDay +
+          query.endDay +
+          query.page +
+          query.nrCount +
+          searchTOW;
       }
     } else {
       // database detail
