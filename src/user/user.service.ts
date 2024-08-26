@@ -44,19 +44,10 @@ export class UserService {
       return undefined;
     }
 
-    if (user.userType.includes('_')) {
-      return `Already logged in`;
-    }
-
     const passwordMatch = password === user.password;
 
     if (passwordMatch) {
       // Passwords match
-
-      const userTypeAndIsLoggedIn = user.userType + '_' + user.id;
-      await this.userRepository.update(user.id, {
-        userType: userTypeAndIsLoggedIn,
-      });
       const updatedUser = await this.userRepository.findOne({
         where: { userId },
       });
@@ -77,10 +68,6 @@ export class UserService {
       return false;
     }
 
-    const logOutUserType = user.userType.split('_')[0];
-    await this.userRepository.update(user.id, {
-      userType: logOutUserType,
-    });
     return true;
   }
 
