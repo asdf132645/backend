@@ -7,7 +7,7 @@ import Redis from 'ioredis';
 export class RestoreController {
   constructor(
     private readonly restoreService: RestoreService,
-    // @InjectRedis() private readonly redis: Redis,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @Post('execute')
@@ -20,7 +20,7 @@ export class RestoreController {
       dayQuery: string;
     },
   ) {
-    // this.redis.del(body.dayQuery);
+    this.redis.del(body.dayQuery);
     await this.restoreService.changeDatabaseAndExecute(body);
     return { message: 'SQL file executed successfully' };
   }

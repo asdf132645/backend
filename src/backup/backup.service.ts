@@ -1,7 +1,7 @@
 // backup.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { BackupDto } from './backup.dto';
 import { exec } from 'child_process';
@@ -41,8 +41,11 @@ export class BackupService {
     return false;
   }
 
-  async backupData(backupDto: BackupDto): Promise<void> {
-    const { startDate, endDate, backupPath, sourceFolderPath } = backupDto;
+  async backupData(
+    backupDto: BackupDto & { method: 'copy' | 'move' },
+  ): Promise<void> {
+    const { startDate, endDate, backupPath, sourceFolderPath, method } =
+      backupDto;
     // 날짜를 문자열로 변환
     const startDateObj = startDate ? moment(startDate).toDate() : undefined;
     const endDateObj = endDate ? moment(endDate).toDate() : undefined;
@@ -70,52 +73,33 @@ export class BackupService {
     // 조회된 데이터에서 slotId를 추출
     const slotIds = dataToBackup.map((item: any) => item.slotId);
 
-    const movePromises = slotIds.map(async (slotId) => {
-      const sourcePath = path.join(sourceFolderPath, slotId);
-      const targetFolderPath = path.join(dateFolder, slotId); // 변경된 부분
+    // 비동기 작업을 5개씩 끊어서 실행
+    const batchSize = 5; // 배치 크기
+    for (let i = 0; i < slotIds.length; i += batchSize) {
+      const batch = slotIds.slice(i, i + batchSize);
 
-      // 대상 폴더가 존재하지 않으면 생성
-      if (!(await fs.pathExists(targetFolderPath))) {
-        await fs.ensureDir(targetFolderPath);
-      }
+      const movePromises = batch.map((slotId) => {
+        const sourcePath = path.join(sourceFolderPath, slotId);
+        const targetFolderPath = path.join(dateFolder, slotId);
 
-      await fs
-        .move(sourcePath, targetFolderPath, { overwrite: true })
-        .catch((err) => {
-          console.error(
-            `Error moving ${sourcePath} to ${targetFolderPath}: ${err}`,
-          );
-        });
-    });
+        return fs
+          .ensureDir(targetFolderPath)
+          .then(() => {
+            if (method === 'move') {
+              return fs.move(sourcePath, targetFolderPath, { overwrite: true });
+            } else {
+              return fs.copy(sourcePath, targetFolderPath, { overwrite: true });
+            }
+          })
+          .catch((err) => {
+            console.error(
+              `Error ${method === 'move' ? 'moving' : 'copying'} ${sourcePath} to ${targetFolderPath}: ${err}`,
+            );
+          });
+      });
 
-    // slotId를 sourceFolderPath에 결합
-    // for (const slotId of slotIds) {
-    //   const sourcePath = path.join(sourceFolderPath, slotId);
-    //   const targetFolderPath = path.join(dateFolder, slotId); // 변경된 부분
-    //
-    //   // 대상 폴더가 존재하지 않으면 생성
-    //   if (!(await fs.pathExists(targetFolderPath))) {
-    //     await fs.ensureDir(targetFolderPath);
-    //   }
-    //
-    //   console.log('moving');
-    //   // 대상 폴더가 존재할 때만 이동 수행
-    //   await fs
-    //     .move(sourcePath, targetFolderPath, { overwrite: true })
-    //     .catch((err) => {
-    //       console.error(
-    //         `Error moving ${sourcePath} to ${targetFolderPath}: ${err}`,
-    //       );
-    //     });
-    // }
-    await Promise.all(movePromises);
-
-    await Promise.all(
-      dataToBackup.map(async (item: any) => {
-        item.img_drive_root_path = dateFolder;
-        await this.runningInfoRepository.save(item);
-      }),
-    );
+      await Promise.all(movePromises);
+    }
 
     // MySQL 데이터베이스 특정 테이블 백업
     const backupFileName = `backup-${startDate}_${endDate}.sql`;
@@ -133,14 +117,19 @@ export class BackupService {
       }
       if (stderr) {
         console.error(`mysqldump stderr: ${stderr}`);
+        if (method === 'move') {
+          await this.runningInfoRepository.delete({
+            slotId: In(slotIds),
+          });
+        }
         return stderr;
       }
       if (stdout) {
-        const updateItems = dataToBackup.map((item) => ({
-          ...item,
-          img_drive_root_path: dateFolder,
-        }));
-        await this.runningInfoRepository.save(updateItems);
+        if (method === 'move') {
+          await this.runningInfoRepository.delete({
+            slotId: In(slotIds),
+          });
+        }
       }
       console.log(`Database backup saved to ${sqlBackupFilePath}`);
     });
