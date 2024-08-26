@@ -45,7 +45,7 @@ export class UserService {
     }
 
     if (user.userType.includes('_')) {
-      return `UserId ${user.userId} is logged in already`;
+      return `Already logged in`;
     }
 
     const passwordMatch = password === user.password;
@@ -53,7 +53,7 @@ export class UserService {
     if (passwordMatch) {
       // Passwords match
 
-      const userTypeAndIsLoggedIn = user.userType + '_' + user.userId;
+      const userTypeAndIsLoggedIn = user.userType + '_' + user.id;
       await this.userRepository.update(user.id, {
         userType: userTypeAndIsLoggedIn,
       });
