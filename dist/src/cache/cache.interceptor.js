@@ -38,6 +38,16 @@ let RedisCacheInterceptor = class RedisCacheInterceptor {
         let returnKey = '';
         if (url.includes('/api/runningInfo/getAll')) {
             let searchText = '';
+            let searchTOW = '';
+            if (query?.testType) {
+                searchTOW += query.testType;
+            }
+            if (query?.title) {
+                searchTOW += query.title;
+            }
+            if (query?.wbcCountOrder) {
+                searchTOW += query.wbcCountOrder;
+            }
             if (query.barcodeNo) {
                 searchText = query.barcodeNo;
             }
@@ -53,10 +63,16 @@ let RedisCacheInterceptor = class RedisCacheInterceptor {
                         query.endDay +
                         query.page +
                         searchText +
-                        query.nrCount;
+                        query.nrCount +
+                        searchTOW;
             }
             else {
-                returnKey = query.startDay + query.endDay + query.page + query.nrCount;
+                returnKey =
+                    query.startDay +
+                        query.endDay +
+                        query.page +
+                        query.nrCount +
+                        searchTOW;
             }
         }
         else {
