@@ -27,6 +27,20 @@ export class BackupService {
     }
   }
 
+  async checkIsPossibleToBackup(backupDto: BackupDto): Promise<boolean> {
+    const { startDate, endDate, backupPath } = backupDto;
+    // 백업 폴더가 존재하는지 확인하고 없으면 생성
+    if (!(await fs.pathExists(backupPath))) {
+      await fs.ensureDir(backupPath);
+    }
+
+    const dateFolder = path.join(backupPath, `${startDate}_${endDate}`);
+    if (!(await fs.pathExists(dateFolder))) {
+      return true;
+    }
+    return false;
+  }
+
   async backupData(backupDto: BackupDto): Promise<void> {
     const { startDate, endDate, backupPath, sourceFolderPath } = backupDto;
     // 날짜를 문자열로 변환
@@ -106,8 +120,9 @@ export class BackupService {
     // MySQL 데이터베이스 특정 테이블 백업
     const backupFileName = `backup-${startDate}_${endDate}.sql`;
     const sqlBackupFilePath = path.join(dateFolder, backupFileName);
-    const databaseSchema =
-      sourceFolderPath === 'D:\\PBIA_proc' ? 'pb_db_web' : 'bm_db_web';
+    const databaseSchema = sourceFolderPath.includes('PB')
+      ? 'pb_db_web'
+      : 'bm_db_web';
 
     const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${databaseSchema} runing_info_entity --where="analyzedDttm BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'" > ${sqlBackupFilePath}`;
 

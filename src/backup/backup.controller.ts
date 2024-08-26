@@ -11,4 +11,11 @@ export class BackupController {
   async createBackup(@Body() backupDto: BackupDto): Promise<void> {
     await this.backupService.backupData(backupDto);
   }
+
+  @Post('check')
+  async checkIsPossibleToBackup(
+    @Body() backupDto: BackupDto,
+  ): Promise<boolean> {
+    return await this.backupService.checkIsPossibleToBackup(backupDto);
+  }
 }
