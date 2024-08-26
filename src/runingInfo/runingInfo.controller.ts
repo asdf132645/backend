@@ -71,8 +71,10 @@ export class RuningInfoController {
   async create(
     @Body() createDto: CreateRuningInfoDto,
   ): Promise<RuningInfoEntity | null> {
+    // await this.redis.del(updateDto?.dayQuery);
     // 반환 타입에 null 추가
     // runingInfoDtoItems가 객체일 경우, slotNo의 중복 확인 로직 (데이터베이스 조회)
+    await this.redis.del(createDto?.dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     const slotId = createDto.runingInfoDtoItems.slotId;
 
     // slotNo로 기존 엔티티 조회

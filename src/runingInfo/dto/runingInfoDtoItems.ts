@@ -103,6 +103,8 @@ export class CreateRuningInfoDto {
   @ValidateNested({ each: true })
   @Type(() => RuningInfoDtoItems)
   runingInfoDtoItems: RuningInfoDtoItems;
+
+  dayQuery: any;
 }
 
 export class UpdateRuningInfoDto {
