@@ -31,7 +31,7 @@ export class RedisCacheInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(async (data) => {
         // 응답 데이터를 Redis에 캐싱
-        await this.redis.set(key, JSON.stringify(data), 'EX', 1800); // 30분 TTL
+        await this.redis.set(key, JSON.stringify(data), 'EX', 1800);
       }),
     );
   }
