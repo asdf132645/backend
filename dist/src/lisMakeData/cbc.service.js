@@ -77,7 +77,9 @@ let CbcService = class CbcService {
     }
     async fetchExternalData(queryParams) {
         const baseUrl = 'http://emr012.cmcnu.or.kr/cmcnu/.live';
-        const queryString = new URLSearchParams(queryParams).toString();
+        const queryString = Object.keys(queryParams)
+            .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
+            .join('&');
         const url = `${baseUrl}?${queryString}`;
         this.logger.cbc(`cbc-service-fetchExternalData: ${url}`);
         const curlCommand = `curl -s "${url}"`;

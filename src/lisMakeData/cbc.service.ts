@@ -75,13 +75,13 @@ export class CbcService {
     // UIMD 테스트 http://192.168.0.131/api/cbc/liveTest
     const baseUrl = 'http://emr012.cmcnu.or.kr/cmcnu/.live';
     // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
-    const queryString = new URLSearchParams(queryParams).toString();
-    // const queryString = Object.keys(queryParams)
-    //   .map(
-    //     (key: string) =>
-    //       `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`,
-    //   )
-    //   .join('&');
+    // const queryString = new URLSearchParams(queryParams).toString();
+    const queryString = Object.keys(queryParams)
+      .map(
+        (key: string) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`,
+      )
+      .join('&');
 
     const url = `${baseUrl}?${queryString}`;
 
