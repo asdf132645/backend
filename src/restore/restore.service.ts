@@ -294,6 +294,10 @@ export class RestoreService {
     const sqlFilePath = `${backupFilePath}\\${dateFolderPath}\\${fileName}`;
 
     try {
+      if (!(await fs.pathExists(saveFilePath))) {
+        await fs.ensureDir(saveFilePath);
+      }
+      
       if (!(await fs.pathExists(sqlFilePath))) {
         return 'Backup file does not exist';
       }
@@ -302,9 +306,7 @@ export class RestoreService {
         return 'Backup folder does not exist';
       }
 
-      if (!(await fs.pathExists(saveFilePath))) {
-        await fs.ensureDir(saveFilePath);
-      }
+
 
       await this.dataSource.query(`USE ${databaseName}`);
 
