@@ -74,7 +74,7 @@ export class RuningInfoController {
     // await this.redis.del(updateDto?.dayQuery);
     // 반환 타입에 null 추가
     // runingInfoDtoItems가 객체일 경우, slotNo의 중복 확인 로직 (데이터베이스 조회)
-    await this.redis.del(createDto?.dayQuery); // 해당 쿼리로 생성된 캐시 삭제
+    await this.redis.flushall(); // 모든 키 삭제
     const slotId = createDto.runingInfoDtoItems.slotId;
 
     // slotNo로 기존 엔티티 조회
@@ -177,6 +177,7 @@ export class RuningInfoController {
     @Query('testType') testType?: string,
     @Query('wbcCountOrder') wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number; page: number }> {
+    await this.redis.flushall(); // 모든 키 삭제
     // 입력된 날짜 문자열을 Date 객체로 변환
     const startDate = startDay ? moment(startDay).toDate() : undefined;
     const endDate = endDay ? moment(endDay).toDate() : undefined;
