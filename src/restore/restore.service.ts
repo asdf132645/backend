@@ -187,16 +187,19 @@ export class RestoreService {
   };
 
   private deleteImageFolder = async (folderPath) => {
-    if (fs.pathExists(folderPath)) {
+    if (await fs.pathExists(folderPath)) {
       try {
-        await fs.removeSync(folderPath);
+        fs.removeSync(folderPath);
       } catch (e) {
         console.log(e);
       }
     }
   };
 
-  private updateImgDriveRootPath = async (fileNames: string[]) => {
+  private updateImgDriveRootPath = async (
+    fileNames: string[],
+    saveFilePath: string,
+  ) => {
     for (const fileName of fileNames) {
       const item = await this.runningInfoRepository.find({
         where: { slotId: fileName },
@@ -207,7 +210,11 @@ export class RestoreService {
   };
 
   async changeDatabaseAndExecute(fileInfo: any): Promise<string> {
-    const { fileName, saveFilePath, backupFilePath } = fileInfo;
+    const { fileName, saveFilePath } = fileInfo;
+
+    const backupDriveStart = saveFilePath.split(':')[0];
+    const projectType = saveFilePath.includes('PB') ? 'PB' : 'BM';
+    const backupPath = backupDriveStart + ':\\' + projectType + '_backup';
 
     await this.deleteTemporaryTable();
 
@@ -220,11 +227,9 @@ export class RestoreService {
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${backupFilePath}\\${dateFolderPath}`;
-    const sqlFilePath = `${backupFilePath}\\${dateFolderPath}\\${fileName}`;
-    const databaseName = backupFilePath.includes('PB')
-      ? 'pb_db_web'
-      : 'bm_db_web';
+    const folderPath = `${backupPath}\\${dateFolderPath}`;
+    const sqlFilePath = `${backupPath}\\${dateFolderPath}\\${fileName}`;
+    const databaseName = backupPath.includes('PB') ? 'pb_db_web' : 'bm_db_web';
 
     try {
       if (!(await fs.pathExists(sqlFilePath))) {
@@ -246,13 +251,15 @@ export class RestoreService {
         const sourceFolderPath = path.join(folderPath, folderName);
         const targetFolderPath = path.join(saveFilePath, folderName);
 
-        await fs
-          .move(sourceFolderPath, targetFolderPath, { overwrite: true })
-          .catch((err) => {
-            console.error(
-              `Error moving ${sourceFolderPath} to ${targetFolderPath}: ${err}`,
-            );
+        try {
+          await fs.move(sourceFolderPath, targetFolderPath, {
+            overwrite: true,
           });
+        } catch (e) {
+          console.log(
+            `Error moving ${sourceFolderPath} to ${targetFolderPath}: ${e}`,
+          );
+        }
       }
 
       await this.dataSource.query(`USE ${databaseName}`);
@@ -261,10 +268,11 @@ export class RestoreService {
 
       await this.moveDataToDatabase();
 
-      await this.updateImgDriveRootPath(folderNamesArr);
+      await this.updateImgDriveRootPath(folderNamesArr, saveFilePath);
 
       await this.deleteTemporaryTable();
 
+      console.log('folderPath', folderPath);
       await this.deleteImageFolder(folderPath);
 
       return 'Restoration completed successfully';
@@ -274,7 +282,11 @@ export class RestoreService {
   }
 
   async checkDuplicatedData(fileInfo: any): Promise<any> {
-    const { fileName, saveFilePath, backupFilePath } = fileInfo;
+    const { fileName, saveFilePath } = fileInfo;
+
+    const backupDriveStart = saveFilePath.split(':')[0];
+    const projectType = saveFilePath.includes('PB') ? 'PB' : 'BM';
+    const backupPath = backupDriveStart + ':\\' + projectType + '_backup';
 
     await this.deleteTemporaryTable();
 
@@ -290,14 +302,14 @@ export class RestoreService {
     const databaseName = saveFilePath.includes('PB')
       ? 'pb_db_web'
       : 'bm_db_web';
-    const folderPath = `${backupFilePath}\\${dateFolderPath}`;
-    const sqlFilePath = `${backupFilePath}\\${dateFolderPath}\\${fileName}`;
+    const folderPath = `${backupPath}\\${dateFolderPath}`;
+    const sqlFilePath = `${backupPath}\\${dateFolderPath}\\${fileName}`;
 
     try {
       if (!(await fs.pathExists(saveFilePath))) {
         await fs.ensureDir(saveFilePath);
       }
-      
+
       if (!(await fs.pathExists(sqlFilePath))) {
         return 'Backup file does not exist';
       }
@@ -305,8 +317,6 @@ export class RestoreService {
       if (!(await fs.pathExists(folderPath))) {
         return 'Backup folder does not exist';
       }
-
-
 
       await this.dataSource.query(`USE ${databaseName}`);
 

@@ -44,11 +44,14 @@ export class BackupService {
   async backupData(
     backupDto: BackupDto & { method: 'copy' | 'move' },
   ): Promise<void> {
-    const { startDate, endDate, backupPath, sourceFolderPath, method } =
-      backupDto;
+    const { startDate, endDate, sourceFolderPath, method } = backupDto;
     // 날짜를 문자열로 변환
     const startDateObj = startDate ? moment(startDate).toDate() : undefined;
     const endDateObj = endDate ? moment(endDate).toDate() : undefined;
+
+    const backupDriveStart = sourceFolderPath.split(':')[0];
+    const projectType = sourceFolderPath.includes('PB') ? 'PB' : 'BM';
+    const backupPath = backupDriveStart + ':\\' + projectType + '_backup';
 
     // 시작 및 종료 날짜를 YYYYMMDD 형식의 문자열로 변환
     const formattedStartDate = this.formatDateToString(startDateObj, 'start');
@@ -73,31 +76,42 @@ export class BackupService {
     // 조회된 데이터에서 slotId를 추출
     const slotIds = dataToBackup.map((item: any) => item.slotId);
 
-    // 비동기 작업을 5개씩 끊어서 실행
-    const batchSize = 5; // 배치 크기
-    for (let i = 0; i < slotIds.length; i += batchSize) {
-      const batch = slotIds.slice(i, i + batchSize);
-
-      const movePromises = batch.map((slotId) => {
+    if (method === 'move') {
+      const movePromises = slotIds.map((slotId) => {
+        const sourcePath = path.join(sourceFolderPath, slotId);
+        const targetFolderPath = path.join(dateFolder, slotId);
+        return fs
+          .ensureDir(targetFolderPath)
+          .then(() => {
+            return fs.moveSync(sourcePath, targetFolderPath, {
+              overwrite: true,
+            });
+          })
+          .catch((err) => {
+            console.error(
+              `Error 'moving' ${sourcePath} to ${targetFolderPath}: ${err}`,
+            );
+          });
+      });
+      await Promise.all(movePromises);
+    } else {
+      const movePromises = slotIds.map((slotId) => {
         const sourcePath = path.join(sourceFolderPath, slotId);
         const targetFolderPath = path.join(dateFolder, slotId);
 
         return fs
           .ensureDir(targetFolderPath)
           .then(() => {
-            if (method === 'move') {
-              return fs.move(sourcePath, targetFolderPath, { overwrite: true });
-            } else {
-              return fs.copy(sourcePath, targetFolderPath, { overwrite: true });
-            }
+            return fs.copySync(sourcePath, targetFolderPath, {
+              overwrite: true,
+            });
           })
           .catch((err) => {
             console.error(
-              `Error ${method === 'move' ? 'moving' : 'copying'} ${sourcePath} to ${targetFolderPath}: ${err}`,
+              `Error copying ${sourcePath} to ${targetFolderPath}: ${err}`,
             );
           });
       });
-
       await Promise.all(movePromises);
     }
 

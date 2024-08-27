@@ -20,7 +20,8 @@ export class RestoreController {
       dayQuery: string;
     },
   ) {
-    this.redis.del(body.dayQuery);
+    await this.redis.flushall();
+    // this.redis.del(body.dayQuery);
     await this.restoreService.changeDatabaseAndExecute(body);
     return { message: 'SQL file executed successfully' };
   }
