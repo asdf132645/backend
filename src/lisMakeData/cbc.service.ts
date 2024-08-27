@@ -76,6 +76,13 @@ export class CbcService {
     const baseUrl = 'http://emr012.cmcnu.or.kr/cmcnu/.live';
     // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
     const queryString = new URLSearchParams(queryParams).toString();
+    // const queryString = Object.keys(queryParams)
+    //   .map(
+    //     (key: string) =>
+    //       `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`,
+    //   )
+    //   .join('&');
+
     const url = `${baseUrl}?${queryString}`;
 
     this.logger.cbc(`cbc-service-fetchExternalData: ${url}`);
