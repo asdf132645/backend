@@ -16,11 +16,16 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import Redis from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 
 @ApiTags('user')
 @Controller('/user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    @InjectRedis() private readonly redis: Redis,
+  ) {}
 
   @Post('/register')
   @ApiOperation({ summary: 'Register a new user' })
@@ -86,6 +91,7 @@ export class UserController {
     @Body() { userId, password }: { userId: string; password: string },
   ) {
     try {
+      await this.redis.flushall();
       const user = await this.userService.findOne(userId, password);
       return { user };
     } catch (error) {
