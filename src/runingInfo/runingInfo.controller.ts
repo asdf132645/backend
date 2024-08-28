@@ -162,6 +162,11 @@ export class RuningInfoController {
     return this.runingInfoService.getRunningInfoClassInfoMenu(Number(id));
   }
 
+  @Get('removePageAllData')
+  async removePageAllDataApi(): Promise<void> {
+    await this.redis.flushall(); // 모든 키 삭제
+  }
+
   @Get('getAll')
   @UseInterceptors(RedisCacheInterceptor)
   async findAllWithPagingAndFilter(
@@ -177,7 +182,6 @@ export class RuningInfoController {
     @Query('testType') testType?: string,
     @Query('wbcCountOrder') wbcCountOrder?: string,
   ): Promise<{ data: RuningInfoEntity[]; total: number; page: number }> {
-    await this.redis.flushall(); // 모든 키 삭제
     // 입력된 날짜 문자열을 Date 객체로 변환
     const startDate = startDay ? moment(startDay).toDate() : undefined;
     const endDate = endDay ? moment(endDay).toDate() : undefined;
