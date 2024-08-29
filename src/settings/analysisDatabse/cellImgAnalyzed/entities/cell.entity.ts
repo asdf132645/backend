@@ -41,6 +41,10 @@ export class CellImgAnalyzed {
   stitchCount: string;
 
   @Column()
+  @ApiProperty({ example: '0', description: 'Side Edge Wbc Mode' })
+  sideEdgeWbcMode: string;
+
+  @Column()
   @ApiProperty({ example: '', description: 'IA 루트 경로' })
   iaRootPath: string;
 

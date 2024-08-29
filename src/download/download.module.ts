@@ -1,8 +1,7 @@
-// backup.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BackupService } from './backup.service';
-import { BackupController } from './backup.controller';
+import { DownloadService } from './download.service';
+import { DownloadController } from './download.controller';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 
@@ -14,7 +13,7 @@ import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
       url: 'redis://localhost:6379',
     } as RedisModuleOptions),
   ],
-  providers: [BackupService],
-  controllers: [BackupController],
+  providers: [DownloadService],
+  controllers: [DownloadController],
 })
-export class BackupModule {}
+export class DownloadModule {}

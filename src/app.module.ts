@@ -41,13 +41,13 @@ import { FileModule } from './file/file.module';
 import { ImagesService } from './images/images.service';
 import { Hl7Module } from './hl7/hl7.module';
 import { DeviceModule } from './device/device.module';
-import { BackupModule } from './backup/backup.module';
+import { DownloadModule } from './download/download.module';
 import { RemainingCountController } from './settings/analysisDatabse/deviceController/remaining-count.controller';
 import { RemainingCountService } from './settings/analysisDatabse/deviceController/remaining-count.service';
 import { QualityCheckService } from './settings/qualityCheck/qualityCheck.service';
 import { QualityCheckController } from './settings/qualityCheck/qualityCheck.controller';
 import { BrowserModule } from './browserExit/browser.module';
-import { RestoreModule } from './restore/restore.module';
+import { UploadModule } from './upload/upload.module';
 import { CbcModule } from './lisMakeData/cbc.module';
 
 @Module({
@@ -60,7 +60,6 @@ import { CbcModule } from './lisMakeData/cbc.module';
     // }),
     UserModule,
     CellImgAnalyzedModule,
-    RestoreModule,
     RbcDegreeModule,
     WbcCustomClassModule,
     WbcHotKeysModule,
@@ -82,9 +81,9 @@ import { CbcModule } from './lisMakeData/cbc.module';
     FileModule,
     Hl7Module,
     DeviceModule,
-    BackupModule,
+    DownloadModule,
     BrowserModule,
-    RestoreModule,
+    UploadModule,
     CbcModule,
   ],
   controllers: [

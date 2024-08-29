@@ -1,9 +1,8 @@
-// restore.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestoreService } from './restore.service';
+import { UploadService } from './upload.service';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
-import { RestoreController } from './restore.controller';
+import { UploadController } from './upload.controller';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { LoggerService } from '../logger.service';
 
@@ -15,7 +14,7 @@ import { LoggerService } from '../logger.service';
       url: 'redis://localhost:6379',
     } as RedisModuleOptions),
   ],
-  providers: [RestoreService, LoggerService],
-  controllers: [RestoreController],
+  providers: [UploadService, LoggerService],
+  controllers: [UploadController],
 })
-export class RestoreModule {}
+export class UploadModule {}

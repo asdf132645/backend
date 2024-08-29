@@ -4,9 +4,10 @@ import { DataSource, In, Repository } from 'typeorm';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
+import { UploadDto } from './upload.dto';
 
 @Injectable()
-export class RestoreService {
+export class UploadService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(RuningInfoEntity)
@@ -197,24 +198,117 @@ export class RestoreService {
   };
 
   private updateImgDriveRootPath = async (
-    fileNames: string[],
-    saveFilePath: string,
+    availableIds: string[],
+    destinationUploadPath: string,
   ) => {
-    for (const fileName of fileNames) {
-      const item = await this.runningInfoRepository.find({
-        where: { slotId: fileName },
-      });
-      const query = `UPDATE runing_info_entity SET img_drive_root_path = NULL WHERE (id = '${item[0].id}');`;
+    destinationUploadPath.split('\\').join('\\\\');
+    for (const id of availableIds) {
+      const query = `UPDATE runing_info_entity SET img_drive_root_path = '${destinationUploadPath}' WHERE (id = '${id}');`;
       await this.dataSource.query(query);
     }
   };
 
-  async changeDatabaseAndExecute(fileInfo: any): Promise<string> {
-    const { fileName, saveFilePath } = fileInfo;
+  private moveImages = async (
+    fileNames: string[],
+    originUploadPath: string,
+    destinationUploadPath: string,
+    uploadType: 'copy' | 'move',
+  ) => {
+    const availableFileNames = [];
+    const availableIds = [];
+    for (const fileName of fileNames) {
+      const item: any = await this.runningInfoRepository.find({
+        where: { slotId: fileName },
+      });
+      if (item[0]?.slotId) {
+        availableFileNames.push(fileName);
+        availableIds.push(item[0].id);
+      }
+    }
 
-    const backupDriveStart = saveFilePath.split(':')[0];
-    const projectType = saveFilePath.includes('PB') ? 'PB' : 'BM';
-    const backupPath = backupDriveStart + ':\\' + projectType + '_backup';
+    const moveResults = {
+      success: [],
+      failed: [],
+    };
+    const concurrency = 10;
+    let activeTasks = 0;
+
+    const queue = availableFileNames.map((slotId) => {
+      const sourcePath = path.join(originUploadPath, slotId);
+      const targetFolderPath = path.join(destinationUploadPath, slotId);
+      return {
+        source: sourcePath,
+        destination: targetFolderPath,
+        uploadType,
+      };
+    });
+
+    const moveImageFiles = async (
+      source: string,
+      destination: string,
+      uploadType: 'copy' | 'move',
+    ) => {
+      try {
+        if (uploadType === 'copy') {
+          await fs.copySync(source, destination, {
+            overwrite: true,
+          });
+        } else {
+          await fs.moveSync(source, destination, {
+            overwrite: true,
+          });
+        }
+
+        moveResults.success.push(destination);
+      } catch (err) {
+        moveResults.failed.push(destination);
+        console.error(`Error moving ${source} to ${destination}: ${err}`);
+      } finally {
+        activeTasks--;
+        processQueue();
+      }
+    };
+
+    const processQueue = () => {
+      while (activeTasks < concurrency && queue.length > 0) {
+        const { source, destination, uploadType } = queue.shift();
+        activeTasks++;
+        moveImageFiles(source, destination, uploadType);
+      }
+    };
+
+    processQueue();
+
+    await new Promise((resolve) => {
+      const checkCompletion = setInterval(() => {
+        if (activeTasks === 0 && queue.length === 0) {
+          clearInterval(checkCompletion);
+          resolve(null);
+        }
+      }, 100);
+    });
+
+    return availableIds;
+  };
+
+  async changeDatabaseAndExecute(fileInfo: UploadDto): Promise<string> {
+    const {
+      fileName,
+      destinationUploadPath,
+      projectType,
+      originUploadPath,
+      uploadType,
+    } = fileInfo;
+
+    const databaseName =
+      projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
+    const originDriveStart = originUploadPath.split(':')[0];
+    const uploadOriginPath =
+      originDriveStart +
+      ':\\' +
+      'UIMD_' +
+      projectType.toUpperCase() +
+      '_backup';
 
     await this.deleteTemporaryTable();
 
@@ -223,44 +317,32 @@ export class RestoreService {
     );
 
     if (!match) {
-      return 'Invalid backup file name';
+      return 'Invalid download file name';
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${backupPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${backupPath}\\${dateFolderPath}\\${fileName}`;
-    const databaseName = backupPath.includes('PB') ? 'pb_db_web' : 'bm_db_web';
+    const folderPath = `${uploadOriginPath}\\${dateFolderPath}`;
+    const sqlFilePath = `${uploadOriginPath}\\${dateFolderPath}\\${fileName}`;
 
     try {
-      if (!(await fs.pathExists(sqlFilePath))) {
-        return 'Backup file does not exist';
+      // PBIA_proc or BMIA_proc 없을 시 생성 코드
+      if (!(await fs.pathExists(destinationUploadPath))) {
+        await fs.ensureDir(destinationUploadPath);
       }
 
       if (!(await fs.pathExists(folderPath))) {
         return 'Backup folder does not exist';
       }
 
-      if (!(await fs.pathExists(saveFilePath))) {
-        await fs.ensureDir(saveFilePath);
+      if (!(await fs.pathExists(sqlFilePath))) {
+        return 'Backup file does not exist';
+      }
+
+      if (!(await fs.pathExists(destinationUploadPath))) {
+        await fs.ensureDir(destinationUploadPath);
       }
 
       const folderNamesArr = await this.listDirectoriesInFolder(folderPath);
-
-      /** 이미지 폴더 이동 Logic */
-      for (const folderName of folderNamesArr) {
-        const sourceFolderPath = path.join(folderPath, folderName);
-        const targetFolderPath = path.join(saveFilePath, folderName);
-
-        try {
-          await fs.move(sourceFolderPath, targetFolderPath, {
-            overwrite: true,
-          });
-        } catch (e) {
-          console.log(
-            `Error moving ${sourceFolderPath} to ${targetFolderPath}: ${e}`,
-          );
-        }
-      }
 
       await this.dataSource.query(`USE ${databaseName}`);
 
@@ -268,12 +350,21 @@ export class RestoreService {
 
       await this.moveDataToDatabase();
 
-      await this.updateImgDriveRootPath(folderNamesArr, saveFilePath);
+      // 폴더 이동 전에 DB에 있는 폴더들만 이동
+      const availableIds = await this.moveImages(
+        folderNamesArr,
+        folderPath,
+        destinationUploadPath,
+        uploadType,
+      );
+
+      await this.updateImgDriveRootPath(availableIds, destinationUploadPath);
 
       await this.deleteTemporaryTable();
 
-      console.log('folderPath', folderPath);
-      await this.deleteImageFolder(folderPath);
+      if (uploadType === 'move') {
+        await this.deleteImageFolder(folderPath);
+      }
 
       return 'Restoration completed successfully';
     } catch (e) {
@@ -281,12 +372,19 @@ export class RestoreService {
     }
   }
 
-  async checkDuplicatedData(fileInfo: any): Promise<any> {
-    const { fileName, saveFilePath } = fileInfo;
+  async checkDuplicatedData(fileInfo: UploadDto): Promise<any> {
+    const { fileName, destinationUploadPath, originUploadPath, projectType } =
+      fileInfo;
 
-    const backupDriveStart = saveFilePath.split(':')[0];
-    const projectType = saveFilePath.includes('PB') ? 'PB' : 'BM';
-    const backupPath = backupDriveStart + ':\\' + projectType + '_backup';
+    const databaseName =
+      projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
+    const originDriveStart = originUploadPath.split(':')[0];
+    const originDownloadPath =
+      originDriveStart +
+      ':\\' +
+      'UIMD_' +
+      projectType.toUpperCase() +
+      '_backup';
 
     await this.deleteTemporaryTable();
 
@@ -295,27 +393,24 @@ export class RestoreService {
     );
 
     if (!match) {
-      return 'Invalid backup file name';
+      return 'Invalid download file name';
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
-    const databaseName = saveFilePath.includes('PB')
-      ? 'pb_db_web'
-      : 'bm_db_web';
-    const folderPath = `${backupPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${backupPath}\\${dateFolderPath}\\${fileName}`;
+    const folderPath = `${originDownloadPath}\\${dateFolderPath}`;
+    const sqlFilePath = `${originDownloadPath}\\${dateFolderPath}\\${fileName}`;
 
     try {
-      if (!(await fs.pathExists(saveFilePath))) {
-        await fs.ensureDir(saveFilePath);
-      }
-
-      if (!(await fs.pathExists(sqlFilePath))) {
-        return 'Backup file does not exist';
+      if (!(await fs.pathExists(destinationUploadPath))) {
+        await fs.ensureDir(destinationUploadPath);
       }
 
       if (!(await fs.pathExists(folderPath))) {
-        return 'Backup folder does not exist';
+        return 'Download folder does not exist';
+      }
+
+      if (!(await fs.pathExists(sqlFilePath))) {
+        return 'Download file does not exist';
       }
 
       await this.dataSource.query(`USE ${databaseName}`);

@@ -9,6 +9,7 @@ export class CellImgAnalyzedDto {
   diffRbcPositionMargin: string;
   diffPltPositionMargin: string;
   stitchCount: string;
+  sideEdgeWbcMode: string;
   iaRootPath: string;
   isNsNbIntegration: boolean;
   isAlarm: boolean;
