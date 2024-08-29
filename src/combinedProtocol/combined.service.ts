@@ -35,7 +35,7 @@ export class CombinedService
   private serverIp: any; // 서버의 IP 주소 저장
   private reconnectAttempts: number = 0; // 재연결 시도 횟수
   private maxReconnectAttempts: number = 10; // 최대 재연결 시도 횟수
-  private reconnectDelay: number = 5000; // 재연결 시도 지연 (밀리초 단위)
+  private reconnectDelay: number = 1000; // 재연결 시도 지연 (밀리초 단위)
   private mainPc: boolean = true;
 
   constructor(
@@ -240,10 +240,10 @@ export class CombinedService
       if (!this.connectedClient || this.connectedClient.destroyed) {
         const newClient = new net.Socket();
 
-        newClient.setTimeout(10000); // 10초 타임아웃
+        newClient.setTimeout(10000); // 10초 동안 클라이언트 소켓이 데이터를 송수신하지 않으면 timeout 이벤트가 발생하도록 설정
 
         newClient.connect(newPort, newAddress, () => {
-          this.logger.log('코어 TCP 웹 백엔드 연결 성공');
+          this.logger.warn('코어 TCP 웹 백엔드 연결 성공');
           this.connectedClient = newClient;
           this.wss.emit('isTcpConnected', true);
           this.reconnectAttempts = 0; // 재연결 시도 횟수 초기화
@@ -255,6 +255,7 @@ export class CombinedService
         });
 
         newClient.on('data', (chunk) => {
+          this.logger.warn(`코어 TCP 서버로부터 데이터 수신 성공`); // 추가된 로깅
           if (this.wss) {
             this.sendDataToWebSocketClients(chunk);
             this.notRes = false;
@@ -264,7 +265,7 @@ export class CombinedService
         });
 
         newClient.on('end', () => {
-          this.logger.log('코어 TCP 클라이언트 연결 종료');
+          this.logger.warn('코어 TCP 클라이언트 연결 종료');
           this.sendDataToWebSocketClients({ err: true });
           this.handleReconnectFailure(newClient);
         });
@@ -294,14 +295,17 @@ export class CombinedService
     client.destroy(); // 기존 소켓 종료
     this.connectedClient = null;
 
+    this.logger.warn(
+      `⚠️ TCP 연결 실패, 재연결 시도 중 (${this.reconnectAttempts}/${this.maxReconnectAttempts})... 재 연결 텀 1초`,
+    );
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.logger.warn(
-        `⚠️ 재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
-      );
       setTimeout(
         () => this.setupTcpServer('localhost', 11235),
         this.reconnectDelay,
       );
+      // 연결 실패 후 즉시 재시도를 방지 - 끊기고 나서 바로 재연결 시도하면 여러가지 문제발생 할 수 있어서 바로 재시작 안함
+      // 재연결 지연 시간을 두어, 자원 낭비를 줄이고 시스템을 안정화하려는 목적
     } else {
       this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
     }
