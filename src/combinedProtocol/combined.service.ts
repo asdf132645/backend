@@ -97,6 +97,14 @@ export class CombinedService
     this.serverIp = await isServerRunningLocally();
     this.wss.emit('multiViewer', client.conn.remoteAddress);
 
+    // 클라이언트가 보낸 ping 메시지 처리
+    client.on('ping', () => {
+      client.emit('pong'); // 클라이언트로 pong 메시지 응답
+      this.logger.ping(
+        ` 프론트 연결 끊김 Ping TEST ${client.conn.remoteAddress}`,
+      );
+    });
+
     // 클라이언트의 Origin 헤더 가져오기
     client.on('message', (message) => {
       try {
