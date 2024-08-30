@@ -205,7 +205,6 @@ export class CombinedService
           this.connectedClient.write(serializedData);
           // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
         }, throttleDelay);
-
         if (
           data.payload.jobCmd === 'INIT' ||
           data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
