@@ -97,11 +97,10 @@ export class CombinedService
     this.serverIp = await isServerRunningLocally();
     this.wss.emit('multiViewer', client.conn.remoteAddress);
 
-    // 클라이언트가 보낸 ping 메시지 처리
     client.on('ping', () => {
-      client.emit('pong'); // 클라이언트로 pong 메시지 응답
+      client.emit('pong');
       this.logger.ping(
-        ` 프론트 연결 끊김 Ping TEST ${client.conn.remoteAddress}`,
+        ` 프론트 Ping : 최초연결 한번 PING ${client.conn.remoteAddress}`,
       );
     });
 
