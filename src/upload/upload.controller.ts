@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { UploadService } from './upload.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
@@ -27,5 +27,10 @@ export class UploadController {
     body: UploadDto,
   ) {
     return await this.uploadService.checkDuplicatedData(body);
+  }
+
+  @Get('checkUploadDataMoved')
+  async checkDataMoved() {
+    return await this.uploadService.checkDataMoved();
   }
 }

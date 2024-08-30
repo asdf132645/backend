@@ -8,14 +8,16 @@ import { exec } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
+import { LoggerService } from '../logger.service';
 
 @Injectable()
 export class DownloadService {
   constructor(
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
+    private readonly logger: LoggerService,
   ) {}
-
+  private moveResults = { success: 0, total: 0 };
   private formatDateToString(date: Date, time): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -64,22 +66,37 @@ export class DownloadService {
     }
 
     if (!(await fs.pathExists(dateFolder))) {
-      let totalFileCount = 0;
-      for (const slotId of slotIds) {
-        const sourcePath = path.join(originDownloadPath, slotId);
-        const files = await fs.readdir(sourcePath);
-        totalFileCount += files.length;
-      }
-
+      this.moveResults.total = slotIds.length;
+      this.moveResults.success = 0;
       return {
         success: true,
-        message: `Success ${totalFileCount}`,
+        message: `Success ${slotIds.length}`,
       };
     }
     return {
       success: false,
       message: 'The download file for the specified date already exists',
     };
+  }
+
+  private retryOperation(operation, retries, delay) {
+    let attempts = 0;
+
+    const execute = () => {
+      attempts++;
+      return operation().catch((error) => {
+        if (attempts < retries) {
+          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
+          return new Promise((resolve) =>
+            setTimeout(() => execute().then(resolve), delay),
+          );
+        } else {
+          return Promise.reject(error);
+        }
+      });
+    };
+
+    return execute();
   }
 
   async backupData(downloadDto: DownloadDto): Promise<void> {
@@ -135,11 +152,6 @@ export class DownloadService {
     // 조회된 데이터에서 slotId를 추출
     const slotIds = dataToBackup.map((item: any) => item.slotId);
 
-    const moveResults = {
-      success: [],
-      failed: [],
-    };
-
     const concurrency = 10;
     let activeTasks = 0;
 
@@ -159,47 +171,56 @@ export class DownloadService {
       destination: string,
       downloadType: 'copy' | 'move',
     ) => {
+      const retries = 3;
+      const delay = 1000;
       try {
-        if (downloadType === 'copy') {
-          await fs.copySync(source, destination, {
-            overwrite: true,
-          });
-        } else {
-          await fs.moveSync(source, destination, {
-            overwrite: true,
-          });
+        if (await fs.pathExists(destinationDownloadPath)) {
+          const operation = () => {
+            if (downloadType === 'copy') {
+              return fs.copy(source, destination, { overwrite: true });
+            } else {
+              return fs.move(source, destination, { overwrite: true });
+            }
+          };
+          await this.retryOperation(operation, retries, delay);
+          this.moveResults.success += 1;
         }
-        moveResults.success.push(destination);
       } catch (error) {
-        moveResults.failed.push(destination);
-        console.error(
-          `Error ${downloadType === 'copy' ? 'copy' : 'mov'}ing ${source} to ${destination}: ${error}`,
+        this.logger.logic(
+          `[Download] - Error ${downloadType === 'copy' ? 'copy' : 'mov'}ing ${source} to ${destination}: ${error}`,
         );
       } finally {
+        this.moveResults.total -= 1;
         activeTasks--;
         processQueue();
       }
     };
 
     // 큐 처리 함수
-    const processQueue = () => {
+    const processQueue = async () => {
+      const tasks = [];
       while (activeTasks < concurrency && queue.length > 0) {
         const { source, destination, downloadType } = queue.shift();
         activeTasks++;
-        moveImageFiles(source, destination, downloadType);
+        tasks.push(moveImageFiles(source, destination, downloadType));
+      }
+      if (tasks.length > 0) {
+        await Promise.all(tasks);
       }
     };
 
     // 큐 처리 시작
-    processQueue();
+    await processQueue();
 
+    // 10개씩 나누어서 실행 -> 현재 실행되는 이동과 Queue 확인
     await new Promise((resolve) => {
-      const checkCompletion = setInterval(() => {
+      const checkCompletion = () => {
         if (activeTasks === 0 && queue.length === 0) {
-          clearInterval(checkCompletion);
-          resolve(null);
+          resolve(null); // 성공
+        } else {
+          setTimeout(checkCompletion, 500);
         }
-      }, 100);
+      };
     });
 
     // MySQL 데이터베이스 특정 테이블 백업
@@ -210,11 +231,12 @@ export class DownloadService {
 
     exec(dumpCommand, async (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error executing dump command: ${error.message}`);
+        this.logger.logic(
+          `[OpenDrive] - Error executing dump command: ${error.message}`,
+        );
         return error.message;
       }
       if (stderr) {
-        console.error(`mysqldump stderr: ${stderr}`);
         if (downloadType === 'move') {
           await this.runningInfoRepository.delete({
             slotId: In(slotIds),
@@ -229,8 +251,11 @@ export class DownloadService {
           });
         }
       }
-      console.log(`Database backup saved to ${sqlBackupFilePath}`);
     });
+  }
+
+  async checkDataMoved() {
+    return this.moveResults;
   }
 
   async openDrive(
@@ -238,13 +263,14 @@ export class DownloadService {
   ): Promise<void> {
     const { originDownloadPath } = downloadDto;
 
-    console.log('제발', originDownloadPath);
     exec(`explorer.exe ${originDownloadPath}`, (err) => {
       if (err) {
-        console.error(`Error opening ${originDownloadPath}`, err);
+        this.logger.logic(
+          `[OpenDrive] - Error opening ${originDownloadPath} : ${err}`,
+        );
       } else {
-        console.log('opening drive success');
+        this.logger.logic(`[OpenDrive] - Opening drive success`);
       }
-    })
+    });
   }
 }

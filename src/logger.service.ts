@@ -13,6 +13,7 @@ export class LoggerService extends Logger {
     debug: null,
     cbc: null,
     ping: null,
+    login: null,
   }; // 각 로그 레벨별 마지막 메시지 저장
 
   constructor() {
@@ -55,6 +56,12 @@ export class LoggerService extends Logger {
     if (this.isDuplicateMessage('ping', message)) return;
     super.log(message);
     this.writeLog('ping', message);
+  }
+
+  logic(message: string) {
+    if (this.isDuplicateMessage('logic', message)) return;
+    super.log(message);
+    this.writeLog('logic', message);
   }
 
   private isDuplicateMessage(level: string, message: string): boolean {

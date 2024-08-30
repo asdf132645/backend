@@ -4,6 +4,7 @@ import { DownloadService } from './download.service';
 import { DownloadController } from './download.controller';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
+import {LoggerService} from "../logger.service";
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
       url: 'redis://localhost:6379',
     } as RedisModuleOptions),
   ],
-  providers: [DownloadService],
+  providers: [DownloadService, LoggerService],
   controllers: [DownloadController],
 })
 export class DownloadModule {}
