@@ -13,6 +13,7 @@ import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
 import { RuningInfoService } from '../runingInfo/runingInfo.service';
 import { isServerRunningLocally } from '../utils/network';
+import { BrowserService } from '../browserExit/browser.service';
 
 dotenv.config(); // dotenv 설정 추가
 
@@ -41,6 +42,7 @@ export class CombinedService
   constructor(
     private readonly logger: LoggerService,
     private readonly runingInfoService: RuningInfoService,
+    private readonly browserService: BrowserService,
   ) {}
 
   // 이전 reqDttm 값을 갱신하는 함수
@@ -155,6 +157,10 @@ export class CombinedService
     });
 
     client.on('disconnect', async () => {
+      if (!clientIpAddress.includes('192.168.0.131')) {
+        await this.browserService.closeNodeProcesses();
+      }
+      await this.runingInfoService.redisAllClear();
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });
 

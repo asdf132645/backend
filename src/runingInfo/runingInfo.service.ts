@@ -10,8 +10,9 @@ import {
   UpdateRuningInfoDto,
 } from './dto/runingInfoDtoItems';
 import * as fs from 'fs';
-import * as path from 'path';
 import { LoggerService } from '../logger.service';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class RuningInfoService {
@@ -20,6 +21,7 @@ export class RuningInfoService {
     private readonly dataSource: DataSource, // 트랜잭션을 사용 하여 비동기 작업의 타이밍 문제를 해결
     @InjectRepository(RuningInfoEntity)
     private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
+    @InjectRedis() private readonly redis: Redis, // Redis 인스턴스 주입
   ) {}
 
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
@@ -579,5 +581,9 @@ export class RuningInfoService {
       { pcIp: oldPcIp },
       { pcIp: '', lock_status: false },
     );
+  }
+
+  async redisAllClear(): Promise<void> {
+    this.redis.flushall();
   }
 }
