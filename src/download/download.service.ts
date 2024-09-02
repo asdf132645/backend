@@ -79,6 +79,30 @@ export class DownloadService {
     };
   }
 
+  private moveFile(source: string, destination: string) {
+    return new Promise((resolve, reject) => {
+      exec(`move /Y ${source} ${destination}`, (error, stdout, stderr) => {
+        if (error) {
+          reject(`Error moving file: ${stderr}`);
+        } else {
+          resolve(stdout);
+        }
+      })
+    })
+  }
+
+  private copyFile(source: string, destination: string) {
+    return new Promise((resolve, reject) => {
+      exec(`copy /Y ${source} ${destination}`, (error, stdout, stderr) => {
+        if (error) {
+          reject(`Error copying file: ${stderr}`);
+        } else {
+          resolve(stdout);
+        }
+      })
+    })
+  }
+
   private retryOperation(operation, retries, delay) {
     let attempts = 0;
 
@@ -175,11 +199,11 @@ export class DownloadService {
       const delay = 1000;
       try {
         if (await fs.pathExists(destinationDownloadPath)) {
-          const operation = () => {
+          const operation = async () => {
             if (downloadType === 'copy') {
-              return fs.copy(source, destination, { overwrite: true });
+              return this.copyFile(source, destination);
             } else {
-              return fs.move(source, destination, { overwrite: true });
+              return this.moveFile(source, destination);
             }
           };
           await this.retryOperation(operation, retries, delay);
@@ -198,14 +222,13 @@ export class DownloadService {
 
     // 큐 처리 함수
     const processQueue = async () => {
-      const tasks = [];
       while (activeTasks < concurrency && queue.length > 0) {
-        const { source, destination, downloadType } = queue.shift();
-        activeTasks++;
-        tasks.push(moveImageFiles(source, destination, downloadType));
-      }
-      if (tasks.length > 0) {
-        await Promise.all(tasks);
+        const newTask = queue.shift();
+        if (newTask) {
+          const { source, destination, downloadType } = newTask;
+          activeTasks++;
+          moveImageFiles(source, destination, downloadType);
+        }
       }
     };
 
@@ -218,9 +241,10 @@ export class DownloadService {
         if (activeTasks === 0 && queue.length === 0) {
           resolve(null); // 성공
         } else {
-          setTimeout(checkCompletion, 500);
+          setTimeout(checkCompletion, 1000);
         }
       };
+      checkCompletion();
     });
 
     // MySQL 데이터베이스 특정 테이블 백업

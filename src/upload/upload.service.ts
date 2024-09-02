@@ -6,6 +6,7 @@ import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
+import {exec} from "child_process";
 
 @Injectable()
 export class UploadService {
@@ -182,12 +183,14 @@ export class UploadService {
     // 겹치는 데이터가 없는 경우 다음 Upload API를 호출하기 때문에 total값과 success값을 준비
     if (duplicatedSlotIdArr.length === 0) {
       this.moveResults.success = 0;
-      this.moveResults.total = 0;
+      this.moveResults.total = nonDuplicatedSlotIdArr.length;
     }
 
     return {
       duplicated: duplicatedSlotIdArr,
       nonDuplicated: nonDuplicatedSlotIdArr,
+      totalMove: this.moveResults.total,
+      successMove: this.moveResults.success,
     };
   };
 
@@ -224,6 +227,30 @@ export class UploadService {
     };
 
     return execute();
+  }
+
+  private moveFile(source: string, destination: string) {
+    return new Promise((resolve, reject) => {
+      exec(`move /Y ${source} ${destination}`, (error, stdout, stderr) => {
+        if (error) {
+          reject(`Error moving file: ${stderr}`);
+        } else {
+          resolve(stdout);
+        }
+      })
+    })
+  }
+
+  private copyFile(source: string, destination: string) {
+    return new Promise((resolve, reject) => {
+      exec(`copy /Y ${source} ${destination}`, (error, stdout, stderr) => {
+        if (error) {
+          reject(`Error copying file: ${stderr}`);
+        } else {
+          resolve(stdout);
+        }
+      })
+    })
   }
 
   private updateImgDriveRootPath = async (
@@ -282,15 +309,12 @@ export class UploadService {
       const retries = 3;
       const delay = 1000;
       try {
-        if (
-          (await fs.pathExists(destination)) &&
-          (await fs.pathExists(source))
-        ) {
+        if (await fs.pathExists(source)) {
           const operation = () => {
             if (uploadType === 'copy') {
-              return fs.copy(source, destination, { overwrite: true });
+              return this.copyFile(source, destination);
             } else {
-              return fs.move(source, destination, { overwrite: true });
+              return this.moveFile(source, destination);
             }
           };
           await this.retryOperation(operation, retries, delay);
@@ -302,20 +326,21 @@ export class UploadService {
         );
       } finally {
         this.moveResults.total -= 1;
+        this.logger.logic(`[Download] success: ${this.moveResults.success}`);
+        this.logger.logic(`[Download] total: ${this.moveResults.total}`);
         activeTasks--;
         processQueue();
       }
     };
 
     const processQueue = async () => {
-      const tasks = [];
       while (activeTasks < concurrency && queue.length > 0) {
-        const { source, destination, uploadType } = queue.shift();
-        activeTasks++;
-        moveImageFiles(source, destination, uploadType);
-      }
-      if (tasks.length > 0) {
-        await Promise.all(tasks);
+        const newTask = queue.shift();
+        if (newTask) {
+          const { source, destination, uploadType } = newTask;
+          activeTasks++;
+          moveImageFiles(source, destination, uploadType);
+        }
       }
     };
 
@@ -323,12 +348,13 @@ export class UploadService {
 
     await new Promise((resolve) => {
       const checkCompletion = () => {
-        if (activeTasks === 0 && queue.length === 0) {
+        if (activeTasks <= 0 && queue.length === 0) {
           resolve(null); // 성공
         } else {
-          setTimeout(checkCompletion, 500);
+          setTimeout(checkCompletion, 1000);
         }
-      }
+      };
+      checkCompletion();
     });
 
     return availableIds;
