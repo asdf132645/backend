@@ -6,7 +6,7 @@ import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
-import {exec} from "child_process";
+import { exec } from 'child_process';
 
 @Injectable()
 export class UploadService {
@@ -229,28 +229,40 @@ export class UploadService {
     return execute();
   }
 
-  private moveFile(source: string, destination: string) {
+  private async moveFile(source: string, destination: string) {
+    // 덮어쓰기
+    const command = `move ${source}\\* ${destination} /Y`;
     return new Promise((resolve, reject) => {
-      exec(`move /Y ${source} ${destination}`, (error, stdout, stderr) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
-          reject(`Error moving file: ${stderr}`);
-        } else {
-          resolve(stdout);
+          reject(`실행 실패: ${error.message}`);
+          return;
         }
-      })
-    })
+        if (stderr) {
+          console.error(`표준 에러: ${stderr}`);
+        }
+        console.log(`표준 출력: ${stdout}`);
+        resolve(null);
+      });
+    });
   }
 
-  private copyFile(source: string, destination: string) {
+  private async copyFile(source: string, destination: string) {
+    // 하위 모든 디렉토리 및 파일 복사
+    const command = `xcopy ${source}\\* ${destination}\\ /E /I /H`;
     return new Promise((resolve, reject) => {
-      exec(`copy /Y ${source} ${destination}`, (error, stdout, stderr) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
-          reject(`Error copying file: ${stderr}`);
-        } else {
-          resolve(stdout);
+          reject(`실행 실패: ${error.message}`);
+          return;
         }
-      })
-    })
+        if (stderr) {
+          console.error(`표준 에러: ${stderr}`);
+        }
+        console.log(`표준 출력: ${stdout}`);
+        resolve(null);
+      });
+    });
   }
 
   private updateImgDriveRootPath = async (

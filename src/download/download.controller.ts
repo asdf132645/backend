@@ -28,8 +28,8 @@ export class DownloadController {
   @Post('openDrive')
   async openDrive(
     @Body() downloadDto: Pick<DownloadDto, 'originDownloadPath'>,
-  ): Promise<void> {
-    await this.downloadService.openDrive(downloadDto);
+  ): Promise<string[] | string> {
+    return await this.downloadService.openDrive(downloadDto);
   }
 
   @Get('checkDownloadDataMoved')

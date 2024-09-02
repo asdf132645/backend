@@ -79,28 +79,40 @@ export class DownloadService {
     };
   }
 
-  private moveFile(source: string, destination: string) {
+  private async moveFile(source: string, destination: string) {
+    // 덮어쓰기
+    const command = `move ${source}\\* ${destination} /Y`;
     return new Promise((resolve, reject) => {
-      exec(`move /Y ${source} ${destination}`, (error, stdout, stderr) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
-          reject(`Error moving file: ${stderr}`);
-        } else {
-          resolve(stdout);
+          reject(`실행 실패: ${error.message}`);
+          return;
         }
-      })
-    })
+        if (stderr) {
+          console.error(`표준 에러: ${stderr}`);
+        }
+        console.log(`표준 출력: ${stdout}`);
+        resolve(null);
+      });
+    });
   }
 
-  private copyFile(source: string, destination: string) {
+  private async copyFile(source: string, destination: string) {
+    // 하위 모든 디렉토리 및 파일 복사
+    const command = `xcopy ${source}\\* ${destination}\\ /E /I /H`;
     return new Promise((resolve, reject) => {
-      exec(`copy /Y ${source} ${destination}`, (error, stdout, stderr) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
-          reject(`Error copying file: ${stderr}`);
-        } else {
-          resolve(stdout);
+          reject(`실행 실패: ${error.message}`);
+          return;
         }
-      })
-    })
+        if (stderr) {
+          console.error(`표준 에러: ${stderr}`);
+        }
+        console.log(`표준 출력: ${stdout}`);
+        resolve(null);
+      });
+    });
   }
 
   private retryOperation(operation, retries, delay) {
@@ -201,9 +213,9 @@ export class DownloadService {
         if (await fs.pathExists(destinationDownloadPath)) {
           const operation = async () => {
             if (downloadType === 'copy') {
-              return this.copyFile(source, destination);
+              return await this.copyFile(source, destination);
             } else {
-              return this.moveFile(source, destination);
+              return await this.moveFile(source, destination);
             }
           };
           await this.retryOperation(operation, retries, delay);
@@ -284,9 +296,29 @@ export class DownloadService {
 
   async openDrive(
     downloadDto: Pick<DownloadDto, 'originDownloadPath'>,
-  ): Promise<void> {
+  ): Promise<string[] | string> {
     const { originDownloadPath } = downloadDto;
 
+    // 백업 폴더 없으면 생성
+    if (!(await fs.pathExists(originDownloadPath))) {
+      await fs.ensureDir(originDownloadPath);
+    }
+
+    // try {
+    //   const entries = await fs.readdir(originDownloadPath, {
+    //     withFileTypes: true,
+    //   });
+    //
+    //   const topLevelDirectories = entries
+    //     .filter((entry) => entry.isDirectory())
+    //     .map((dir) => dir.name);
+    //
+    //   return topLevelDirectories;
+    // } catch (error) {
+    //   return 'Error reading download path';
+    // }
+
+    // 이전 코드
     exec(`explorer.exe ${originDownloadPath}`, (err) => {
       if (err) {
         this.logger.logic(
@@ -296,5 +328,6 @@ export class DownloadService {
         this.logger.logic(`[OpenDrive] - Opening drive success`);
       }
     });
+    return 'Success';
   }
 }
