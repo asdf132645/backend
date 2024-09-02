@@ -38,6 +38,7 @@ export class CombinedService
   private maxReconnectAttempts: number = 10; // 최대 재연결 시도 횟수
   private reconnectDelay: number = 1000; // 재연결 시도 지연 (밀리초 단위)
   private mainPc: boolean = true;
+  private isNotDownloadOrUploading = true;
 
   constructor(
     private readonly logger: LoggerService,
@@ -142,6 +143,25 @@ export class CombinedService
       }
     });
 
+    client.on(
+      'isDownloadUploading',
+      (state: { type: string; payload: boolean }) => {
+        try {
+          if (this.wss) {
+            if (state.payload) {
+              this.isNotDownloadOrUploading = false;
+            } else {
+              this.isNotDownloadOrUploading = true;
+            }
+          }
+        } catch (e) {
+          this.logger.logic(
+            `[Download&Upload] 다운로드 or 업로드 도중 Core Backend로 통신 중지 실패: ${e}`,
+          );
+        }
+      },
+    );
+
     client.on('viewerCheck', () => {
       try {
         if (this.wss) {
@@ -205,7 +225,11 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    if (this.connectedClient && !this.connectedClient.destroyed) {
+    if (
+      this.connectedClient &&
+      !this.connectedClient.destroyed &&
+      this.isNotDownloadOrUploading
+    ) {
       try {
         const serializedData = JSON.stringify(data.payload);
 

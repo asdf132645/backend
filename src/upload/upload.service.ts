@@ -209,62 +209,6 @@ export class UploadService {
     }
   };
 
-  private retryOperation(operation, retries, delay) {
-    let attempts = 0;
-
-    const execute = () => {
-      attempts++;
-      return operation().catch((error) => {
-        if (attempts < retries) {
-          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
-          return new Promise((resolve) =>
-            setTimeout(() => execute().then(resolve), delay),
-          );
-        } else {
-          return Promise.reject(error);
-        }
-      });
-    };
-
-    return execute();
-  }
-
-  private async moveFile(source: string, destination: string) {
-    // 덮어쓰기
-    const command = `move ${source}\\* ${destination} /Y`;
-    return new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          reject(`실행 실패: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`표준 에러: ${stderr}`);
-        }
-        console.log(`표준 출력: ${stdout}`);
-        resolve(null);
-      });
-    });
-  }
-
-  private async copyFile(source: string, destination: string) {
-    // 하위 모든 디렉토리 및 파일 복사
-    const command = `xcopy ${source}\\* ${destination}\\ /E /I /H`;
-    return new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          reject(`실행 실패: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`표준 에러: ${stderr}`);
-        }
-        console.log(`표준 출력: ${stdout}`);
-        resolve(null);
-      });
-    });
-  }
-
   private updateImgDriveRootPath = async (
     availableIds: string[],
     destinationUploadPath: string,
@@ -318,18 +262,13 @@ export class UploadService {
       destination: string,
       uploadType: 'copy' | 'move',
     ) => {
-      const retries = 3;
-      const delay = 1000;
       try {
         if (await fs.pathExists(source)) {
-          const operation = () => {
-            if (uploadType === 'copy') {
-              return this.copyFile(source, destination);
-            } else {
-              return this.moveFile(source, destination);
-            }
-          };
-          await this.retryOperation(operation, retries, delay);
+          if (uploadType === 'copy') {
+            await fs.copy(source, destination);
+          } else {
+            await fs.move(source, destination);
+          }
           this.moveResults.success += 1;
         }
       } catch (err) {

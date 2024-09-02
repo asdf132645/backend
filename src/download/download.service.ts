@@ -79,42 +79,6 @@ export class DownloadService {
     };
   }
 
-  private async moveFile(source: string, destination: string) {
-    // 덮어쓰기
-    const command = `move ${source}\\* ${destination} /Y`;
-    return new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          reject(`실행 실패: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`표준 에러: ${stderr}`);
-        }
-        console.log(`표준 출력: ${stdout}`);
-        resolve(null);
-      });
-    });
-  }
-
-  private async copyFile(source: string, destination: string) {
-    // 하위 모든 디렉토리 및 파일 복사
-    const command = `xcopy ${source}\\* ${destination}\\ /E /I /H`;
-    return new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          reject(`실행 실패: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`표준 에러: ${stderr}`);
-        }
-        console.log(`표준 출력: ${stdout}`);
-        resolve(null);
-      });
-    });
-  }
-
   private retryOperation(operation, retries, delay) {
     let attempts = 0;
 
@@ -213,9 +177,9 @@ export class DownloadService {
         if (await fs.pathExists(destinationDownloadPath)) {
           const operation = async () => {
             if (downloadType === 'copy') {
-              return await this.copyFile(source, destination);
+              await fs.copy(source, destination, { overwrite: true });
             } else {
-              return await this.moveFile(source, destination);
+              await fs.move(source, destination, { overwrite: true });
             }
           };
           await this.retryOperation(operation, retries, delay);
