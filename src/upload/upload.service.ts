@@ -99,6 +99,20 @@ export class UploadService {
     }
   };
 
+  private cleanNpmCache() {
+    return new Promise((resolve, reject) => {
+      exec('npm cache clean --force', (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        if (stderr) {
+          console.log(`npm cache clean warning: ${stderr}`);
+        }
+        resolve(stdout);
+      });
+    });
+  }
+
   private moveDataToDatabase = async () => {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
     const items = await this.dataSource.query(restoreSql);
@@ -220,6 +234,14 @@ export class UploadService {
     }
   };
 
+  private async ensurePermissions(path, permission) {
+    try {
+      await fs.access(path, permission);
+    } catch (error) {
+      await fs.chmod(path, 0o666);
+    }
+  }
+
   private moveImages = async (
     fileNames: string[],
     originUploadPath: string,
@@ -263,7 +285,18 @@ export class UploadService {
       uploadType: 'copy' | 'move',
     ) => {
       try {
-        if (await fs.pathExists(source)) {
+        if (
+          (await fs.pathExists(destinationUploadPath)) &&
+          (await fs.pathExists(source))
+        ) {
+          await this.ensurePermissions(
+            source,
+            fs.constants.R_OK | fs.constants.W_OK,
+          );
+          await this.ensurePermissions(
+            destinationUploadPath,
+            fs.constants.W_OK,
+          );
           if (uploadType === 'copy') {
             await fs.copy(source, destination);
           } else {
@@ -361,6 +394,8 @@ export class UploadService {
       if (!(await fs.pathExists(destinationUploadPath))) {
         await fs.ensureDir(destinationUploadPath);
       }
+
+      await this.cleanNpmCache();
 
       const folderNamesArr = await this.listDirectoriesInFolder(folderPath);
 

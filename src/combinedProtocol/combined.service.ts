@@ -225,11 +225,7 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    if (
-      this.connectedClient &&
-      !this.connectedClient.destroyed &&
-      this.isNotDownloadOrUploading
-    ) {
+    if (this.connectedClient && !this.connectedClient.destroyed) {
       try {
         const serializedData = JSON.stringify(data.payload);
 
@@ -244,7 +240,8 @@ export class CombinedService
           // this.connectedClient가 유효한지 확인
           if (
             this.connectedClient &&
-            typeof this.connectedClient.write === 'function'
+            typeof this.connectedClient.write === 'function' &&
+            this.isNotDownloadOrUploading
           ) {
             this.connectedClient.write(serializedData);
             // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);

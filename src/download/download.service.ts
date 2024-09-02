@@ -29,6 +29,20 @@ export class DownloadService {
     }
   }
 
+  private cleanNpmCache() {
+    return new Promise((resolve, reject) => {
+      exec('npm cache clean --force', (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        if (stderr) {
+          console.log(`npm cache clean warning: ${stderr}`);
+        }
+        resolve(stdout);
+      });
+    });
+  }
+
   async checkIsPossibleToDownload(
     downloadDto: DownloadDto,
   ): Promise<DownloadReturn> {
@@ -99,6 +113,14 @@ export class DownloadService {
     return execute();
   }
 
+  private async ensurePermissions(path, permission) {
+    try {
+      await fs.access(path, permission);
+    } catch (error) {
+      await fs.chmod(path, 0o666);
+    }
+  }
+
   async backupData(downloadDto: DownloadDto): Promise<void> {
     const {
       startDate,
@@ -142,6 +164,8 @@ export class DownloadService {
       await fs.ensureDir(downloadDateFolder);
     }
 
+    await this.cleanNpmCache();
+
     // 지정된 날짜 범위의 데이터를 조회
     const dataToBackup = await this.runningInfoRepository.find({
       where: {
@@ -174,7 +198,15 @@ export class DownloadService {
       const retries = 3;
       const delay = 1000;
       try {
-        if (await fs.pathExists(destinationDownloadPath)) {
+        if (await fs.pathExists(source)) {
+          await this.ensurePermissions(
+            source,
+            fs.constants.R_OK | fs.constants.W_OK,
+          );
+          await this.ensurePermissions(
+            destinationDownloadPath,
+            fs.constants.W_OK,
+          );
           const operation = async () => {
             if (downloadType === 'copy') {
               await fs.copy(source, destination, { overwrite: true });
@@ -203,7 +235,10 @@ export class DownloadService {
         if (newTask) {
           const { source, destination, downloadType } = newTask;
           activeTasks++;
-          moveImageFiles(source, destination, downloadType);
+
+          if (await fs.pathExists(destinationDownloadPath)) {
+            moveImageFiles(source, destination, downloadType);
+          }
         }
       }
     };
