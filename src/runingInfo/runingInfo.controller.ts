@@ -113,19 +113,7 @@ export class RuningInfoController {
     const updatedEntities = await this.runingInfoService.update(updateDto);
 
     // 캐시 무효화
-    await Promise.all(
-      updateDto.runingInfoDtoItems.map(async (item: any) => {
-        // 관련된 다른 캐시 키도 무효화
-        const relatedCacheKeys = [
-          `GET:/api/runningInfo/detail/${item.id}?`,
-          `GET:/api/runningInfo/classInfoDetail/${item.id}?`,
-          `GET:/api/runningInfo/classInfoDetailSelectQuery/${item.id}?`,
-          `GET:/api/runningInfo/classInfoMenuDetailSelectQuery/${item.id}?`,
-        ];
-
-        await Promise.all(relatedCacheKeys.map((key) => this.redis.del(key)));
-      }),
-    );
+    await this.redis.flushall(); // 모든 키 삭제
 
     return updatedEntities;
   }

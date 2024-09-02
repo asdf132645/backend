@@ -157,9 +157,10 @@ export class CombinedService
     });
 
     client.on('disconnect', async () => {
-      if (!clientIpAddress.includes('192.168.0.131')) {
-        await this.browserService.closeNodeProcesses();
-      }
+      console.log(clientIpAddress);
+      // if (!clientIpAddress.includes('192.168.0.131')) {
+      //   await this.browserService.closeNodeProcesses();
+      // }
       await this.runingInfoService.redisAllClear();
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });

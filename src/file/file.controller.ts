@@ -27,6 +27,31 @@ export class FileController {
     }
   }
 
+  @Get('check-file-exists')
+  checkFileExists(
+    @Query('directoryPath') directoryPath: string,
+    @Query('filename') filename: string,
+  ): any {
+    if (!directoryPath || !filename) {
+      return {
+        success: false,
+        message:
+          'Both directoryPath and filename query parameters are required.',
+        code: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    const fileExists = this.fileService.checkFileExists(
+      directoryPath,
+      filename,
+    );
+    return {
+      success: true,
+      fileExists,
+      code: HttpStatus.OK,
+    };
+  }
+
   @Get('create-directory')
   createDirectory(@Query('path') directoryPath: string) {
     if (!directoryPath) {
