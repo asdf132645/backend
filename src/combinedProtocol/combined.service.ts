@@ -215,9 +215,19 @@ export class CombinedService
           if (!serializedData) {
             return;
           }
-          this.connectedClient.write(serializedData);
-          // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+
+          // this.connectedClient가 유효한지 확인
+          if (
+            this.connectedClient &&
+            typeof this.connectedClient.write === 'function'
+          ) {
+            this.connectedClient.write(serializedData);
+            // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+          } else {
+            console.error('connectedClient가 유효하지 않습니다.');
+          }
         }, throttleDelay);
+
         if (
           data.payload.jobCmd === 'INIT' ||
           data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
