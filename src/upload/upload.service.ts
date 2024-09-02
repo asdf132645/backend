@@ -5,6 +5,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
+import { LoggerService } from '../logger.service';
 
 @Injectable()
 export class UploadService {
@@ -12,7 +13,9 @@ export class UploadService {
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
+    private readonly logger: LoggerService,
   ) {}
+  private moveResults = { success: 0, total: 0 };
   private listDirectoriesInFolder = async (
     folderPath: string,
   ): Promise<string[]> => {
@@ -34,7 +37,7 @@ export class UploadService {
 
       return folderNamesArr;
     } catch (error) {
-      console.error('Error reading directories:', error);
+      this.logger.logic(`[Upload] Error reading directories: ${error}`);
       return [];
     }
   };
@@ -176,6 +179,12 @@ export class UploadService {
       }
     }
 
+    // 겹치는 데이터가 없는 경우 다음 Upload API를 호출하기 때문에 total값과 success값을 준비
+    if (duplicatedSlotIdArr.length === 0) {
+      this.moveResults.success = 0;
+      this.moveResults.total = 0;
+    }
+
     return {
       duplicated: duplicatedSlotIdArr,
       nonDuplicated: nonDuplicatedSlotIdArr,
@@ -192,10 +201,30 @@ export class UploadService {
       try {
         fs.removeSync(folderPath);
       } catch (e) {
-        console.log(e);
+        this.logger.logic(`[Upload] Error(Remained Image Folder): ${e}`);
       }
     }
   };
+
+  private retryOperation(operation, retries, delay) {
+    let attempts = 0;
+
+    const execute = () => {
+      attempts++;
+      return operation().catch((error) => {
+        if (attempts < retries) {
+          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
+          return new Promise((resolve) =>
+            setTimeout(() => execute().then(resolve), delay),
+          );
+        } else {
+          return Promise.reject(error);
+        }
+      });
+    };
+
+    return execute();
+  }
 
   private updateImgDriveRootPath = async (
     availableIds: string[],
@@ -216,31 +245,33 @@ export class UploadService {
   ) => {
     const availableFileNames = [];
     const availableIds = [];
-    for (const fileName of fileNames) {
-      const item: any = await this.runningInfoRepository.find({
-        where: { slotId: fileName },
-      });
-      if (item[0]?.slotId) {
-        availableFileNames.push(fileName);
-        availableIds.push(item[0].id);
-      }
-    }
 
-    const moveResults = {
-      success: [],
-      failed: [],
+    const processFileName = async (fileName: string) => {
+      try {
+        const items: any[] = await this.runningInfoRepository.find({
+          where: { slotId: fileName },
+        });
+
+        if (Array.isArray(items) && items[0]?.slotId) {
+          availableFileNames.push(fileName);
+          availableIds.push(items[0].id);
+        } else {
+          console.log(`Unexpected data format for slotId: ${fileName}`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     };
+
+    await Promise.all(fileNames.map((fileName) => processFileName(fileName)));
+
     const concurrency = 10;
     let activeTasks = 0;
 
     const queue = availableFileNames.map((slotId) => {
       const sourcePath = path.join(originUploadPath, slotId);
       const targetFolderPath = path.join(destinationUploadPath, slotId);
-      return {
-        source: sourcePath,
-        destination: targetFolderPath,
-        uploadType,
-      };
+      return { source: sourcePath, destination: targetFolderPath, uploadType };
     });
 
     const moveImageFiles = async (
@@ -248,44 +279,56 @@ export class UploadService {
       destination: string,
       uploadType: 'copy' | 'move',
     ) => {
+      const retries = 3;
+      const delay = 1000;
       try {
-        if (uploadType === 'copy') {
-          await fs.copySync(source, destination, {
-            overwrite: true,
-          });
-        } else {
-          await fs.moveSync(source, destination, {
-            overwrite: true,
-          });
+        if (
+          (await fs.pathExists(destination)) &&
+          (await fs.pathExists(source))
+        ) {
+          const operation = () => {
+            if (uploadType === 'copy') {
+              return fs.copy(source, destination, { overwrite: true });
+            } else {
+              return fs.move(source, destination, { overwrite: true });
+            }
+          };
+          await this.retryOperation(operation, retries, delay);
+          this.moveResults.success += 1;
         }
-
-        moveResults.success.push(destination);
       } catch (err) {
-        moveResults.failed.push(destination);
-        console.error(`Error moving ${source} to ${destination}: ${err}`);
+        this.logger.logic(
+          `[Upload] Error moving ${source} to ${destination}: ${err}`,
+        );
       } finally {
+        this.moveResults.total -= 1;
         activeTasks--;
         processQueue();
       }
     };
 
-    const processQueue = () => {
+    const processQueue = async () => {
+      const tasks = [];
       while (activeTasks < concurrency && queue.length > 0) {
         const { source, destination, uploadType } = queue.shift();
         activeTasks++;
         moveImageFiles(source, destination, uploadType);
       }
+      if (tasks.length > 0) {
+        await Promise.all(tasks);
+      }
     };
 
-    processQueue();
+    await processQueue();
 
     await new Promise((resolve) => {
-      const checkCompletion = setInterval(() => {
+      const checkCompletion = () => {
         if (activeTasks === 0 && queue.length === 0) {
-          clearInterval(checkCompletion);
-          resolve(null);
+          resolve(null); // 성공
+        } else {
+          setTimeout(checkCompletion, 500);
         }
-      }, 100);
+      }
     });
 
     return availableIds;
@@ -317,7 +360,7 @@ export class UploadService {
     );
 
     if (!match) {
-      return 'Invalid download file name';
+      return 'Invalid upload file name';
     }
 
     const dateFolderPath = `${match[1]}_${match[2]}`;
@@ -331,11 +374,11 @@ export class UploadService {
       }
 
       if (!(await fs.pathExists(folderPath))) {
-        return 'Backup folder does not exist';
+        return 'Upload folder does not exist';
       }
 
       if (!(await fs.pathExists(sqlFilePath))) {
-        return 'Backup file does not exist';
+        return 'Upload file does not exist';
       }
 
       if (!(await fs.pathExists(destinationUploadPath))) {
@@ -366,7 +409,7 @@ export class UploadService {
         await this.deleteImageFolder(folderPath);
       }
 
-      return 'Restoration completed successfully';
+      return 'Upload completed successfully';
     } catch (e) {
       console.log(e);
     }
@@ -417,10 +460,13 @@ export class UploadService {
 
       await this.createTemporaryTable(sqlFilePath);
 
-      const duplicatedData = await this.checkDuplicatedInDatabase();
-      return duplicatedData;
+      return await this.checkDuplicatedInDatabase();
     } catch (e) {
       return `Error: ${e}`;
     }
+  }
+
+  async checkDataMoved() {
+    return this.moveResults;
   }
 }

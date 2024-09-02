@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { DownloadService } from './download.service';
 import { DownloadDto, DownloadReturn } from './download.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
@@ -30,5 +30,10 @@ export class DownloadController {
     @Body() downloadDto: Pick<DownloadDto, 'originDownloadPath'>,
   ): Promise<void> {
     await this.downloadService.openDrive(downloadDto);
+  }
+
+  @Get('checkDownloadDataMoved')
+  async checkDataMoved() {
+    return await this.downloadService.checkDataMoved();
   }
 }
