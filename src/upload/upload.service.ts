@@ -227,9 +227,12 @@ export class UploadService {
     availableIds: string[],
     destinationUploadPath: string,
   ) => {
-    destinationUploadPath.split('\\').join('\\\\');
+    const convertedDestinationUploadPath = destinationUploadPath.replace(
+      '\\',
+      '\\\\',
+    );
     for (const id of availableIds) {
-      const query = `UPDATE runing_info_entity SET img_drive_root_path = '${destinationUploadPath}' WHERE (id = '${id}');`;
+      const query = `UPDATE runing_info_entity SET img_drive_root_path = '${convertedDestinationUploadPath}' WHERE (id = '${id}');`;
       await this.dataSource.query(query);
     }
   };
@@ -278,6 +281,8 @@ export class UploadService {
       const targetFolderPath = path.join(destinationUploadPath, slotId);
       return { source: sourcePath, destination: targetFolderPath, uploadType };
     });
+
+    this.moveResults.total = availableFileNames.length;
 
     const moveImageFiles = async (
       source: string,

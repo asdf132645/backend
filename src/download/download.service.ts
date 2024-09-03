@@ -123,6 +123,27 @@ export class DownloadService {
     }
   }
 
+  private updateImgDriveRootPath = async (
+    availableIds: string[],
+    destinationDownloadPath: string,
+  ) => {
+    const convertedDestinationDownloadPath = destinationDownloadPath.replace(
+      '\\',
+      '\\\\',
+    );
+
+    for (const slotId of availableIds) {
+      const item = await this.runningInfoRepository.findOne({
+        where: { slotId: slotId },
+      });
+
+      if (item) {
+        item.img_drive_root_path = convertedDestinationDownloadPath;
+        await this.runningInfoRepository.save(item);
+      }
+    }
+  };
+
   async backupData(downloadDto: DownloadDto): Promise<void> {
     const {
       startDate,
@@ -275,17 +296,14 @@ export class DownloadService {
       }
       if (stderr) {
         if (downloadType === 'move') {
-          await this.runningInfoRepository.delete({
-            slotId: In(slotIds),
-          });
+          console.log('destinationDownloadPath', downloadDateFolder);
+          await this.updateImgDriveRootPath(slotIds, downloadDateFolder);
         }
         return stderr;
       }
       if (stdout) {
         if (downloadType === 'move') {
-          await this.runningInfoRepository.delete({
-            slotId: In(slotIds),
-          });
+          await this.updateImgDriveRootPath(slotIds, downloadDateFolder);
         }
       }
     });
