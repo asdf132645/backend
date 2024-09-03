@@ -6,7 +6,7 @@ import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
-import {exec} from "child_process";
+import { exec } from 'child_process';
 
 @Injectable()
 export class UploadService {
@@ -98,6 +98,20 @@ export class UploadService {
       await this.dataSource.query(insertStatement);
     }
   };
+
+  private cleanNpmCache() {
+    return new Promise((resolve, reject) => {
+      exec('npm cache clean --force', (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        if (stderr) {
+          console.log(`npm cache clean warning: ${stderr}`);
+        }
+        resolve(stdout);
+      });
+    });
+  }
 
   private moveDataToDatabase = async () => {
     const restoreSql = `SELECT * FROM restore_runing_info_entity`;
@@ -209,50 +223,6 @@ export class UploadService {
     }
   };
 
-  private retryOperation(operation, retries, delay) {
-    let attempts = 0;
-
-    const execute = () => {
-      attempts++;
-      return operation().catch((error) => {
-        if (attempts < retries) {
-          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
-          return new Promise((resolve) =>
-            setTimeout(() => execute().then(resolve), delay),
-          );
-        } else {
-          return Promise.reject(error);
-        }
-      });
-    };
-
-    return execute();
-  }
-
-  private moveFile(source: string, destination: string) {
-    return new Promise((resolve, reject) => {
-      exec(`move /Y ${source} ${destination}`, (error, stdout, stderr) => {
-        if (error) {
-          reject(`Error moving file: ${stderr}`);
-        } else {
-          resolve(stdout);
-        }
-      })
-    })
-  }
-
-  private copyFile(source: string, destination: string) {
-    return new Promise((resolve, reject) => {
-      exec(`copy /Y ${source} ${destination}`, (error, stdout, stderr) => {
-        if (error) {
-          reject(`Error copying file: ${stderr}`);
-        } else {
-          resolve(stdout);
-        }
-      })
-    })
-  }
-
   private updateImgDriveRootPath = async (
     availableIds: string[],
     destinationUploadPath: string,
@@ -263,6 +233,14 @@ export class UploadService {
       await this.dataSource.query(query);
     }
   };
+
+  private async ensurePermissions(path, permission) {
+    try {
+      await fs.access(path, permission);
+    } catch (error) {
+      await fs.chmod(path, 0o666);
+    }
+  }
 
   private moveImages = async (
     fileNames: string[],
@@ -306,18 +284,24 @@ export class UploadService {
       destination: string,
       uploadType: 'copy' | 'move',
     ) => {
-      const retries = 3;
-      const delay = 1000;
       try {
-        if (await fs.pathExists(source)) {
-          const operation = () => {
-            if (uploadType === 'copy') {
-              return this.copyFile(source, destination);
-            } else {
-              return this.moveFile(source, destination);
-            }
-          };
-          await this.retryOperation(operation, retries, delay);
+        if (
+          (await fs.pathExists(destinationUploadPath)) &&
+          (await fs.pathExists(source))
+        ) {
+          await this.ensurePermissions(
+            source,
+            fs.constants.R_OK | fs.constants.W_OK,
+          );
+          await this.ensurePermissions(
+            destinationUploadPath,
+            fs.constants.W_OK,
+          );
+          if (uploadType === 'copy') {
+            await fs.copy(source, destination);
+          } else {
+            await fs.move(source, destination);
+          }
           this.moveResults.success += 1;
         }
       } catch (err) {
@@ -371,27 +355,20 @@ export class UploadService {
 
     const databaseName =
       projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
-    const originDriveStart = originUploadPath.split(':')[0];
-    const uploadOriginPath =
-      originDriveStart +
-      ':\\' +
-      'UIMD_' +
-      projectType.toUpperCase() +
-      '_backup';
 
     await this.deleteTemporaryTable();
 
-    const match = fileName.match(
-      /^backup-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.sql$/,
-    );
+    const uploadDateFolderName = path.join(originUploadPath, fileName);
 
-    if (!match) {
-      return 'Invalid upload file name';
-    }
+    fs.access(uploadDateFolderName, fs.constants.R_OK);
+    const entries = await fs.readdir(uploadDateFolderName, {
+      withFileTypes: true,
+    });
 
-    const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${uploadOriginPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${uploadOriginPath}\\${dateFolderPath}\\${fileName}`;
+    const sqlFileName = entries
+      .filter((entry) => entry.name.includes('.sql'))
+      .map((file) => file.name)[0];
+    const sqlFilePath = `${uploadDateFolderName}\\${sqlFileName}`;
 
     try {
       // PBIA_proc or BMIA_proc 없을 시 생성 코드
@@ -399,7 +376,7 @@ export class UploadService {
         await fs.ensureDir(destinationUploadPath);
       }
 
-      if (!(await fs.pathExists(folderPath))) {
+      if (!(await fs.pathExists(uploadDateFolderName))) {
         return 'Upload folder does not exist';
       }
 
@@ -411,7 +388,10 @@ export class UploadService {
         await fs.ensureDir(destinationUploadPath);
       }
 
-      const folderNamesArr = await this.listDirectoriesInFolder(folderPath);
+      await this.cleanNpmCache();
+
+      const folderNamesArr =
+        await this.listDirectoriesInFolder(uploadDateFolderName);
 
       await this.dataSource.query(`USE ${databaseName}`);
 
@@ -422,7 +402,7 @@ export class UploadService {
       // 폴더 이동 전에 DB에 있는 폴더들만 이동
       const availableIds = await this.moveImages(
         folderNamesArr,
-        folderPath,
+        uploadDateFolderName,
         destinationUploadPath,
         uploadType,
       );
@@ -432,7 +412,7 @@ export class UploadService {
       await this.deleteTemporaryTable();
 
       if (uploadType === 'move') {
-        await this.deleteImageFolder(folderPath);
+        await this.deleteImageFolder(uploadDateFolderName);
       }
 
       return 'Upload completed successfully';
@@ -447,34 +427,27 @@ export class UploadService {
 
     const databaseName =
       projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
-    const originDriveStart = originUploadPath.split(':')[0];
-    const originDownloadPath =
-      originDriveStart +
-      ':\\' +
-      'UIMD_' +
-      projectType.toUpperCase() +
-      '_backup';
 
     await this.deleteTemporaryTable();
 
-    const match = fileName.match(
-      /^backup-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.sql$/,
-    );
+    const uploadDateFolderName = path.join(originUploadPath, fileName);
 
-    if (!match) {
-      return 'Invalid download file name';
-    }
+    fs.access(uploadDateFolderName, fs.constants.R_OK);
+    const entries = await fs.readdir(uploadDateFolderName, {
+      withFileTypes: true,
+    });
 
-    const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${originDownloadPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${originDownloadPath}\\${dateFolderPath}\\${fileName}`;
+    const sqlFileName = entries
+      .filter((entry) => entry.name.includes('.sql'))
+      .map((file) => file.name)[0];
+    const sqlFilePath = `${uploadDateFolderName}\\${sqlFileName}`;
 
     try {
       if (!(await fs.pathExists(destinationUploadPath))) {
         await fs.ensureDir(destinationUploadPath);
       }
 
-      if (!(await fs.pathExists(folderPath))) {
+      if (!(await fs.pathExists(uploadDateFolderName))) {
         return 'Download folder does not exist';
       }
 
@@ -494,5 +467,31 @@ export class UploadService {
 
   async checkDataMoved() {
     return this.moveResults;
+  }
+
+  async checkPossibleUploadFile(
+    fileInfo: Pick<UploadDto, 'originUploadPath'>,
+  ): Promise<any> {
+    const { originUploadPath } = fileInfo;
+
+    // 백업 폴더 없을 경우
+    if (!(await fs.pathExists(originUploadPath))) {
+      return { success: false, message: 'Download folder does not exits' };
+    }
+
+    try {
+      fs.access(originUploadPath, fs.constants.R_OK);
+      const entries = await fs.readdir(originUploadPath, {
+        withFileTypes: true,
+      });
+
+      const topLevelDirectories = entries
+        .filter((entry) => entry.isDirectory())
+        .map((dir) => dir.name);
+
+      return topLevelDirectories;
+    } catch (error) {
+      return { success: false, message: 'Error reading download path' };
+    }
   }
 }

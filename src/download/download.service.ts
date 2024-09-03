@@ -29,11 +29,27 @@ export class DownloadService {
     }
   }
 
+  private cleanNpmCache() {
+    return new Promise((resolve, reject) => {
+      exec('npm cache clean --force', (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        if (stderr) {
+          console.log(`npm cache clean warning: ${stderr}`);
+        }
+        resolve(stdout);
+      });
+    });
+  }
+
   async checkIsPossibleToDownload(
-    downloadDto: DownloadDto,
+    downloadDto: Pick<
+      DownloadDto,
+      'startDate' | 'endDate' | 'destinationDownloadPath'
+    >,
   ): Promise<DownloadReturn> {
-    const { startDate, endDate, destinationDownloadPath, originDownloadPath } =
-      downloadDto;
+    const { startDate, endDate, destinationDownloadPath } = downloadDto;
 
     // 백업 폴더가 존재하는지 확인하고 없으면 생성
     if (!(await fs.pathExists(destinationDownloadPath))) {
@@ -79,30 +95,6 @@ export class DownloadService {
     };
   }
 
-  private moveFile(source: string, destination: string) {
-    return new Promise((resolve, reject) => {
-      exec(`move /Y ${source} ${destination}`, (error, stdout, stderr) => {
-        if (error) {
-          reject(`Error moving file: ${stderr}`);
-        } else {
-          resolve(stdout);
-        }
-      })
-    })
-  }
-
-  private copyFile(source: string, destination: string) {
-    return new Promise((resolve, reject) => {
-      exec(`copy /Y ${source} ${destination}`, (error, stdout, stderr) => {
-        if (error) {
-          reject(`Error copying file: ${stderr}`);
-        } else {
-          resolve(stdout);
-        }
-      })
-    })
-  }
-
   private retryOperation(operation, retries, delay) {
     let attempts = 0;
 
@@ -121,6 +113,14 @@ export class DownloadService {
     };
 
     return execute();
+  }
+
+  private async ensurePermissions(path, permission) {
+    try {
+      await fs.access(path, permission);
+    } catch (error) {
+      await fs.chmod(path, 0o666);
+    }
   }
 
   async backupData(downloadDto: DownloadDto): Promise<void> {
@@ -166,6 +166,8 @@ export class DownloadService {
       await fs.ensureDir(downloadDateFolder);
     }
 
+    await this.cleanNpmCache();
+
     // 지정된 날짜 범위의 데이터를 조회
     const dataToBackup = await this.runningInfoRepository.find({
       where: {
@@ -198,12 +200,20 @@ export class DownloadService {
       const retries = 3;
       const delay = 1000;
       try {
-        if (await fs.pathExists(destinationDownloadPath)) {
+        if (await fs.pathExists(source)) {
+          await this.ensurePermissions(
+            source,
+            fs.constants.R_OK | fs.constants.W_OK,
+          );
+          await this.ensurePermissions(
+            destinationDownloadPath,
+            fs.constants.W_OK,
+          );
           const operation = async () => {
             if (downloadType === 'copy') {
-              return this.copyFile(source, destination);
+              await fs.copy(source, destination, { overwrite: true });
             } else {
-              return this.moveFile(source, destination);
+              await fs.move(source, destination, { overwrite: true });
             }
           };
           await this.retryOperation(operation, retries, delay);
@@ -227,7 +237,10 @@ export class DownloadService {
         if (newTask) {
           const { source, destination, downloadType } = newTask;
           activeTasks++;
-          moveImageFiles(source, destination, downloadType);
+
+          if (await fs.pathExists(destinationDownloadPath)) {
+            moveImageFiles(source, destination, downloadType);
+          }
         }
       }
     };
@@ -284,9 +297,15 @@ export class DownloadService {
 
   async openDrive(
     downloadDto: Pick<DownloadDto, 'originDownloadPath'>,
-  ): Promise<void> {
+  ): Promise<string[] | string> {
     const { originDownloadPath } = downloadDto;
 
+    // 백업 폴더 없으면 생성
+    if (!(await fs.pathExists(originDownloadPath))) {
+      await fs.ensureDir(originDownloadPath);
+    }
+
+    // 이전 코드
     exec(`explorer.exe ${originDownloadPath}`, (err) => {
       if (err) {
         this.logger.logic(
@@ -296,5 +315,6 @@ export class DownloadService {
         this.logger.logic(`[OpenDrive] - Opening drive success`);
       }
     });
+    return 'Success';
   }
 }

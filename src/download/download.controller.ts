@@ -20,7 +20,11 @@ export class DownloadController {
 
   @Post('check')
   async checkIsPossibleToDownload(
-    @Body() downloadDto: DownloadDto,
+    @Body()
+    downloadDto: Pick<
+      DownloadDto,
+      'startDate' | 'endDate' | 'destinationDownloadPath'
+    >,
   ): Promise<DownloadReturn> {
     return await this.downloadService.checkIsPossibleToDownload(downloadDto);
   }
@@ -28,8 +32,8 @@ export class DownloadController {
   @Post('openDrive')
   async openDrive(
     @Body() downloadDto: Pick<DownloadDto, 'originDownloadPath'>,
-  ): Promise<void> {
-    await this.downloadService.openDrive(downloadDto);
+  ): Promise<string[] | string> {
+    return await this.downloadService.openDrive(downloadDto);
   }
 
   @Get('checkDownloadDataMoved')

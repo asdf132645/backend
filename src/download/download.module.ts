@@ -4,7 +4,7 @@ import { DownloadService } from './download.service';
 import { DownloadController } from './download.controller';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
-import {LoggerService} from "../logger.service";
+import { LoggerService } from '../logger.service';
 
 @Module({
   imports: [
