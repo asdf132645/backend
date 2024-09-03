@@ -295,7 +295,7 @@ export class CombinedService
 
         newClient.on('error', (err: any) => {
           this.logger.error(
-            `🚨[${err.code}] 코어 TCP 연결 오류: ${err.syscall} ${err.address} ${err.port}`,
+            `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류`,
           );
           this.sendDataToWebSocketClients({ err: true });
           this.handleReconnectFailure(newClient);
