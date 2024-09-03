@@ -355,27 +355,20 @@ export class UploadService {
 
     const databaseName =
       projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
-    const originDriveStart = originUploadPath.split(':')[0];
-    const uploadOriginPath =
-      originDriveStart +
-      ':\\' +
-      'UIMD_' +
-      projectType.toUpperCase() +
-      '_backup';
 
     await this.deleteTemporaryTable();
 
-    const match = fileName.match(
-      /^backup-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.sql$/,
-    );
+    const uploadDateFolderName = path.join(originUploadPath, fileName);
 
-    if (!match) {
-      return 'Invalid upload file name';
-    }
+    fs.access(uploadDateFolderName, fs.constants.R_OK);
+    const entries = await fs.readdir(uploadDateFolderName, {
+      withFileTypes: true,
+    });
 
-    const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${uploadOriginPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${uploadOriginPath}\\${dateFolderPath}\\${fileName}`;
+    const sqlFileName = entries
+      .filter((entry) => entry.name.includes('.sql'))
+      .map((file) => file.name)[0];
+    const sqlFilePath = `${uploadDateFolderName}\\${sqlFileName}`;
 
     try {
       // PBIA_proc or BMIA_proc 없을 시 생성 코드
@@ -383,7 +376,7 @@ export class UploadService {
         await fs.ensureDir(destinationUploadPath);
       }
 
-      if (!(await fs.pathExists(folderPath))) {
+      if (!(await fs.pathExists(uploadDateFolderName))) {
         return 'Upload folder does not exist';
       }
 
@@ -397,7 +390,8 @@ export class UploadService {
 
       await this.cleanNpmCache();
 
-      const folderNamesArr = await this.listDirectoriesInFolder(folderPath);
+      const folderNamesArr =
+        await this.listDirectoriesInFolder(uploadDateFolderName);
 
       await this.dataSource.query(`USE ${databaseName}`);
 
@@ -408,7 +402,7 @@ export class UploadService {
       // 폴더 이동 전에 DB에 있는 폴더들만 이동
       const availableIds = await this.moveImages(
         folderNamesArr,
-        folderPath,
+        uploadDateFolderName,
         destinationUploadPath,
         uploadType,
       );
@@ -418,7 +412,7 @@ export class UploadService {
       await this.deleteTemporaryTable();
 
       if (uploadType === 'move') {
-        await this.deleteImageFolder(folderPath);
+        await this.deleteImageFolder(uploadDateFolderName);
       }
 
       return 'Upload completed successfully';
@@ -433,34 +427,27 @@ export class UploadService {
 
     const databaseName =
       projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
-    const originDriveStart = originUploadPath.split(':')[0];
-    const originDownloadPath =
-      originDriveStart +
-      ':\\' +
-      'UIMD_' +
-      projectType.toUpperCase() +
-      '_backup';
 
     await this.deleteTemporaryTable();
 
-    const match = fileName.match(
-      /^backup-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.sql$/,
-    );
+    const uploadDateFolderName = path.join(originUploadPath, fileName);
 
-    if (!match) {
-      return 'Invalid download file name';
-    }
+    fs.access(uploadDateFolderName, fs.constants.R_OK);
+    const entries = await fs.readdir(uploadDateFolderName, {
+      withFileTypes: true,
+    });
 
-    const dateFolderPath = `${match[1]}_${match[2]}`;
-    const folderPath = `${originDownloadPath}\\${dateFolderPath}`;
-    const sqlFilePath = `${originDownloadPath}\\${dateFolderPath}\\${fileName}`;
+    const sqlFileName = entries
+      .filter((entry) => entry.name.includes('.sql'))
+      .map((file) => file.name)[0];
+    const sqlFilePath = `${uploadDateFolderName}\\${sqlFileName}`;
 
     try {
       if (!(await fs.pathExists(destinationUploadPath))) {
         await fs.ensureDir(destinationUploadPath);
       }
 
-      if (!(await fs.pathExists(folderPath))) {
+      if (!(await fs.pathExists(uploadDateFolderName))) {
         return 'Download folder does not exist';
       }
 
@@ -480,5 +467,31 @@ export class UploadService {
 
   async checkDataMoved() {
     return this.moveResults;
+  }
+
+  async checkPossibleUploadFile(
+    fileInfo: Pick<UploadDto, 'originUploadPath'>,
+  ): Promise<any> {
+    const { originUploadPath } = fileInfo;
+
+    // 백업 폴더 없을 경우
+    if (!(await fs.pathExists(originUploadPath))) {
+      return { success: false, message: 'Download folder does not exits' };
+    }
+
+    try {
+      fs.access(originUploadPath, fs.constants.R_OK);
+      const entries = await fs.readdir(originUploadPath, {
+        withFileTypes: true,
+      });
+
+      const topLevelDirectories = entries
+        .filter((entry) => entry.isDirectory())
+        .map((dir) => dir.name);
+
+      return topLevelDirectories;
+    } catch (error) {
+      return { success: false, message: 'Error reading download path' };
+    }
   }
 }

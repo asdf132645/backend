@@ -44,10 +44,12 @@ export class DownloadService {
   }
 
   async checkIsPossibleToDownload(
-    downloadDto: DownloadDto,
+    downloadDto: Pick<
+      DownloadDto,
+      'startDate' | 'endDate' | 'destinationDownloadPath'
+    >,
   ): Promise<DownloadReturn> {
-    const { startDate, endDate, destinationDownloadPath, originDownloadPath } =
-      downloadDto;
+    const { startDate, endDate, destinationDownloadPath } = downloadDto;
 
     // 백업 폴더가 존재하는지 확인하고 없으면 생성
     if (!(await fs.pathExists(destinationDownloadPath))) {
@@ -302,20 +304,6 @@ export class DownloadService {
     if (!(await fs.pathExists(originDownloadPath))) {
       await fs.ensureDir(originDownloadPath);
     }
-
-    // try {
-    //   const entries = await fs.readdir(originDownloadPath, {
-    //     withFileTypes: true,
-    //   });
-    //
-    //   const topLevelDirectories = entries
-    //     .filter((entry) => entry.isDirectory())
-    //     .map((dir) => dir.name);
-    //
-    //   return topLevelDirectories;
-    // } catch (error) {
-    //   return 'Error reading download path';
-    // }
 
     // 이전 코드
     exec(`explorer.exe ${originDownloadPath}`, (err) => {

@@ -33,4 +33,11 @@ export class UploadController {
   async checkDataMoved() {
     return await this.uploadService.checkDataMoved();
   }
+
+  @Post('checkPossibleUploadFile')
+  async checkPossibleUploadFile(
+    @Body() body: Pick<UploadDto, 'originUploadPath'>,
+  ) {
+    return await this.uploadService.checkPossibleUploadFile(body);
+  }
 }

@@ -20,7 +20,11 @@ export class DownloadController {
 
   @Post('check')
   async checkIsPossibleToDownload(
-    @Body() downloadDto: DownloadDto,
+    @Body()
+    downloadDto: Pick<
+      DownloadDto,
+      'startDate' | 'endDate' | 'destinationDownloadPath'
+    >,
   ): Promise<DownloadReturn> {
     return await this.downloadService.checkIsPossibleToDownload(downloadDto);
   }

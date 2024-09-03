@@ -6,6 +6,7 @@ export class DownloadDto {
   downloadType: 'copy' | 'move';
   projectType: 'bm' | 'pb';
   dayQuery: any;
+  deleteFileNames: string[];
 }
 
 export class DownloadReturn {
