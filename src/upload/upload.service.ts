@@ -245,6 +245,26 @@ export class UploadService {
     }
   }
 
+  private retryOperation(operation, retries, delay) {
+    let attempts = 0;
+
+    const execute = () => {
+      attempts++;
+      return operation().catch((error) => {
+        if (attempts < retries) {
+          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
+          return new Promise((resolve) =>
+            setTimeout(() => execute().then(resolve), delay),
+          );
+        } else {
+          return Promise.reject(error);
+        }
+      });
+    };
+
+    return execute();
+  }
+
   private moveImages = async (
     fileNames: string[],
     originUploadPath: string,
@@ -273,9 +293,6 @@ export class UploadService {
 
     await Promise.all(fileNames.map((fileName) => processFileName(fileName)));
 
-    const concurrency = 10;
-    let activeTasks = 0;
-
     const queue = availableFileNames.map((slotId) => {
       const sourcePath = path.join(originUploadPath, slotId);
       const targetFolderPath = path.join(destinationUploadPath, slotId);
@@ -290,6 +307,8 @@ export class UploadService {
       uploadType: 'copy' | 'move',
     ) => {
       try {
+        const retries = 5;
+        const delay = 1000;
         if (
           (await fs.pathExists(destinationUploadPath)) &&
           (await fs.pathExists(source))
@@ -302,29 +321,28 @@ export class UploadService {
             destinationUploadPath,
             fs.constants.W_OK,
           );
-          if (uploadType === 'copy') {
-            await fs.copy(source, destination);
-          } else {
-            await fs.move(source, destination);
-          }
+          const operation = async () => {
+            if (uploadType === 'copy') {
+              await fs.copy(source, destination, { overwrite: true });
+            } else {
+              await fs.move(source, destination, { overwrite: true });
+            }
+          };
+          await this.retryOperation(operation, retries, delay);
         }
       } catch (err) {
         this.logger.logic(
           `[Upload] Error moving ${source} to ${destination}: ${err}`,
         );
-      } finally {
-        activeTasks--;
-        processQueue();
       }
     };
 
     const processQueue = async () => {
-      while (activeTasks < concurrency && queue.length > 0) {
+      while (queue.length > 0) {
         const newTask = queue.shift();
         if (newTask) {
           const { source, destination, uploadType } = newTask;
-          activeTasks++;
-          moveImageFiles(source, destination, uploadType);
+          await moveImageFiles(source, destination, uploadType);
         }
       }
     };
@@ -333,7 +351,7 @@ export class UploadService {
 
     await new Promise((resolve) => {
       const checkCompletion = () => {
-        if (activeTasks <= 0 && queue.length === 0) {
+        if (queue.length === 0) {
           resolve(null); // 성공
         } else {
           setTimeout(checkCompletion, 1000);
@@ -438,9 +456,11 @@ export class UploadService {
       withFileTypes: true,
     });
 
+
     const sqlFileName = entries
       .filter((entry) => entry.name.includes('.sql'))
       .map((file) => file.name)[0];
+
     const sqlFilePath = `${uploadDateFolderName}\\${sqlFileName}`;
 
     try {
@@ -462,7 +482,8 @@ export class UploadService {
 
       return await this.checkDuplicatedInDatabase();
     } catch (e) {
-      return `Error: ${e}`;
+      this.logger.logic(`[UPLOAD] Error: ${e}`);
+      return `Invalid access`;
     }
   }
 

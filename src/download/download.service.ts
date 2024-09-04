@@ -173,8 +173,8 @@ export class DownloadService {
     const formattedEndDate = this.formatDateToString(endDateObj, 'end');
 
     // 백업 폴더가 존재하는지 확인하고 없으면 생성
-    if (!(await fs.pathExists(downloadPath))) {
-      await fs.ensureDir(downloadPath);
+    if (!(await fs.pathExists(destinationDownloadPath))) {
+      await fs.ensureDir(destinationDownloadPath);
     }
 
     const downloadDateFolder = path.join(
@@ -198,9 +198,6 @@ export class DownloadService {
 
     // 조회된 데이터에서 slotId를 추출
     const slotIds = dataToBackup.map((item: any) => item.slotId);
-
-    const concurrency = 10;
-    let activeTasks = 0;
 
     // 큐 작업 추가
     const queue = slotIds.map((slotId) => {
@@ -238,28 +235,22 @@ export class DownloadService {
             }
           };
           await this.retryOperation(operation, retries, delay);
+          this.logger.logic(`[Download] - Success ${source}`);
         }
       } catch (error) {
         this.logger.logic(
           `[Download] - Error ${downloadType === 'copy' ? 'copy' : 'mov'}ing ${source} to ${destination}: ${error}`,
         );
-      } finally {
-        activeTasks--;
-        processQueue();
       }
     };
 
     // 큐 처리 함수
     const processQueue = async () => {
-      while (activeTasks < concurrency && queue.length > 0) {
+      while (queue.length > 0) {
         const newTask = queue.shift();
         if (newTask) {
           const { source, destination, downloadType } = newTask;
-          activeTasks++;
-
-          if (await fs.pathExists(destinationDownloadPath)) {
-            moveImageFiles(source, destination, downloadType);
-          }
+          await moveImageFiles(source, destination, downloadType);
         }
       }
     };
@@ -270,7 +261,7 @@ export class DownloadService {
     // 10개씩 나누어서 실행 -> 현재 실행되는 이동과 Queue 확인
     await new Promise((resolve) => {
       const checkCompletion = () => {
-        if (activeTasks === 0 && queue.length === 0) {
+        if (queue.length === 0) {
           resolve(null); // 성공
         } else {
           setTimeout(checkCompletion, 1000);
