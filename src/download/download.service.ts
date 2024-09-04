@@ -238,14 +238,12 @@ export class DownloadService {
             }
           };
           await this.retryOperation(operation, retries, delay);
-          this.moveResults.success += 1;
         }
       } catch (error) {
         this.logger.logic(
           `[Download] - Error ${downloadType === 'copy' ? 'copy' : 'mov'}ing ${source} to ${destination}: ${error}`,
         );
       } finally {
-        this.moveResults.total -= 1;
         activeTasks--;
         processQueue();
       }
@@ -307,10 +305,6 @@ export class DownloadService {
         }
       }
     });
-  }
-
-  async checkDataMoved() {
-    return this.moveResults;
   }
 
   async openDrive(

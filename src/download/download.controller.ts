@@ -35,9 +35,4 @@ export class DownloadController {
   ): Promise<string[] | string> {
     return await this.downloadService.openDrive(downloadDto);
   }
-
-  @Get('checkDownloadDataMoved')
-  async checkDataMoved() {
-    return await this.downloadService.checkDataMoved();
-  }
 }

@@ -29,11 +29,6 @@ export class UploadController {
     return await this.uploadService.checkDuplicatedData(body);
   }
 
-  @Get('checkUploadDataMoved')
-  async checkDataMoved() {
-    return await this.uploadService.checkDataMoved();
-  }
-
   @Post('checkPossibleUploadFile')
   async checkPossibleUploadFile(
     @Body() body: Pick<UploadDto, 'originUploadPath'>,

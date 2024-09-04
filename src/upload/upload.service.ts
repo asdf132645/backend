@@ -307,16 +307,12 @@ export class UploadService {
           } else {
             await fs.move(source, destination);
           }
-          this.moveResults.success += 1;
         }
       } catch (err) {
         this.logger.logic(
           `[Upload] Error moving ${source} to ${destination}: ${err}`,
         );
       } finally {
-        this.moveResults.total -= 1;
-        this.logger.logic(`[Download] success: ${this.moveResults.success}`);
-        this.logger.logic(`[Download] total: ${this.moveResults.total}`);
         activeTasks--;
         processQueue();
       }
@@ -468,10 +464,6 @@ export class UploadService {
     } catch (e) {
       return `Error: ${e}`;
     }
-  }
-
-  async checkDataMoved() {
-    return this.moveResults;
   }
 
   async checkPossibleUploadFile(
