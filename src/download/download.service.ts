@@ -218,7 +218,7 @@ export class DownloadService {
       destination: string,
       downloadType: 'copy' | 'move',
     ) => {
-      const retries = 3;
+      const retries = 5;
       const delay = 1000;
       try {
         if (await fs.pathExists(source)) {
