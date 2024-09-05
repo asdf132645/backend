@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
-import * as os from 'os';
+// import * as os from 'os';
 
 @Injectable()
 export class BrowserService {
   closeEdgeBrowser(): Promise<string> {
     return new Promise((resolve, reject) => {
-      const userHomeDir = os.homedir();
-      const appPath = `"${userHomeDir}\\AppData\\Local\\Programs\\UIMD\\web\\viewer\\kill_edge.exe"`;
-      // const appPath = `"D:\\UIMD_Data\\UI_KILL\\kill_edge.exe"`;
-
-      exec(appPath, (error, stdout, stderr) => {
+      // const userHomeDir = os.homedir();
+      // const appPath = `"${userHomeDir}\\AppData\\Local\\Programs\\UIMD\\web\\viewer\\kill_edge.exe"`;
+      const appPath = `"D:\\UIMD_Data\\UI_ETC\\kill_edge.exe"`;
+      const command = `powershell -Command "Start-Process '${appPath}' -Verb RunAs"`;
+      exec(command, (error, stdout, stderr) => {
         if (error) {
           reject(`Error: ${error.message}`);
         } else if (stderr) {
