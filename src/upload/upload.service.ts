@@ -325,7 +325,9 @@ export class UploadService {
             if (uploadType === 'copy') {
               await fs.copy(source, destination, { overwrite: true });
             } else {
-              await fs.move(source, destination, { overwrite: true });
+              // await fs.move(source, destination, { overwrite: true });
+              await fs.copy(source, destination, { overwrite: true });
+              // await fs.remove(source);
             }
           };
           await this.retryOperation(operation, retries, delay);
