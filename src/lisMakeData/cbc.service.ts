@@ -10,7 +10,7 @@ export class CbcService {
   constructor(private readonly logger: LoggerService) {}
 
   getMockCbcWorkList(): string {
-    // 가짜 XML 데이터를 생성
+    // 가짜 XML 데이터를 생성 서울 성모 기준
     return `
     <root>
     <spcworklist>
@@ -64,36 +64,44 @@ export class CbcService {
   async fetchExternalData(queryParams: {
     [key: string]: string;
   }): Promise<any> {
-    // 운영 http://emr012.cmcnu.or.kr/cmcnu/.live
-    // 개발 http://emr012edu.cmcnu.or.kr/cmcnu/.live
-    // UIMD 테스트 http://192.168.0.131/api/cbc/liveTest
-    const baseUrl = 'http://emr012.cmcnu.or.kr/cmcnu/.live';
-    // const baseUrl = 'http://192.168.0.131/api/cbc/liveTest';
-    const queryString = new URLSearchParams(queryParams).toString();
-    // const queryString = Object.keys(queryParams)
-    //   .map(
-    //     (key: string) =>
-    //       `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`,
-    //   )
-    //   .join('&');
-
-    const url = `${baseUrl}?${queryString}`;
-
-    this.logger.cbc(`cbc-service-fetchExternalData: ${url}`);
-
+    const queryParamsCopy = { ...queryParams };
+    delete queryParamsCopy.baseUrl;
+    const queryString = new URLSearchParams(queryParamsCopy).toString();
+    const url = `${queryParams.baseUrl}?${queryString}`;
+    this.logger.cbcLis(`cbc-service-fetchExternalData: ${url}`);
     const curlCommand = `curl -s "${url}"`; // -s 옵션을 사용하여 진행 상황 출력 숨김
-
     try {
       const { stdout, stderr } = await execPromise(curlCommand);
-
       if (stderr) {
-        this.logger.cbc(`Curl stderr lis err:, ${stderr}`); // stderr를 로그에 기록
+        this.logger.cbcLis(`Curl stderr lis err:, ${stderr}`);
       }
-      this.logger.cbc(`cbc 응답 값:, ${stdout}`); // stdout 로그에 기록
+      this.logger.cbcLis(`cbcLis 응답 값:, ${stdout}`);
       return stdout; // 응답 데이터는 stdout에서 반환
     } catch (error) {
-      this.logger.cbc(`cbc error.message:, ${error.message}`); // stderr를 로그에 기록
-      // throw new Error(`Error fetching data: ${error.message}`);
+      this.logger.cbcLis(`cbcLis error.message:, ${error.message}`);
+    }
+  }
+
+  async executePostCurl(bodyParams: any): Promise<any> {
+    const url = bodyParams.baseUrl;
+    delete bodyParams.baseUrl; // baseUrl은 본문에서 제외
+
+    // JSON 데이터를 요청 본문에 전달
+    const jsonBody = JSON.stringify(bodyParams).replace(/"/g, '\\"');
+    this.logger.cbcLis(`lis-service-executePostCurl: ${url}`);
+
+    // curl 명령어 수정: -X POST로 JSON 본문 전송
+    const curlCommand = `curl -X POST -H "Content-Type: application/json" -d "${jsonBody}" "${url}"`;
+    console.log(curlCommand);
+    try {
+      const { stdout, stderr } = await execPromise(curlCommand);
+      if (stderr) {
+        this.logger.cbcLis(`Curl stderr lis err:, ${stderr}`);
+      }
+      this.logger.cbcLis(`lis 응답 값:, ${stdout}`);
+      return stdout;
+    } catch (error) {
+      this.logger.cbcLis(`lis error.message:, ${error.message}`);
     }
   }
 }
