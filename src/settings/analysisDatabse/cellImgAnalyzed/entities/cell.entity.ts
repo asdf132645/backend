@@ -41,6 +41,10 @@ export class CellImgAnalyzed {
   stitchCount: string;
 
   @Column()
+  @ApiProperty({ example: '0', description: 'Edge Shot Type' })
+  edgeShotType: string;
+
+  @Column()
   @ApiProperty({ example: '', description: 'IA 루트 경로' })
   iaRootPath: string;
 
