@@ -11,7 +11,7 @@ export class LoggerService extends Logger {
     error: null,
     warn: null,
     debug: null,
-    cbc: null,
+    cbcLis: null,
     ping: null,
     login: null,
   }; // 각 로그 레벨별 마지막 메시지 저장
@@ -46,10 +46,10 @@ export class LoggerService extends Logger {
     this.writeLog('debug', message);
   }
 
-  cbc(message: string) {
-    if (this.isDuplicateMessage('cbc', message)) return;
+  cbcLis(message: string) {
+    if (this.isDuplicateMessage('cbcLis', message)) return;
     super.log(message);
-    this.writeLog('cbc', message);
+    this.writeLog('cbcLis', message);
   }
 
   ping(message: string) {

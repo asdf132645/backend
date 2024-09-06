@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { CbcService } from './cbc.service';
 import { Response } from 'express';
 
@@ -14,12 +14,19 @@ export class CbcController {
   }
 
   @Get('/lisCbcMarys')
-  async getData(
-    @Query() query: { [key: string]: string },
-    // @Res() res: Response,
-  ) {
-    const data = await this.cbcService.fetchExternalData(query);
-    // res.send(data)
-    return data;
+  async getData(@Query() query: { [key: string]: string }) {
+    return await this.cbcService.fetchExternalData(query);
+  }
+
+  @Post('/executePostCurl')
+  async executeCurlCommand(@Body() body: any, @Res() res: Response) {
+    const result = await this.cbcService.executePostCurl(body);
+    return res.json(result); // JSON 응답 반환
+  }
+
+  @Post('/executePostCurltest')
+  async sss(@Body() body: any) {
+    console.log(body);
+    return 'ssssssss'; // JSON 응답 반환
   }
 }
