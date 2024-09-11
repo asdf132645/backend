@@ -47,21 +47,6 @@ export class RuningInfoEntity {
   @Column()
   analyzedDttm: string;
 
-  // @Column()
-  // createDate: string;
-
-  // @Column()
-  // pltCount: string;
-  //
-  // @Column()
-  // malariaCount: string;
-  //
-  // @Column()
-  // maxRbcCount: string;
-
-  // @Column()
-  // stateCd: string;
-
   @Column()
   tactTime: string;
 
@@ -70,15 +55,6 @@ export class RuningInfoEntity {
 
   @Column('json')
   bf_lowPowerPath: any[];
-
-  // @Column('json')
-  // runningPath: any[];
-
-  // @Column('json')
-  // bminfo: any[];
-
-  // @Column()
-  // userId: number;
 
   @Column()
   cassetId: string;
@@ -101,25 +77,6 @@ export class RuningInfoEntity {
   @Column('json')
   rbcInfoAfter: any[];
 
-  // @Column('json')
-  // processInfo: {
-  //   cassetteNo: number;
-  //   barcodeId: string;
-  //   patientId: string;
-  //   patientName: string;
-  //   wbcCount: string;
-  //   orderDate: string;
-  //   analyzedDttm: string;
-  // };
-
-  // @Column('json')
-  // orderList: {
-  //   barcodeId: string;
-  //   patientName: string;
-  //   orderDate: string;
-  //   analyzedDttm: string;
-  //   state: string;
-  // }[];
   @Column()
   submitState?: string;
 
@@ -132,9 +89,6 @@ export class RuningInfoEntity {
   @Column('json')
   rbcInfoPosAfter: any[];
 
-  // @Column('json')
-  // classificationResult?: any[];
-
   @Column()
   isNsNbIntegration?: string;
 
@@ -146,12 +100,6 @@ export class RuningInfoEntity {
 
   @Column()
   pcIp?: string;
-
-  // @Column()
-  // siteCd?: string;
-
-  // @Column()
-  // deviceBarcode?: string;
 
   @Column()
   cbcPatientNo?: string;
