@@ -2,8 +2,16 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, In, Repository, EntityManager, DataSource } from 'typeorm';
+import {
+  Brackets,
+  In,
+  Repository,
+  EntityManager,
+  DataSource,
+  Between,
+} from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
+import * as moment from 'moment';
 
 import {
   CreateRuningInfoDto,
@@ -27,22 +35,42 @@ export class RuningInfoService {
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
     const { runingInfoDtoItems } = createDto;
 
+    // 입력받은 analyzedDttm 값을 moment 객체로 변환 (형식: YYYYMMDDHHmm)
+    const analyzedDttm = moment(
+      runingInfoDtoItems.analyzedDttm,
+      'YYYYMMDDHHmm',
+    );
+
+    // 앞뒤 1시간 범위 계산
+    const startDttm = analyzedDttm.clone().subtract(1, 'hours'); // 1시간 전
+    const endDttm = analyzedDttm.clone().add(1, 'hours'); // 1시간 후
+
+    // 시작 시간과 끝 시간을 다시 문자열로 변환
+    const startDttmStr = startDttm.format('YYYYMMDDHHmm');
+    const endDttmStr = endDttm.format('YYYYMMDDHHmm');
+
     return await this.dataSource.transaction(async (manager) => {
+      // 동일한 slotId와 analyzedDttm의 앞뒤 1시간 내의 데이터가 있는지 확인
       const existingEntity = await manager.findOne(RuningInfoEntity, {
         where: {
           slotId: runingInfoDtoItems.slotId,
+          analyzedDttm: Between(startDttmStr, endDttmStr), // 1시간 범위 내에서 조회
         },
       });
 
       if (existingEntity) {
-        console.log('동일 슬롯아이디 존재 저장 x');
+        console.log(
+          '동일 슬롯아이디 및 1시간 범위 내 analyzedDttm 존재, 저장 x',
+        );
         return null;
       }
 
+      // 새로운 엔티티 생성
       const entity = manager.create(RuningInfoEntity, {
         ...runingInfoDtoItems,
       });
 
+      // 엔티티 저장
       return await manager.save(entity);
     });
   }
@@ -76,11 +104,9 @@ export class RuningInfoService {
         existingEntity.cbcPatientNm = item.cbcPatientNm;
         existingEntity.cbcSex = item.cbcSex;
         existingEntity.cbcAge = item.cbcAge;
-        // existingEntity.stateCd = item.stateCd;
         existingEntity.tactTime = item.tactTime;
         existingEntity.maxWbcCount = item.maxWbcCount;
         existingEntity.bf_lowPowerPath = item.bf_lowPowerPath;
-        // existingEntity.runningPath = item.runningPath;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
         existingEntity.wbcMemo = item.wbcMemo;
