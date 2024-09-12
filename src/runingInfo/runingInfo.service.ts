@@ -33,31 +33,42 @@ export class RuningInfoService {
   ) {}
   async addUniqueConstraintToSlotId() {
     try {
+      const entityManager = this.runingInfoEntityRepository.manager;
+
       // UNIQUE 제약 조건이 이미 있는지 확인
       const checkQuery = `
-        SELECT CONSTRAINT_NAME
-        FROM information_schema.TABLE_CONSTRAINTS
-        WHERE TABLE_NAME = 'runing_info_entity' 
-        AND CONSTRAINT_TYPE = 'UNIQUE'
-        AND COLUMN_NAME = 'slotId';
-      `;
+      SELECT COUNT(*)
+      FROM information_schema.TABLE_CONSTRAINTS tc
+      JOIN information_schema.KEY_COLUMN_USAGE kcu
+      ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+      WHERE tc.TABLE_SCHEMA = DATABASE() -- 현재 데이터베이스 선택
+      AND tc.TABLE_NAME = 'runing_info_entity'
+      AND tc.CONSTRAINT_TYPE = 'UNIQUE'
+      AND kcu.COLUMN_NAME = 'slotId';
+    `;
 
-      const result = await this.runingInfoEntityRepository.query(checkQuery);
+      const checkResult = await entityManager.query(checkQuery);
 
-      // 만약 제약 조건이 이미 존재하면 추가하지 않음
-      if (result.length > 0) {
+      // 제약 조건이 이미 존재하면 추가하지 않음
+      if (checkResult[0]['COUNT(*)'] > 0) {
         console.log('UNIQUE 제약 조건이 이미 존재합니다.');
+        return;
       }
 
       // UNIQUE 제약 조건 추가
-      const addQuery = `ALTER TABLE runing_info ADD CONSTRAINT unique_slotId UNIQUE (slotId);`;
-      await this.runingInfoEntityRepository.query(addQuery);
+      const addQuery = `
+      ALTER TABLE runing_info_entity 
+      ADD CONSTRAINT unique_slotId UNIQUE (slotId);
+    `;
+
+      await entityManager.query(addQuery);
 
       console.log('slotId에 UNIQUE 제약 조건이 추가되었습니다.');
     } catch (error) {
-      console.log(error.message);
+      console.log('오류 발생:', error.message);
     }
   }
+
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
     const { runingInfoDtoItems } = createDto;
 
