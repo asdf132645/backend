@@ -14,6 +14,9 @@ import * as dotenv from 'dotenv';
 import { RuningInfoService } from '../runingInfo/runingInfo.service';
 import { isServerRunningLocally } from '../utils/network';
 import { BrowserService } from '../browserExit/browser.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
+import { Repository } from 'typeorm';
 
 dotenv.config(); // dotenv 설정 추가
 
@@ -96,6 +99,7 @@ export class CombinedService
     const ipAddress = this.extractIPAddress(clientIpAddress);
     this.clients.push(client);
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
+    await this.runingInfoService.addUniqueConstraintToSlotId();
 
     this.serverIp = await isServerRunningLocally();
     this.wss.emit('multiViewer', client.conn.remoteAddress);

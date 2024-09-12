@@ -31,7 +31,33 @@ export class RuningInfoService {
     private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
     @InjectRedis() private readonly redis: Redis, // Redis 인스턴스 주입
   ) {}
+  async addUniqueConstraintToSlotId() {
+    try {
+      // UNIQUE 제약 조건이 이미 있는지 확인
+      const checkQuery = `
+        SELECT CONSTRAINT_NAME
+        FROM information_schema.TABLE_CONSTRAINTS
+        WHERE TABLE_NAME = 'runing_info' 
+        AND CONSTRAINT_TYPE = 'UNIQUE'
+        AND COLUMN_NAME = 'slotId';
+      `;
 
+      const result = await this.runingInfoEntityRepository.query(checkQuery);
+
+      // 만약 제약 조건이 이미 존재하면 추가하지 않음
+      if (result.length > 0) {
+        console.log('UNIQUE 제약 조건이 이미 존재합니다.');
+      }
+
+      // UNIQUE 제약 조건 추가
+      const addQuery = `ALTER TABLE runing_info ADD CONSTRAINT unique_slotId UNIQUE (slotId);`;
+      await this.runingInfoEntityRepository.query(addQuery);
+
+      console.log('slotId에 UNIQUE 제약 조건이 추가되었습니다.');
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
   async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
     const { runingInfoDtoItems } = createDto;
 
