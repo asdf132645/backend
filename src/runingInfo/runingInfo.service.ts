@@ -37,7 +37,7 @@ export class RuningInfoService {
       const checkQuery = `
         SELECT CONSTRAINT_NAME
         FROM information_schema.TABLE_CONSTRAINTS
-        WHERE TABLE_NAME = 'runing_info' 
+        WHERE TABLE_NAME = 'runing_info_entity' 
         AND CONSTRAINT_TYPE = 'UNIQUE'
         AND COLUMN_NAME = 'slotId';
       `;
