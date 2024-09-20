@@ -1,7 +1,7 @@
 // src/file/file.service.ts
 import { Injectable } from '@nestjs/common';
 import { promises as fs } from 'fs';
-import { writeFile, mkdir, access, constants } from 'fs/promises';
+import { writeFile, mkdir, access, constants, unlink } from 'fs/promises';
 import * as path from 'path';
 import * as fss from 'fs'; // 'fs/promises' 대신 'fs'를 사용
 
@@ -47,21 +47,26 @@ export class FileService {
     await this.ensureDirectoryExistence(directory);
 
     try {
-      // 파일이 아닌 디렉토리인지 확인
+      // 파일이 존재하는지 확인
       await access(filePath, constants.F_OK);
-      console.log(`File or directory exists at ${filePath}`);
-    } catch {
-      // 파일이 없으면 새로 생성
-      await writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+
+      // 파일이 존재하면 삭제
+      await unlink(filePath);
+    } catch (error) {
+      // 파일이 없으면 오류 발생하나, 이는 무시하고 새 파일을 생성
+      console.log(`파일 없음 새로 생성`);
     }
+
+    // 파일 작성
+    await writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    console.log(`File saved successfully at ${filePath}`);
   }
 
   private async ensureDirectoryExistence(directory: string): Promise<any> {
     try {
+      await access(directory, constants.F_OK);
+    } catch {
       await mkdir(directory, { recursive: true });
-    } catch (error) {
-      console.error('Error creating directory:', error);
-      throw error;
     }
   }
 }
