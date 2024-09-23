@@ -1,0 +1,100 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type RuningInfoEntity {
+  id: Float!
+  lock_status: Boolean
+  traySlot: String
+  slotNo: String!
+  barcodeNo: String!
+  patientId: String!
+  patientNm: String!
+  gender: String!
+  birthDay: String!
+  wbcCount: String!
+  slotId: String!
+  orderDttm: String!
+  testType: String!
+  analyzedDttm: String!
+  tactTime: String!
+  maxWbcCount: String!
+  bf_lowPowerPath: [String!]!
+  cassetId: String!
+  isNormal: String!
+  wbcInfo: [String!]!
+  wbcInfoAfter: [String!]!
+  rbcInfo: [String!]!
+  rbcInfoAfter: [String!]!
+  submitState: String
+  submitOfDate: DateTime
+  submitUserId: String
+  rbcInfoPosAfter: [String!]!
+  isNsNbIntegration: String
+  wbcMemo: String
+  rbcMemo: String
+  pcIp: String
+  cbcPatientNo: String
+  cbcPatientNm: String
+  cbcSex: String
+  cbcAge: String
+  img_drive_root_path: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  getRunningInfoById(id: Float!): RuningInfoEntity
+}
+
+type Mutation {
+  createRunningInfo(createRunningInfoDto: CreateRuningInfoDto!): RuningInfoEntity!
+}
+
+input CreateRuningInfoDto {
+  userId: Int
+  runingInfoDtoItems: RuningInfoDtoItems!
+  dayQuery: String!
+}
+
+input RuningInfoDtoItems {
+  id: Int!
+  lock_status: Boolean
+  traySlot: String!
+  slotNo: String!
+  barcodeNo: String!
+  patientId: String!
+  patientNm: String!
+  gender: String!
+  birthDay: String!
+  wbcCount: String!
+  slotId: String!
+  orderDttm: String!
+  testType: String!
+  analyzedDttm: String!
+  tactTime: String!
+  maxWbcCount: String!
+  bf_lowPowerPath: [String!]!
+  wbcInfo: [String!]!
+  wbcInfoAfter: [String!]
+  rbcInfo: [String!]!
+  rbcInfoAfter: [String!]!
+  cassetId: String!
+  isNormal: String!
+  submitState: String
+  submitOfDate: DateTime
+  submitUserId: String
+  classificationResult: [String!]
+  isNsNbIntegration: String!
+  wbcMemo: String
+  rbcMemo: String
+  pcIp: String!
+  cbcPatientNo: String
+  cbcPatientNm: String
+  cbcSex: String
+  cbcAge: String
+  img_drive_root_path: String
+}

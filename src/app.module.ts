@@ -49,15 +49,21 @@ import { QualityCheckController } from './settings/qualityCheck/qualityCheck.con
 import { BrowserModule } from './browserExit/browser.module';
 import { UploadModule } from './upload/upload.module';
 import { CbcModule } from './lisMakeData/cbc.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: createTypeOrmOptions,
     }),
-    // TypeOrmModule.forRootAsync({
-    //   useFactory: createLisTypeOrmOptions,
-    // }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      playground: true, // 개발용 그래프QL 플레이그라운드 활성화
+    }),
+
     UserModule,
     CellImgAnalyzedModule,
     RbcDegreeModule,
