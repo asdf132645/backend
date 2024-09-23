@@ -76,7 +76,7 @@ export class RuningInfoService {
 
     // 입력받은 analyzedDttm 값을 moment 객체로 변환 (형식: YYYYMMDDHHmm)
     const analyzedDttm = moment(
-      runingInfoDtoItems[0].analyzedDttm, // 첫 번째 요소로 접근
+      runingInfoDtoItems.analyzedDttm, // 첫 번째 요소로 접근
       'YYYYMMDDHHmm',
     );
 
@@ -92,7 +92,7 @@ export class RuningInfoService {
       // 동일한 slotId와 analyzedDttm의 앞뒤 1시간 내의 데이터가 있는지 확인
       const existingEntity = await manager.findOne(RuningInfoEntity, {
         where: {
-          slotId: runingInfoDtoItems[0].slotId, // 첫 번째 요소로 접근
+          slotId: runingInfoDtoItems.slotId, // 첫 번째 요소로 접근
           analyzedDttm: Between(startDttmStr, endDttmStr), // 1시간 범위 내에서 조회
         },
       });
@@ -106,14 +106,13 @@ export class RuningInfoService {
 
       // 새로운 엔티티 생성
       const entity = manager.create(RuningInfoEntity, {
-        ...runingInfoDtoItems[0], // 첫 번째 요소로 접근
+        ...runingInfoDtoItems, // 첫 번째 요소로 접근
       });
 
       // 엔티티 저장
       return await manager.save(entity);
     });
   }
-
 
   async findBySlotNo(slotId: string): Promise<RuningInfoEntity | undefined> {
     return this.runingInfoEntityRepository.findOne({ where: { slotId } });
