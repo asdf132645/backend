@@ -1,148 +1,212 @@
 // download.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, In } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { DownloadDto, DownloadReturn } from './download.dto';
 import { exec } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
+import * as os from 'os';
 import { LoggerService } from '../logger.service';
+
+const userInfo = os.userInfo();
 
 @Injectable()
 export class DownloadService {
+  private moveResults = { success: 0, total: 0 };
+
   constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
     private readonly logger: LoggerService,
   ) {}
-  private moveResults = { success: 0, total: 0 };
-  private formatDateToString(date: Date, time): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    if (time === 'start') {
-      return `${year}${month}${day}000000000`;
-    } else {
-      return `${year}${month}${day}999999999`;
+
+  private async cleanNpmCache(): Promise<void> {
+    await this.execCommand('npm cache clean --force');
+  }
+
+  private formatDate(date: Date, type: 'start' | 'end'): string {
+    const formattedDate = moment(date).format('YYYYMMDD');
+    return type === 'start'
+      ? `${formattedDate}000000000`
+      : `${formattedDate}999999999`;
+  }
+
+  private async ensureDirectoryExists(directoryPath: string) {
+    if (!(await fs.pathExists(directoryPath))) {
+      await fs.ensureDir(directoryPath);
     }
   }
 
-  private cleanNpmCache() {
+  private async runPythonScript(
+    queue: any[],
+    downloadType: string,
+  ): Promise<void> {
+    const scriptPath = `D:\\UIMD_download_upload_tool\\move_files.exe`;
+    // const scriptPath = `C:\\Users\\${userInfo.username}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+
+    // JSON 데이터를 임시 파일에 저장
+    const tempFilePath = `C:\\Users\\${userInfo.username}\\AppData\\Local\\Temp\\queue_data_${Date.now()}.json`;
+
+    try {
+      // JSON 데이터를 임시 파일에 동기적으로 저장
+      fs.writeFileSync(tempFilePath, JSON.stringify(queue));
+      console.log(`Temp file created at: ${tempFilePath}`);
+
+      // exec를 프로미스로 감싸기
+      const { stdout } = await new Promise<{
+        stdout: string;
+        stderr: string;
+      }>((resolve, reject) => {
+        exec(
+          `${scriptPath} ${tempFilePath} ${downloadType}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              console.log('error', error);
+              this.logger.logic(
+                `[PythonScript] - Error executing script: ${error.message}`,
+              );
+              return reject(error);
+            }
+
+            if (stderr) {
+              console.log('stderr', stderr);
+              this.logger.logic(`[PythonScript] - Warning: ${stderr}`);
+            }
+
+            console.log(
+              `error - ${error} | stdout - ${stdout} | stderr - ${stderr}`,
+            );
+            resolve({ stdout, stderr });
+          },
+        );
+      });
+
+      // 정상적으로 종료되었는지 확인
+      if (stdout) {
+        console.log('stdout:', stdout);
+        console.log('All operations completed successfully.');
+      } else {
+        this.logger.logic(`Python script did not complete successfully`);
+      }
+    } catch (error) {
+      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
+    } finally {
+      try {
+        await fs.remove(tempFilePath);
+        console.log(`[PythonScript] - Temp file deleted: ${tempFilePath}`);
+      } catch (deleteError) {
+        this.logger.logic(
+          `[PythonScript] - Error deleting temp file: ${deleteError.message}`,
+        );
+      }
+    }
+  }
+
+  private execCommand(command: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      exec('npm cache clean --force', (error, stdout, stderr) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
+          this.logger.logic(
+            `[Command] - Error executing ${command}: ${error.message}`,
+          );
           return reject(error);
         }
         if (stderr) {
-          console.log(`npm cache clean warning: ${stderr}`);
+          this.logger.logic(`[Command] - Warning: ${stderr}`);
         }
-        resolve(stdout);
+        resolve();
       });
     });
+  }
+
+  private async fetchDataByDateRange(startDate: Date, endDate: Date) {
+    const formattedStart = this.formatDate(startDate, 'start');
+    const formattedEnd = this.formatDate(endDate, 'end');
+
+    const query = `
+      SELECT slotId
+      FROM runing_info_entity
+      WHERE analyzedDttm BETWEEN ? AND ?;
+    `;
+
+    const slotIdArray = await this.runningInfoRepository.query(query, [
+      formattedStart,
+      formattedEnd,
+    ]);
+    return slotIdArray.map((item: { slotId: string }) => item.slotId);
+  }
+
+  private async readFolderNames(dirPath: string): Promise<string[]> {
+    const files = await fs.readdir(dirPath, { withFileTypes: true });
+    return files.filter((file) => file.isDirectory()).map((file) => file.name);
+  }
+
+  private checkAvailableFolders = async (path: string, slotIds: string[]) => {
+    const folderNames = await this.readFolderNames(path);
+    return folderNames.filter((folderName) => slotIds.includes(folderName));
+  };
+
+  private async updateImgDriveRootPath(
+    availableIds: string[],
+    destinationUploadPath: string,
+  ) {
+    const convertedDestinationUploadPath = destinationUploadPath.replaceAll(
+      '\\',
+      '\\\\',
+    );
+    const ids = availableIds.map((id) => `'${id}'`).join(',');
+    const query = `UPDATE runing_info_entity SET img_drive_root_path = '${convertedDestinationUploadPath}' WHERE slotId IN (${ids})`;
+    await this.dataSource.query(query);
   }
 
   async checkIsPossibleToDownload(
     downloadDto: Pick<
       DownloadDto,
-      'startDate' | 'endDate' | 'destinationDownloadPath'
+      'startDate' | 'endDate' | 'destinationDownloadPath' | 'originDownloadPath'
     >,
   ): Promise<DownloadReturn> {
-    const { startDate, endDate, destinationDownloadPath } = downloadDto;
+    const { startDate, endDate, destinationDownloadPath, originDownloadPath } =
+      downloadDto;
 
-    // 백업 폴더가 존재하는지 확인하고 없으면 생성
-    if (!(await fs.pathExists(destinationDownloadPath))) {
-      await fs.ensureDir(destinationDownloadPath);
-    }
+    await this.ensureDirectoryExists(destinationDownloadPath);
 
+    console.log('originDownloadPath', originDownloadPath);
     const dateFolder = path.join(
       destinationDownloadPath,
       `${startDate}_${endDate}`,
     );
-    const startDateObj = startDate ? moment(startDate).toDate() : undefined;
-    const endDateObj = endDate ? moment(endDate).toDate() : undefined;
+    const availableSlotIdsFromDB = await this.fetchDataByDateRange(
+      moment(startDate).toDate(),
+      moment(endDate).toDate(),
+    );
 
-    // 시작 및 종료 날짜를 YYYYMMDD 형식의 문자열로 변환
-    const formattedStartDate = this.formatDateToString(startDateObj, 'start');
-    const formattedEndDate = this.formatDateToString(endDateObj, 'end');
+    const moveAvailableFolders = await this.checkAvailableFolders(
+      originDownloadPath,
+      availableSlotIdsFromDB,
+    );
 
-    // 지정된 날짜 범위의 데이터를 조회
-    const dataToBackup = await this.runningInfoRepository.find({
-      where: {
-        analyzedDttm: Between(formattedStartDate, formattedEndDate),
-      },
-    });
-
-    // 조회된 데이터에서 slotId를 추출
-    const slotIds = dataToBackup.map((item: any) => item.slotId);
-
-    if (slotIds.length === 0) {
+    if (moveAvailableFolders.length === 0) {
       return { success: false, message: 'No data exists' };
     }
 
-    if (!(await fs.pathExists(dateFolder))) {
-      this.moveResults.total = slotIds.length;
-      this.moveResults.success = 0;
+    if (await fs.pathExists(dateFolder)) {
       return {
-        success: true,
-        message: `Success ${slotIds.length}`,
+        success: false,
+        message: 'The download file for the specified date already exists',
       };
     }
+
+    this.moveResults.total = moveAvailableFolders.length;
+    this.moveResults.success = 0;
     return {
-      success: false,
-      message: 'The download file for the specified date already exists',
+      success: true,
+      message: `Success ${moveAvailableFolders.length}`,
     };
   }
-
-  private retryOperation(operation, retries, delay) {
-    let attempts = 0;
-
-    const execute = () => {
-      attempts++;
-      return operation().catch((error) => {
-        if (attempts < retries) {
-          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
-          return new Promise((resolve) =>
-            setTimeout(() => execute().then(resolve), delay),
-          );
-        } else {
-          return Promise.reject(error);
-        }
-      });
-    };
-
-    return execute();
-  }
-
-  private async ensurePermissions(path, permission) {
-    try {
-      await fs.access(path, permission);
-    } catch (error) {
-      await fs.chmod(path, 0o666);
-    }
-  }
-
-  private updateImgDriveRootPath = async (
-    availableIds: string[],
-    destinationDownloadPath: string,
-  ) => {
-    const convertedDestinationDownloadPath = destinationDownloadPath.replace(
-      '\\',
-      '\\\\',
-    );
-
-    for (const slotId of availableIds) {
-      const item = await this.runningInfoRepository.findOne({
-        where: { slotId: slotId },
-      });
-
-      if (item) {
-        item.img_drive_root_path = convertedDestinationDownloadPath;
-        await this.runningInfoRepository.save(item);
-      }
-    }
-  };
 
   async backupData(downloadDto: DownloadDto): Promise<void> {
     const {
@@ -153,173 +217,88 @@ export class DownloadService {
       downloadType,
       projectType,
     } = downloadDto;
-
-    const databaseSchema =
+    const schema =
       projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
-    // 날짜를 문자열로 변환
-    const startDateObj = startDate ? moment(startDate).toDate() : undefined;
-    const endDateObj = endDate ? moment(endDate).toDate() : undefined;
 
-    const downloadDriveStart = destinationDownloadPath.split(':')[0];
-    const downloadPath =
-      downloadDriveStart +
-      ':\\' +
-      'UIMD_' +
-      projectType.toUpperCase() +
-      '_backup';
-
-    // 시작 및 종료 날짜를 YYYYMMDD 형식의 문자열로 변환
-    const formattedStartDate = this.formatDateToString(startDateObj, 'start');
-    const formattedEndDate = this.formatDateToString(endDateObj, 'end');
-
-    // 백업 폴더가 존재하는지 확인하고 없으면 생성
-    if (!(await fs.pathExists(destinationDownloadPath))) {
-      await fs.ensureDir(destinationDownloadPath);
-    }
-
+    const downloadPath = `${destinationDownloadPath.split(':')[0]}:\\UIMD_${projectType.toUpperCase()}_backup`;
     const downloadDateFolder = path.join(
       downloadPath,
       `${startDate}_${endDate}`,
     );
 
-    // 백업 날짜 폴더가 존재하지 않으면 생성
-    if (!(await fs.pathExists(downloadDateFolder))) {
-      await fs.ensureDir(downloadDateFolder);
-    }
-
+    await this.ensureDirectoryExists(downloadDateFolder);
     await this.cleanNpmCache();
 
-    // 지정된 날짜 범위의 데이터를 조회
-    const dataToBackup = await this.runningInfoRepository.find({
-      where: {
-        analyzedDttm: Between(formattedStartDate, formattedEndDate),
-      },
-    });
+    const availableSlotIdsFromDB = await this.fetchDataByDateRange(
+      moment(startDate).toDate(),
+      moment(endDate).toDate(),
+    );
 
-    // 조회된 데이터에서 slotId를 추출
-    const slotIds = dataToBackup.map((item: any) => item.slotId);
+    const queue = availableSlotIdsFromDB.map((slotId) => ({
+      source: path.join(originDownloadPath, slotId),
+      destination: path.join(downloadDateFolder, slotId),
+    }));
 
-    // 큐 작업 추가
-    const queue = slotIds.map((slotId) => {
-      const sourcePath = path.join(originDownloadPath, slotId);
-      const targetFolderPath = path.join(downloadDateFolder, slotId);
-      return {
-        source: sourcePath,
-        destination: targetFolderPath,
-        downloadType,
-      };
-    });
+    const concurrency = 10;
 
-    const moveImageFiles = async (
-      source: string,
-      destination: string,
-      downloadType: 'copy' | 'move',
-    ) => {
-      const retries = 5;
-      const delay = 1000;
-      try {
-        if (await fs.pathExists(source)) {
-          await this.ensurePermissions(
-            source,
-            fs.constants.R_OK | fs.constants.W_OK,
-          );
-          await this.ensurePermissions(
-            destinationDownloadPath,
-            fs.constants.W_OK,
-          );
-          const operation = async () => {
-            if (downloadType === 'copy') {
-              await fs.copy(source, destination, { overwrite: true });
-            } else {
-              // await fs.move(source, destination, { overwrite: true });
-              await fs.copy(source, destination, { overwrite: true });
-              // await fs.remove(source);
-            }
-          };
-          await this.retryOperation(operation, retries, delay);
-          this.logger.logic(`[Download] - Success ${source}`);
-        }
-      } catch (error) {
-        this.logger.logic(
-          `[Download] - Error ${downloadType === 'copy' ? 'copy' : 'mov'}ing ${source} to ${destination}: ${error}`,
+    // 배열을 주어진 크기로 나누는 함수
+    const splitIntoChunks = (array, chunkSize) => {
+      const chunks = [];
+      for (let i = 0; i < array.length; i += chunkSize) {
+        chunks.push(array.slice(i, i + chunkSize));
+      }
+      return chunks;
+    };
+
+    // 청크 단위로 Python 스크립트를 실행하는 함수
+    const processQueueInChunks = async (queue, downloadType) => {
+      const chunkedQueue = splitIntoChunks(queue, concurrency);
+
+      for (const chunk of chunkedQueue) {
+        await Promise.all(
+          chunk.map((task) => this.runPythonScript([task], downloadType)),
         );
       }
     };
 
-    // 큐 처리 함수
-    const processQueue = async () => {
-      while (queue.length > 0) {
-        const newTask = queue.shift();
-        if (newTask) {
-          const { source, destination, downloadType } = newTask;
-          await moveImageFiles(source, destination, downloadType);
-        }
-      }
-    };
+    // 큐를 10개씩 나눠서 처리
+    await processQueueInChunks(queue, downloadType);
 
-    // 큐 처리 시작
-    await processQueue();
+    if (downloadType === 'move') {
+      await this.updateImgDriveRootPath(
+        availableSlotIdsFromDB,
+        downloadDateFolder,
+      );
+    }
 
-    // 10개씩 나누어서 실행 -> 현재 실행되는 이동과 Queue 확인
-    await new Promise((resolve) => {
-      const checkCompletion = () => {
-        if (queue.length === 0) {
-          resolve(null); // 성공
-        } else {
-          setTimeout(checkCompletion, 1000);
-        }
-      };
-      checkCompletion();
-    });
+    const backupFile = path.join(
+      downloadDateFolder,
+      `backup-${startDate}_${endDate}.sql`,
+    );
+    const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${schema} runing_info_entity --where="analyzedDttm BETWEEN '${this.formatDate(moment(startDate).toDate(), 'start')}' AND '${this.formatDate(moment(endDate).toDate(), 'end')}'" > ${backupFile}`;
 
-    // MySQL 데이터베이스 특정 테이블 백업
-    const backupFileName = `backup-${startDate}_${endDate}.sql`;
-    const sqlBackupFilePath = path.join(downloadDateFolder, backupFileName);
-
-    const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${databaseSchema} runing_info_entity --where="analyzedDttm BETWEEN '${formattedStartDate}' AND '${formattedEndDate}'" > ${sqlBackupFilePath}`;
-
-    exec(dumpCommand, async (error, stdout, stderr) => {
-      if (error) {
-        this.logger.logic(
-          `[OpenDrive] - Error executing dump command: ${error.message}`,
-        );
-        return error.message;
-      }
-      if (stderr) {
-        if (downloadType === 'move') {
-          console.log('destinationDownloadPath', downloadDateFolder);
-          await this.updateImgDriveRootPath(slotIds, downloadDateFolder);
-        }
-        return stderr;
-      }
-      if (stdout) {
-        if (downloadType === 'move') {
-          await this.updateImgDriveRootPath(slotIds, downloadDateFolder);
-        }
-      }
-    });
+    await this.execCommand(dumpCommand);
   }
 
   async openDrive(
     downloadDto: Pick<DownloadDto, 'originDownloadPath'>,
-  ): Promise<string[] | string> {
+  ): Promise<string> {
     const { originDownloadPath } = downloadDto;
 
-    // 백업 폴더 없으면 생성
-    if (!(await fs.pathExists(originDownloadPath))) {
-      await fs.ensureDir(originDownloadPath);
-    }
+    await this.ensureDirectoryExists(originDownloadPath);
 
-    // 이전 코드
     exec(`explorer.exe ${originDownloadPath}`, (err) => {
       if (err) {
-        this.logger.logic(
-          `[OpenDrive] - Error opening ${originDownloadPath} : ${err}`,
+        this.logger.error(
+          `[OpenDrive] - Error opening ${originDownloadPath}: ${err}`,
         );
       } else {
-        this.logger.logic(`[OpenDrive] - Opening drive success`);
+        this.logger.log(
+          `[OpenDrive] - Successfully opened ${originDownloadPath}`,
+        );
       }
     });
+
     return 'Success';
   }
 }

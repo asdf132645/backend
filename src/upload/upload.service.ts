@@ -7,6 +7,9 @@ import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
 import { exec } from 'child_process';
+import * as os from 'os';
+
+const userInfo = os.userInfo();
 
 @Injectable()
 export class UploadService {
@@ -17,6 +20,7 @@ export class UploadService {
     private readonly logger: LoggerService,
   ) {}
   private moveResults = { success: 0, total: 0 };
+
   private listDirectoriesInFolder = async (
     folderPath: string,
   ): Promise<string[]> => {
@@ -237,32 +241,72 @@ export class UploadService {
     }
   };
 
-  private async ensurePermissions(path, permission) {
+  private async runPythonScript(
+    queue: any[],
+    downloadType: string,
+  ): Promise<void> {
+    const scriptPath = `D:\\UIMD_download_upload_tool\\move_files.exe`;
+    // const scriptPath = `C:\\Users\\${userInfo.username}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+
+    // JSON 데이터를 임시 파일에 저장
+    const tempFilePath = path.join(
+      os.tmpdir(),
+      `queue_data_${Date.now()}.json`,
+    );
+
     try {
-      await fs.access(path, permission);
-    } catch (error) {
-      await fs.chmod(path, 0o666);
-    }
-  }
+      // JSON 데이터를 임시 파일에 동기적으로 저장
+      fs.writeFileSync(tempFilePath, JSON.stringify(queue));
+      console.log(`Temp file created at: ${tempFilePath}`);
 
-  private retryOperation(operation, retries, delay) {
-    let attempts = 0;
+      const { stdout } = await new Promise<{
+        stdout: string;
+        stderr: string;
+      }>((resolve, reject) => {
+        exec(
+          `${scriptPath} ${tempFilePath} ${downloadType}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              console.log('error', error);
+              this.logger.logic(
+                `[PythonScript] - Error executing script: ${error.message}`,
+              );
+              return reject(error);
+            }
 
-    const execute = () => {
-      attempts++;
-      return operation().catch((error) => {
-        if (attempts < retries) {
-          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
-          return new Promise((resolve) =>
-            setTimeout(() => execute().then(resolve), delay),
-          );
-        } else {
-          return Promise.reject(error);
-        }
+            if (stderr) {
+              console.log('stderr', stderr);
+              this.logger.logic(`[PythonScript] - Warning: ${stderr}`);
+            }
+
+            console.log(
+              `error - ${error} | stdout - ${stdout} | stderr - ${stderr}`,
+            );
+            resolve({ stdout, stderr });
+          },
+        );
       });
-    };
 
-    return execute();
+      // 정상적으로 종료되었는지 확인
+      if (stdout) {
+        console.log('stdout:', stdout);
+        console.log('All operations completed successfully.');
+      } else {
+        this.logger.logic(`Python script did not complete successfully`);
+      }
+    } catch (error) {
+      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
+    } finally {
+      // 임시 파일 삭제
+      try {
+        await fs.remove(tempFilePath);
+        console.log(`[PythonScript] - Temp file deleted: ${tempFilePath}`);
+      } catch (deleteError) {
+        this.logger.logic(
+          `[PythonScript] - Error deleting temp file: ${deleteError.message}`,
+        );
+      }
+    }
   }
 
   private moveImages = async (
@@ -301,66 +345,30 @@ export class UploadService {
 
     this.moveResults.total = availableFileNames.length;
 
-    const moveImageFiles = async (
-      source: string,
-      destination: string,
-      uploadType: 'copy' | 'move',
-    ) => {
-      try {
-        const retries = 5;
-        const delay = 1000;
-        if (
-          (await fs.pathExists(destinationUploadPath)) &&
-          (await fs.pathExists(source))
-        ) {
-          await this.ensurePermissions(
-            source,
-            fs.constants.R_OK | fs.constants.W_OK,
-          );
-          await this.ensurePermissions(
-            destinationUploadPath,
-            fs.constants.W_OK,
-          );
-          const operation = async () => {
-            if (uploadType === 'copy') {
-              await fs.copy(source, destination, { overwrite: true });
-            } else {
-              // await fs.move(source, destination, { overwrite: true });
-              await fs.copy(source, destination, { overwrite: true });
-              // await fs.remove(source);
-            }
-          };
-          await this.retryOperation(operation, retries, delay);
-        }
-      } catch (err) {
-        this.logger.logic(
-          `[Upload] Error moving ${source} to ${destination}: ${err}`,
+    const concurrency = 10;
+
+    // 배열을 주어진 크기로 나누는 함수
+    const splitIntoChunks = (array, chunkSize) => {
+      const chunks = [];
+      for (let i = 0; i < array.length; i += chunkSize) {
+        chunks.push(array.slice(i, i + chunkSize));
+      }
+      return chunks;
+    };
+
+    // 청크 단위로 Python 스크립트를 실행하는 함수
+    const processQueueInChunks = async (queue, downloadType) => {
+      const chunkedQueue = splitIntoChunks(queue, concurrency);
+
+      for (const chunk of chunkedQueue) {
+        await Promise.all(
+          chunk.map((task) => this.runPythonScript([task], downloadType)),
         );
       }
     };
 
-    const processQueue = async () => {
-      while (queue.length > 0) {
-        const newTask = queue.shift();
-        if (newTask) {
-          const { source, destination, uploadType } = newTask;
-          await moveImageFiles(source, destination, uploadType);
-        }
-      }
-    };
-
-    await processQueue();
-
-    await new Promise((resolve) => {
-      const checkCompletion = () => {
-        if (queue.length === 0) {
-          resolve(null); // 성공
-        } else {
-          setTimeout(checkCompletion, 1000);
-        }
-      };
-      checkCompletion();
-    });
+    // 큐를 10개씩 나눠서 처리
+    await processQueueInChunks(queue, uploadType);
 
     return availableIds;
   };
@@ -457,7 +465,6 @@ export class UploadService {
     const entries = await fs.readdir(uploadDateFolderName, {
       withFileTypes: true,
     });
-
 
     const sqlFileName = entries
       .filter((entry) => entry.name.includes('.sql'))

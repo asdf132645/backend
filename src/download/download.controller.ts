@@ -23,7 +23,7 @@ export class DownloadController {
     @Body()
     downloadDto: Pick<
       DownloadDto,
-      'startDate' | 'endDate' | 'destinationDownloadPath'
+      'startDate' | 'endDate' | 'destinationDownloadPath' | 'originDownloadPath'
     >,
   ): Promise<DownloadReturn> {
     return await this.downloadService.checkIsPossibleToDownload(downloadDto);
