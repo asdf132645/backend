@@ -19,7 +19,7 @@ export class RedisCacheInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const key = this.generateCacheKey(request);
-    // console.log(key);
+
     // Redis에서 캐시된 데이터를 조회
     const cachedData = await this.redis.get(key);
     if (cachedData) {
@@ -30,8 +30,10 @@ export class RedisCacheInterceptor implements NestInterceptor {
     // 캐시된 데이터가 없으면, 다음 핸들러로 넘기고 데이터 캐싱
     return next.handle().pipe(
       tap(async (data) => {
-        // 응답 데이터를 Redis에 캐싱
-        await this.redis.set(key, JSON.stringify(data), 'EX', 1800);
+        if (data) {
+          // 응답 데이터가 있을 때만 Redis에 캐싱
+          await this.redis.set(key, JSON.stringify(data), 'EX', 1800);
+        }
       }),
     );
   }
@@ -82,7 +84,6 @@ export class RedisCacheInterceptor implements NestInterceptor {
       // database detail
       returnKey = `${method}:${url}?${new URLSearchParams(query).toString()}`;
     }
-    // console.log('returnKey', returnKey);
     return returnKey;
   }
 }

@@ -1,143 +1,151 @@
-import { IsArray, IsInt, IsOptional, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { RbcInfo, WbcInfo, WbcInfoAfter, WbcResponse } from "../types/class-info";
 
-@InputType() // 추가
+@ObjectType()
+@InputType()
 export class RuningInfoDtoItems {
   @IsInt()
   @Field(() => Int)
   id: number;
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   lock_status?: boolean;
 
-  @Field()
+  @Field(() => String, { nullable: true })
+  @IsString()
   traySlot?: string;
 
-  @Field()
+  @Field(() => String)
   slotNo: string;
 
-  @Field()
+  @Field(() => String)
   barcodeNo: string;
 
-  @Field()
+  @Field(() => String)
   patientId: string;
 
-  @Field()
+  @Field(() => String)
   patientNm: string;
 
-  @Field()
+  @Field(() => String)
   gender: string;
 
-  @Field()
+  @Field(() => String)
   birthDay: string;
 
-  @Field()
+  @Field(() => String)
   wbcCount: string;
 
-  @Field()
+  @Field(() => String)
   slotId: string;
 
-  @Field()
+  @Field(() => String)
   orderDttm: string;
 
-  @Field()
+  @Field(() => String)
   testType: string;
 
-  @Field()
+  @Field(() => String)
   analyzedDttm: string;
 
-  @Field()
+  @Field(() => String)
   tactTime: string;
 
-  @Field()
+  @Field(() => String)
   maxWbcCount: string;
 
-  @Field(() => [String]) // Change this to a more specific type if possible
+  @Field(() => [String])
   bf_lowPowerPath: string[];
 
-  @Field(() => [String])
-  wbcInfo: string[];
+  @Field(() => WbcResponse, { nullable: true })
+  wbcInfo?: WbcResponse;
 
-  @Field(() => [String], { nullable: true })
-  wbcInfoAfter?: string[];
+  @Field(() => [WbcInfoAfter], { nullable: true })
+  wbcInfoAfter?: WbcInfoAfter[];
 
-  @Field(() => [String])
-  rbcInfo: string[];
+  @Field(() => RbcInfo, { nullable: true })
+  rbcInfo?: RbcInfo;
 
   @Field(() => [String])
   rbcInfoAfter: string[];
 
-  @Field()
+  @Field(() => String)
   cassetId: string;
 
-  @Field()
+  @Field(() => String)
   isNormal: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   submitState?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   submitOfDate?: Date;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   submitUserId?: string;
 
   @Field(() => [String], { nullable: true })
   classificationResult?: string[];
 
-  @Field()
+  @Field(() => String)
   isNsNbIntegration?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   wbcMemo?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   rbcMemo?: string;
 
-  @Field()
+  @Field(() => String)
   pcIp: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   cbcPatientNo?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   cbcPatientNm?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   cbcSex?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   cbcAge?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   img_drive_root_path?: string;
 }
 
-@InputType() // 추가
+@InputType()
 export class CreateRuningInfoDto {
   @Field(() => Int, { nullable: true })
   @IsInt()
   @IsOptional()
   userId?: number;
 
-  @IsArray()
-  @Field(() => RuningInfoDtoItems) // Change to reflect an array of items
+  @Field(() => RuningInfoDtoItems)
   @ValidateNested({ each: true })
   @Type(() => RuningInfoDtoItems)
   runingInfoDtoItems: RuningInfoDtoItems;
 
-  @Field() // Specify the type for dayQuery, for example:
-  dayQuery: string; // Adjust the type based on your actual use case
+  @Field(() => String)
+  dayQuery: string;
 }
 
-@InputType() // 추가
+@InputType()
 export class UpdateRuningInfoDto {
   @Field(() => Int)
   @IsInt()
   userId: number;
 
-  @Field()
+  @Field(() => String)
   dayQuery: string;
 
   @IsArray()

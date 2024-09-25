@@ -31,6 +31,7 @@ export class RuningInfoService {
     private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
     @InjectRedis() private readonly redis: Redis, // Redis 인스턴스 주입
   ) {}
+
   async addUniqueConstraintToSlotId() {
     try {
       const entityManager = this.runingInfoEntityRepository.manager;
@@ -361,6 +362,7 @@ export class RuningInfoService {
     const entity = await this.runingInfoEntityRepository.findOne({
       where: { id },
     });
+    console.log(Array.isArray(entity.rbcInfo));
     return entity || null;
   }
 

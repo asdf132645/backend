@@ -1,35 +1,21 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { RuningInfoService } from './runingInfo.service';
 import { RuningInfoEntity } from './runingInfo.entity';
-import { CreateRuningInfoDto } from './dto/runingInfoDtoItems';
 
 @Resolver(() => RuningInfoEntity)
-export class RuningInfoResolver {
+export class RunningInfoResolver {
   constructor(private readonly runningInfoService: RuningInfoService) {}
 
-  @Mutation(() => RuningInfoEntity)
-  async createRunningInfo(
-    @Args('createRunningInfoDto') createRunningInfoDto: CreateRuningInfoDto,
+  @Query(() => RuningInfoEntity)
+  async getRunningInfoByIdGQL(
+    @Args('id', { type: () => Int }) id: number, // GraphQL의 Int로 명시
   ): Promise<RuningInfoEntity> {
-    const newEntity =
-      await this.runningInfoService.create(createRunningInfoDto);
-    console.log('resolver');
-    if (!newEntity) {
-      throw new Error(
-        'Failed to create running info: entity already exists within the time frame.',
-      );
-    }
-    return newEntity;
-  }
+    const runningInfo = await this.runningInfoService.getRunningInfoById(id);
 
-  @Query(() => RuningInfoEntity, { nullable: true })
-  async getRunningInfoById(
-    @Args('id') id: number,
-  ): Promise<RuningInfoEntity | null> {
-    const entity = await this.runningInfoService.getRunningInfoById(id);
-    if (!entity) {
-      throw new Error(`Running info with id ${id} not found.`);
+    if (runningInfo) {
+      return runningInfo;
     }
-    return entity;
+
+    return null; // 데이터가 없는 경우 null 반환
   }
 }

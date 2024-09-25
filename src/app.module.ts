@@ -51,7 +51,6 @@ import { UploadModule } from './upload/upload.module';
 import { CbcModule } from './lisMakeData/cbc.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
 
 @Module({
   imports: [
@@ -60,8 +59,10 @@ import { join } from 'path';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: 'src/schema.gql',
       playground: true, // 개발용 그래프QL 플레이그라운드 활성화
+      path: 'api/graphql', // 엔드포인트 경로 지정
     }),
 
     UserModule,
