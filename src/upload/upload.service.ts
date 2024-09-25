@@ -20,6 +20,7 @@ export class UploadService {
     private readonly logger: LoggerService,
   ) {}
   private moveResults = { success: 0, total: 0 };
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
 
   private listDirectoriesInFolder = async (
     folderPath: string,
@@ -250,9 +251,6 @@ export class UploadService {
     queue: any[],
     downloadType: string,
   ): Promise<void> {
-    const scriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
-    // const scriptPath = path.join(__dirname, 'move_files.exe');
-
     // JSON 데이터를 임시 파일에 저장
     const tempFilePath = path.join(
       os.tmpdir(),
@@ -269,7 +267,7 @@ export class UploadService {
         stderr: string;
       }>((resolve, reject) => {
         exec(
-          `${scriptPath} ${tempFilePath} ${downloadType}`,
+          `${this.pythonScriptPath} ${tempFilePath} ${downloadType}`,
           (error, stdout, stderr) => {
             if (error) {
               console.log('error', error);
