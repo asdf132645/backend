@@ -245,8 +245,7 @@ export class UploadService {
     queue: any[],
     downloadType: string,
   ): Promise<void> {
-    const scriptPath = `D:\\UIMD_download_upload_tool\\move_files.exe`;
-    // const scriptPath = `C:\\Users\\${userInfo.username}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+    const scriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
 
     // JSON 데이터를 임시 파일에 저장
     const tempFilePath = path.join(
@@ -294,9 +293,7 @@ export class UploadService {
       } else {
         this.logger.logic(`Python script did not complete successfully`);
       }
-    } catch (error) {
-      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
-    } finally {
+
       // 임시 파일 삭제
       try {
         await fs.remove(tempFilePath);
@@ -306,6 +303,8 @@ export class UploadService {
           `[PythonScript] - Error deleting temp file: ${deleteError.message}`,
         );
       }
+    } catch (error) {
+      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
     }
   }
 

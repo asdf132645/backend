@@ -45,11 +45,13 @@ export class DownloadService {
     queue: any[],
     downloadType: string,
   ): Promise<void> {
-    const scriptPath = `D:\\UIMD_download_upload_tool\\move_files.exe`;
-    // const scriptPath = `C:\\Users\\${userInfo.username}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+    const scriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
 
     // JSON 데이터를 임시 파일에 저장
-    const tempFilePath = `C:\\Users\\${userInfo.username}\\AppData\\Local\\Temp\\queue_data_${Date.now()}.json`;
+    const tempFilePath = path.join(
+      os.tmpdir(),
+      `queue_data_${Date.now()}.json`,
+    );
 
     try {
       // JSON 데이터를 임시 파일에 동기적으로 저장
@@ -92,17 +94,19 @@ export class DownloadService {
       } else {
         this.logger.logic(`Python script did not complete successfully`);
       }
-    } catch (error) {
-      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
-    } finally {
+
       try {
-        await fs.remove(tempFilePath);
-        console.log(`[PythonScript] - Temp file deleted: ${tempFilePath}`);
+        if (fs.pathExists(tempFilePath)) {
+          await fs.remove(tempFilePath);
+          console.log(`[PythonScript] - Temp file deleted: ${tempFilePath}`);
+        }
       } catch (deleteError) {
         this.logger.logic(
           `[PythonScript] - Error deleting temp file: ${deleteError.message}`,
         );
       }
+    } catch (error) {
+      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
     }
   }
 
@@ -239,7 +243,8 @@ export class DownloadService {
       destination: path.join(downloadDateFolder, slotId),
     }));
 
-    const concurrency = 10;
+    const concurrency = 5;
+    // const chunkedQueue = [];
 
     // 배열을 주어진 크기로 나누는 함수
     const splitIntoChunks = (array, chunkSize) => {
@@ -249,6 +254,15 @@ export class DownloadService {
       }
       return chunks;
     };
+
+    // const divideIntoChunks = (array: string[], chunkSize: number) => {
+    //   let remainQueueItem = 0;
+    //
+    //   chunkedQueue.push()
+    //   while (remainQueueItem < array.length) {
+    //
+    //   }
+    // }
 
     // 청크 단위로 Python 스크립트를 실행하는 함수
     const processQueueInChunks = async (queue, downloadType) => {
