@@ -17,7 +17,7 @@ export class UploadController {
     body: UploadDto,
   ) {
     await this.redis.flushall();
-    await this.uploadService.changeDatabaseAndExecute(body);
+    await this.uploadService.uploadOperation(body);
     return { message: 'SQL file executed successfully' };
   }
 

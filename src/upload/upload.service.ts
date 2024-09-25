@@ -176,16 +176,19 @@ export class UploadService {
     }
   };
 
+  // 업로드 가능 여부 체크 함수
   private checkDuplicatedInDatabase = async () => {
     const restoreSql = `SELECT slotId, barcodeNo FROM restore_runing_info_entity`;
 
     const items = await this.dataSource.query(restoreSql);
     const slotIds = items.map((item) => item.slotId);
-    const existingItems = await this.runningInfoRepository.find({
+    const existingItemsInDB = await this.runningInfoRepository.find({
       where: { slotId: In(slotIds) },
     });
 
-    const existingSlotIdSet = new Set(existingItems.map((item) => item.slotId));
+    const existingSlotIdSet = new Set(
+      existingItemsInDB.map((item) => item.slotId),
+    );
 
     const duplicatedSlotIdArr = [];
     const nonDuplicatedSlotIdArr = [];
@@ -212,12 +215,13 @@ export class UploadService {
     };
   };
 
+  // Upload 할때 생성한 temp DB 테이블 삭제 함수
   private deleteTemporaryTable = async () => {
     const deleteTableSql = 'DROP TABLE IF EXISTS `restore_runing_info_entity`';
     await this.dataSource.query(deleteTableSql);
   };
 
-  private deleteImageFolder = async (folderPath) => {
+  private deleteImageFolder = async (folderPath: string) => {
     if (await fs.pathExists(folderPath)) {
       try {
         fs.removeSync(folderPath);
@@ -241,11 +245,13 @@ export class UploadService {
     }
   };
 
+  // 이미지 이동은 파이썬 실행파일을 사용
   private async runPythonScript(
     queue: any[],
     downloadType: string,
   ): Promise<void> {
     const scriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+    // const scriptPath = path.join(__dirname, 'move_files.exe');
 
     // JSON 데이터를 임시 파일에 저장
     const tempFilePath = path.join(
@@ -344,7 +350,7 @@ export class UploadService {
 
     this.moveResults.total = availableFileNames.length;
 
-    const concurrency = 10;
+    const concurrency = 5;
 
     // 배열을 주어진 크기로 나누는 함수
     const splitIntoChunks = (array, chunkSize) => {
@@ -356,23 +362,21 @@ export class UploadService {
     };
 
     // 청크 단위로 Python 스크립트를 실행하는 함수
-    const processQueueInChunks = async (queue, downloadType) => {
+    const processQueueInChunks = async (queue, uploadType) => {
       const chunkedQueue = splitIntoChunks(queue, concurrency);
 
       for (const chunk of chunkedQueue) {
-        await Promise.all(
-          chunk.map((task) => this.runPythonScript([task], downloadType)),
-        );
+        await this.runPythonScript(chunk, uploadType);
       }
     };
 
-    // 큐를 10개씩 나눠서 처리
+    // 큐를 5개씩 나눠서 처리
     await processQueueInChunks(queue, uploadType);
 
     return availableIds;
   };
 
-  async changeDatabaseAndExecute(fileInfo: UploadDto): Promise<string> {
+  async uploadOperation(fileInfo: UploadDto): Promise<string> {
     const {
       fileName,
       destinationUploadPath,
