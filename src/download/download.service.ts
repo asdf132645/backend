@@ -4,7 +4,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { DownloadDto, DownloadReturn } from './download.dto';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
@@ -44,54 +44,15 @@ export class DownloadService {
   }
 
   // 이미지 이동은 파이썬 실행파일을 사용
-  private async runPythonScript(
-    queue: any[],
-    downloadType: string,
-  ): Promise<void> {
-    const tempFilePath = path.join(
-      os.tmpdir(),
-      `queue_data_${Date.now()}.json`,
-    );
-
+  private runPythonScript(task: any, downloadType: string) {
+    const { source, destination } = task;
     try {
-      fs.writeFileSync(tempFilePath, JSON.stringify(queue));
-      console.log(`Temp file created at: ${tempFilePath}`);
-
-      const { stdout } = await new Promise<{
-        stdout: string;
-        stderr: string;
-      }>((resolve, reject) => {
-        exec(
-          `${this.pythonScriptPath} ${tempFilePath} ${downloadType}`,
-          (error, stdout, stderr) => {
-            if (error) {
-              this.logger.logic(
-                `[PythonScript] - Error executing script: ${error.message}`,
-              );
-              reject(error);
-            }
-
-            if (stderr) {
-              this.logger.logic(`[PythonScript] - Warning: ${stderr}`);
-            }
-
-            resolve({ stdout, stderr });
-          },
-        );
-      });
-
-      // 정상적으로 종료되었는지 확인
-      if (stdout) {
-        this.logger.logic(`All Backup operations completed successfully`);
-      } else {
-        this.logger.logic(`Python script did not complete successfully`);
-      }
+      const stdout = execSync(
+        `${this.pythonScriptPath}  ${JSON.stringify(source)} ${JSON.stringify(destination)} ${downloadType}`,
+      );
+      console.log('stdout -------', stdout.toString());
     } catch (error) {
-      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
-    } finally {
-      if (await fs.pathExists(tempFilePath)) {
-        await fs.remove(tempFilePath);
-      }
+      console.log('error ------', error);
     }
   }
 
@@ -150,32 +111,6 @@ export class DownloadService {
     const ids = availableIds.map((id) => `'${id}'`).join(',');
     const query = `UPDATE runing_info_entity SET img_drive_root_path = '${convertedDestinationUploadPath}' WHERE slotId IN (${ids})`;
     await this.dataSource.query(query);
-  }
-
-  // chunk를 나누어 활용하는 이미지 이동 로직
-  private async imageMoveOperation(queue: string[], downloadType: string) {
-    const concurrency = 5;
-
-    // 배열을 주어진 크기로 나누는 함수
-    const splitIntoChunks = (array, chunkSize) => {
-      const chunks = [];
-      for (let i = 0; i < array.length; i += chunkSize) {
-        chunks.push(array.slice(i, i + chunkSize));
-      }
-      return chunks;
-    };
-
-    // 청크 단위로 Python 스크립트를 실행하는 함수
-    const processQueueInChunks = async (queue, downloadType) => {
-      const chunkedQueue = splitIntoChunks(queue, concurrency);
-
-      for (const chunk of chunkedQueue) {
-        await this.runPythonScript(chunk, downloadType);
-      }
-    };
-
-    // 큐를 5개씩 나눠서 처리
-    await processQueueInChunks(queue, downloadType);
   }
 
   async checkIsPossibleToDownload(
@@ -246,12 +181,24 @@ export class DownloadService {
       moment(endDate).toDate(),
     );
 
-    const queue = availableSlotIdsFromDB.map((slotId) => ({
-      source: path.join(originDownloadPath, slotId),
-      destination: path.join(downloadDateFolder, slotId),
-    }));
+    const queue = (
+      await Promise.all(
+        availableSlotIdsFromDB.map(async (slotId) => {
+          const sourcePath = path.join(originDownloadPath, slotId);
+          if (await fs.pathExists(sourcePath)) {
+            return {
+              source: sourcePath,
+              destination: path.join(downloadDateFolder, slotId),
+            };
+          }
+          return null; // 존재하지 않을 경우 null 반환
+        }),
+      )
+    ).filter(Boolean);
 
-    await this.imageMoveOperation(queue, downloadType);
+    for (const task of queue) {
+      this.runPythonScript(task, downloadType);
+    }
 
     if (downloadType === 'move') {
       await this.updateImgDriveRootPath(

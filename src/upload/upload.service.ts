@@ -6,7 +6,7 @@ import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import * as os from 'os';
 
 const userInfo = os.userInfo();
@@ -247,68 +247,15 @@ export class UploadService {
   };
 
   // 이미지 이동은 파이썬 실행파일을 사용
-  private async runPythonScript(
-    queue: any[],
-    downloadType: string,
-  ): Promise<void> {
-    // JSON 데이터를 임시 파일에 저장
-    const tempFilePath = path.join(
-      os.tmpdir(),
-      `queue_data_${Date.now()}.json`,
-    );
-
+  private runPythonScript(task: any, downloadType: string) {
+    const { source, destination } = task;
     try {
-      // JSON 데이터를 임시 파일에 동기적으로 저장
-      fs.writeFileSync(tempFilePath, JSON.stringify(queue));
-      console.log(`Temp file created at: ${tempFilePath}`);
-
-      const { stdout } = await new Promise<{
-        stdout: string;
-        stderr: string;
-      }>((resolve, reject) => {
-        exec(
-          `${this.pythonScriptPath} ${tempFilePath} ${downloadType}`,
-          (error, stdout, stderr) => {
-            if (error) {
-              console.log('error', error);
-              this.logger.logic(
-                `[PythonScript] - Error executing script: ${error.message}`,
-              );
-              return reject(error);
-            }
-
-            if (stderr) {
-              console.log('stderr', stderr);
-              this.logger.logic(`[PythonScript] - Warning: ${stderr}`);
-            }
-
-            console.log(
-              `error - ${error} | stdout - ${stdout} | stderr - ${stderr}`,
-            );
-            resolve({ stdout, stderr });
-          },
-        );
-      });
-
-      // 정상적으로 종료되었는지 확인
-      if (stdout) {
-        console.log('stdout:', stdout);
-        console.log('All operations completed successfully.');
-      } else {
-        this.logger.logic(`Python script did not complete successfully`);
-      }
-
-      // 임시 파일 삭제
-      try {
-        await fs.remove(tempFilePath);
-        console.log(`[PythonScript] - Temp file deleted: ${tempFilePath}`);
-      } catch (deleteError) {
-        this.logger.logic(
-          `[PythonScript] - Error deleting temp file: ${deleteError.message}`,
-        );
-      }
+      const stdout = execSync(
+        `${this.pythonScriptPath}  ${JSON.stringify(source)} ${JSON.stringify(destination)} ${downloadType}`,
+      );
+      console.log('stdout -------', stdout.toString());
     } catch (error) {
-      this.logger.logic(`[PythonScript] - Error: ${error.message}`);
+      console.log('error ------', error);
     }
   }
 
@@ -348,28 +295,9 @@ export class UploadService {
 
     this.moveResults.total = availableFileNames.length;
 
-    const concurrency = 5;
-
-    // 배열을 주어진 크기로 나누는 함수
-    const splitIntoChunks = (array, chunkSize) => {
-      const chunks = [];
-      for (let i = 0; i < array.length; i += chunkSize) {
-        chunks.push(array.slice(i, i + chunkSize));
-      }
-      return chunks;
-    };
-
-    // 청크 단위로 Python 스크립트를 실행하는 함수
-    const processQueueInChunks = async (queue, uploadType) => {
-      const chunkedQueue = splitIntoChunks(queue, concurrency);
-
-      for (const chunk of chunkedQueue) {
-        await this.runPythonScript(chunk, uploadType);
-      }
-    };
-
-    // 큐를 5개씩 나눠서 처리
-    await processQueueInChunks(queue, uploadType);
+    for (const task of queue) {
+      this.runPythonScript(task, uploadType);
+    }
 
     return availableIds;
   };

@@ -14,9 +14,6 @@ import * as dotenv from 'dotenv';
 import { RuningInfoService } from '../runingInfo/runingInfo.service';
 import { isServerRunningLocally } from '../utils/network';
 import { BrowserService } from '../browserExit/browser.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
-import { Repository } from 'typeorm';
 
 dotenv.config(); // dotenv 설정 추가
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { DownloadService } from './download.service';
 import { DownloadDto, DownloadReturn } from './download.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
