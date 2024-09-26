@@ -87,7 +87,9 @@ export class CbcService {
     delete bodyParams.baseUrl; // baseUrl은 본문에서 제외
 
     // JSON 데이터를 요청 본문에 전달
-    const jsonBody = JSON.stringify(bodyParams).replace(/"/g, '\\"');
+    const jsonBody = JSON.stringify(bodyParams)
+      .replace(/"/g, '\\"')
+      .replace(/\|/g, '\\\\');
     this.logger.cbcLis(`lis-service-executePostCurl: ${url}`);
 
     // curl 명령어 수정: -X POST로 JSON 본문 전송
