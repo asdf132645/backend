@@ -6,21 +6,24 @@ import * as path from 'path';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
-import { exec, execSync } from 'child_process';
+import { exec, spawn } from 'child_process';
 import * as os from 'os';
+import { CombinedService } from '../combinedProtocol/combined.service';
 
 const userInfo = os.userInfo();
 
 @Injectable()
 export class UploadService {
+  private moveResults = { success: 0, total: 0 };
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
     private readonly logger: LoggerService,
+    private readonly combinedService: CombinedService,
   ) {}
-  private moveResults = { success: 0, total: 0 };
-  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
 
   private listDirectoriesInFolder = async (
     folderPath: string,
@@ -247,16 +250,41 @@ export class UploadService {
   };
 
   // 이미지 이동은 파이썬 실행파일을 사용
-  private runPythonScript(task: any, downloadType: string) {
+  private runPythonScript(task: any, uploadType: string) {
     const { source, destination } = task;
-    try {
-      const stdout = execSync(
-        `${this.pythonScriptPath}  ${JSON.stringify(source)} ${JSON.stringify(destination)} ${downloadType}`,
-      );
-      console.log('stdout -------', stdout.toString());
-    } catch (error) {
-      console.log('error ------', error);
-    }
+
+    const convertedSource = source.replaceAll('\\', '/');
+    const convertedDestination = destination.replaceAll('\\', '/');
+
+    return new Promise((resolve, reject) => {
+      const result = spawn(`${this.pythonScriptPath}`, [
+        convertedSource,
+        convertedDestination,
+        uploadType,
+      ]);
+
+      // 표준 출력 (stdout) 로그 출력
+      result.stdout.on('data', (data) => {
+        console.log(`Output: ${data}`);
+      });
+
+      // 표준 에러 (stderr) 로그 출력
+      result.stderr.on('data', (data) => {
+        console.error(`Error: ${data}`);
+      });
+
+      // 프로세스가 완료되면 실행되는 콜백
+      result.on('close', (code) => {
+        this.moveResults.success++;
+        console.log('close code', code);
+        resolve(null);
+      });
+
+      // 프로세스 실행 에러 발생 시
+      result.on('error', (err) => {
+        reject(err);
+      });
+    });
   }
 
   private moveImages = async (
@@ -295,9 +323,11 @@ export class UploadService {
 
     this.moveResults.total = availableFileNames.length;
 
-    for (const task of queue) {
-      this.runPythonScript(task, uploadType);
-    }
+    const promises = queue.map(
+      async (task) => await this.runPythonScript(task, uploadType),
+    );
+
+    await Promise.all(promises);
 
     return availableIds;
   };
@@ -372,6 +402,8 @@ export class UploadService {
       if (uploadType === 'move') {
         await this.deleteImageFolder(uploadDateFolderName);
       }
+
+      this.combinedService.sendIsDownloadUploadFinished('upload');
 
       return 'Upload completed successfully';
     } catch (e) {

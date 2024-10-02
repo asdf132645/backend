@@ -12,10 +12,10 @@ export class DownloadController {
   ) {}
 
   @Post('post')
-  async createBackup(@Body() downloadDto: DownloadDto): Promise<void> {
+  async createBackup(@Body() downloadDto: DownloadDto): Promise<any> {
     const { dayQuery } = downloadDto;
     await this.redis.del(dayQuery);
-    await this.downloadService.downloadOperation(downloadDto);
+    return await this.downloadService.downloadOperation(downloadDto);
   }
 
   @Post('check')

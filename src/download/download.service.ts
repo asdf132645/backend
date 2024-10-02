@@ -4,12 +4,13 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { DownloadDto, DownloadReturn } from './download.dto';
-import { exec, execSync } from 'child_process';
+import { exec, execSync, spawn, spawnSync } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as os from 'os';
 import { LoggerService } from '../logger.service';
+import { CombinedService } from '../combinedProtocol/combined.service';
 
 const userInfo = os.userInfo();
 
@@ -23,6 +24,7 @@ export class DownloadService {
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
     private readonly logger: LoggerService,
+    private readonly combinedService: CombinedService,
   ) {}
 
   // npm 캐시 삭제 함수
@@ -46,14 +48,63 @@ export class DownloadService {
   // 이미지 이동은 파이썬 실행파일을 사용
   private runPythonScript(task: any, downloadType: string) {
     const { source, destination } = task;
-    try {
-      const stdout = execSync(
-        `${this.pythonScriptPath}  ${JSON.stringify(source)} ${JSON.stringify(destination)} ${downloadType}`,
-      );
-      console.log('stdout -------', stdout.toString());
-    } catch (error) {
-      console.log('error ------', error);
+
+    const convertedSource = source.replaceAll('\\', '/');
+    const convertedDestination = destination.replaceAll('\\', '/');
+
+    return new Promise((resolve, reject) => {
+      const result = spawn(`${this.pythonScriptPath}`, [
+        convertedSource,
+        convertedDestination,
+        downloadType,
+      ]);
+
+      // 표준 출력 (stdout) 로그 출력
+      result.stdout.on('data', (data) => {
+        console.log(`Output: ${data}`);
+      });
+
+      // 표준 에러 (stderr) 로그 출력
+      result.stderr.on('data', (data) => {
+        console.error(`Error: ${data}`);
+      });
+
+      // 프로세스가 완료되면 실행되는 콜백
+      result.on('close', (code) => {
+        this.moveResults.success++;
+        console.log('close code', code);
+        resolve(null);
+      });
+
+      // 프로세스 실행 에러 발생 시
+      result.on('error', (err) => {
+        reject(err);
+      });
+    });
+  }
+
+  private countFilesInDirectory(dir) {
+    let fileCount = 0;
+
+    const stack = [dir]; // 스택을 사용하여 탐색할 디렉토리를 저장
+
+    while (stack.length > 0) {
+      const currentDir = stack.pop();
+      const items = fs.readdirSync(currentDir); // 현재 디렉토리의 내용 읽기
+
+      for (const item of items) {
+        const itemPath = path.join(currentDir, item);
+        const stats = fs.statSync(itemPath);
+
+        if (stats.isDirectory()) {
+          stack.push(itemPath); // 디렉토리인 경우 스택에 추가
+        } else {
+          fileCount++; // 파일인 경우 카운트 증가
+        }
+      }
     }
+
+    return fileCount;
   }
 
   private execCommand(command: string): Promise<void> {
@@ -157,7 +208,7 @@ export class DownloadService {
     };
   }
 
-  async downloadOperation(downloadDto: DownloadDto): Promise<void> {
+  async downloadOperation(downloadDto: DownloadDto): Promise<any> {
     const {
       startDate,
       endDate,
@@ -196,9 +247,18 @@ export class DownloadService {
       )
     ).filter(Boolean);
 
-    for (const task of queue) {
-      this.runPythonScript(task, downloadType);
-    }
+    this.moveResults.success = 0;
+
+    const promises = queue.map(
+      async (task) => await this.runPythonScript(task, downloadType),
+    );
+    await Promise.all(promises);
+
+    await new Promise((resolve) => {
+      if (this.moveResults.success === queue.length) {
+        resolve(null);
+      }
+    });
 
     if (downloadType === 'move') {
       await this.updateImgDriveRootPath(
@@ -216,6 +276,10 @@ export class DownloadService {
     const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${schema} runing_info_entity --where="analyzedDttm BETWEEN '${this.formatDate(moment(startDate).toDate(), 'start')}' AND '${this.formatDate(moment(endDate).toDate(), 'end')}'" > ${backupFile}`;
 
     await this.execCommand(dumpCommand);
+
+    this.combinedService.sendIsDownloadUploadFinished('download');
+
+    return { success: this.moveResults.success, total: queue.length };
   }
 
   async openDrive(

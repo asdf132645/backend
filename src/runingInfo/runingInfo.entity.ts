@@ -1,6 +1,11 @@
 import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { RbcInfo, WbcInfo, WbcInfoAfter, WbcResponse } from "./types/class-info"; // 필요에 따라 import 경로 조정
+import {
+  RbcInfo,
+  WbcInfo,
+  WbcInfoAfter,
+  WbcResponse,
+} from './types/class-info'; // 필요에 따라 import 경로 조정
 
 @ObjectType() // GraphQL ObjectType으로 설정
 @Entity()

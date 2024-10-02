@@ -18,6 +18,7 @@ export class CbcController {
     return await this.cbcService.fetchExternalData(query);
   }
 
+  // 인하대 전용
   @Post('/executePostCurl')
   async executeCurlCommand(@Body() body: any, @Res() res: Response) {
     const result = await this.cbcService.executePostCurl(body);

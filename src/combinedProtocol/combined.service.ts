@@ -355,4 +355,12 @@ export class CombinedService
       this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
     }
   }
+
+  sendIsDownloadUploadFinished(type: 'upload' | 'download') {
+    const obj = {
+      type,
+      isFinished: true,
+    }
+    this.wss.emit('downloadUploadFinished', obj);
+  }
 }
