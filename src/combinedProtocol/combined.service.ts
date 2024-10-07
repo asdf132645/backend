@@ -46,11 +46,6 @@ export class CombinedService
     private readonly browserService: BrowserService,
   ) {}
 
-  // 이전 reqDttm 값을 갱신하는 함수
-  updatePrevReqDttm(reqDttm: string) {
-    this.prevReqDttm = reqDttm;
-  }
-
   afterInit(server: Server) {
     this.wss = server;
   }
@@ -360,7 +355,7 @@ export class CombinedService
     const obj = {
       type,
       isFinished: true,
-    }
+    };
     this.wss.emit('downloadUploadFinished', obj);
   }
 }
