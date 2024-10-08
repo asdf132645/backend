@@ -15,7 +15,7 @@ const userInfo = os.userInfo();
 @Injectable()
 export class UploadService {
   private moveResults = { success: 0, total: 0 };
-  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\web\\UIMD_download_upload_tool\\move_files.exe`;
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\move_files.exe`;
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
