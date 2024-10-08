@@ -5,9 +5,6 @@ export class CrcSettingEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  code: string;
-
   @Column()
   crcTitle: string;
 
@@ -16,4 +13,10 @@ export class CrcSettingEntity {
 
   @Column({ nullable: true })
   crcPercentText: string;
+
+  @Column()
+  morphologyType: string;
+
+  @Column()
+  crcContent: string;
 }

@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CrcSettingController = void 0;
 const common_1 = require("@nestjs/common");
 const crc_setting_service_1 = require("./crc-setting.service");
-const crc_setting_dto_1 = require("./dto/crc-setting.dto");
 let CrcSettingController = class CrcSettingController {
     constructor(crcSettingService) {
         this.crcSettingService = crcSettingService;
@@ -25,6 +24,9 @@ let CrcSettingController = class CrcSettingController {
     }
     findAll() {
         return this.crcSettingService.findAll();
+    }
+    update(updateCrcSettingDtos) {
+        return this.crcSettingService.update(updateCrcSettingDtos);
     }
     findOne(id) {
         return this.crcSettingService.findOne(+id);
@@ -38,15 +40,22 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [crc_setting_dto_1.CreateCrcSettingDto]),
+    __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", void 0)
 ], CrcSettingController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('crc-get'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], CrcSettingController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Put)('crc-put'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", void 0)
+], CrcSettingController.prototype, "update", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -55,8 +64,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CrcSettingController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)('crcDel'),
+    __param(0, (0, common_1.Body)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)

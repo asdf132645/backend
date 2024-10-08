@@ -1,19 +1,35 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { CrcSettingService } from './crc-setting.service';
-import { CreateCrcSettingDto } from './dto/crc-setting.dto';
+import {
+  CreateCrcSettingDto,
+  UpdateCrcSettingDto,
+} from './dto/crc-setting.dto';
 
 @Controller('crc-setting')
 export class CrcSettingController {
   constructor(private readonly crcSettingService: CrcSettingService) {}
 
   @Post()
-  create(@Body() createCrcSettingDto: CreateCrcSettingDto) {
+  create(@Body() createCrcSettingDto: CreateCrcSettingDto[]) {
     return this.crcSettingService.create(createCrcSettingDto);
   }
 
-  @Get()
+  @Get('crc-get')
   findAll() {
     return this.crcSettingService.findAll();
+  }
+
+  @Put('crc-put')
+  update(@Body() updateCrcSettingDtos: UpdateCrcSettingDto[]) {
+    return this.crcSettingService.update(updateCrcSettingDtos);
   }
 
   @Get(':id')
@@ -21,8 +37,8 @@ export class CrcSettingController {
     return this.crcSettingService.findOne(+id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete('crcDel')
+  remove(@Body('id') id: string) {
     return this.crcSettingService.remove(+id);
   }
 }

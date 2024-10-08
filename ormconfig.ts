@@ -17,6 +17,8 @@ import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
 import { ClassOrder } from './src/classOrder/classOrder';
 import * as dotenv from 'dotenv';
 import { DeviceEntity } from './src/device/device.entity';
+import { CrcSettingEntity } from './src/settings/report/crc/entities/crc-setting.entity';
+import { CrcRemarkSettingEntity } from './src/settings/report/crc/entities/crc-remark-setting.entity';
 dotenv.config(); // dotenv 설정 추가
 
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
@@ -48,6 +50,8 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       RuningInfoEntity,
       ClassOrder,
       DeviceEntity,
+      CrcSettingEntity,
+      CrcRemarkSettingEntity,
     ],
     extra: {
       connectionLimit: 20, // 커넥션 풀 크기 설정

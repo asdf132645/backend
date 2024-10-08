@@ -19,10 +19,6 @@ __decorate([
     __metadata("design:type", Number)
 ], CrcSettingEntity.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
-    __metadata("design:type", String)
-], CrcSettingEntity.prototype, "code", void 0);
-__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], CrcSettingEntity.prototype, "crcTitle", void 0);
@@ -34,6 +30,14 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], CrcSettingEntity.prototype, "crcPercentText", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], CrcSettingEntity.prototype, "morphologyType", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], CrcSettingEntity.prototype, "crcContent", void 0);
 exports.CrcSettingEntity = CrcSettingEntity = __decorate([
     (0, typeorm_1.Entity)('crc_setting')
 ], CrcSettingEntity);

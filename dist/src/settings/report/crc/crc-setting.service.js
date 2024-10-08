@@ -17,13 +17,30 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const crc_setting_entity_1 = require("./entities/crc-setting.entity");
+const ioredis_1 = require("@nestjs-modules/ioredis");
+const ioredis_2 = require("ioredis");
 let CrcSettingService = class CrcSettingService {
-    constructor(crcSettingRepository) {
+    constructor(crcSettingRepository, redis) {
         this.crcSettingRepository = crcSettingRepository;
+        this.redis = redis;
     }
-    async create(createCrcSettingDto) {
-        const crcSetting = this.crcSettingRepository.create(createCrcSettingDto);
-        return this.crcSettingRepository.save(crcSetting);
+    async create(createCrcSettingDtos) {
+        const crcSettings = this.crcSettingRepository.create(createCrcSettingDtos);
+        return this.crcSettingRepository.save(crcSettings);
+    }
+    async update(crcSettingDtos) {
+        const updatedEntities = [];
+        for (const dto of crcSettingDtos) {
+            const crcSetting = await this.crcSettingRepository.findOne({
+                where: { id: dto.id },
+            });
+            if (crcSetting) {
+                await this.crcSettingRepository.save(dto);
+                updatedEntities.push(crcSetting);
+            }
+        }
+        await this.redis.flushall();
+        return updatedEntities;
     }
     async findAll() {
         return this.crcSettingRepository.find();
@@ -32,6 +49,8 @@ let CrcSettingService = class CrcSettingService {
         return this.crcSettingRepository.findOneBy({ id });
     }
     async remove(id) {
+        console.log(id);
+        await this.redis.flushall();
         await this.crcSettingRepository.delete(id);
     }
 };
@@ -39,6 +58,8 @@ exports.CrcSettingService = CrcSettingService;
 exports.CrcSettingService = CrcSettingService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(crc_setting_entity_1.CrcSettingEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, ioredis_1.InjectRedis)()),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        ioredis_2.default])
 ], CrcSettingService);
 //# sourceMappingURL=crc-setting.service.js.map
