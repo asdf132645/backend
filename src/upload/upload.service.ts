@@ -8,6 +8,7 @@ import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
 import { exec, spawn } from 'child_process';
 import * as os from 'os';
+import { CombinedService } from '../combinedProtocol/combined.service';
 
 const userInfo = os.userInfo();
 
@@ -21,6 +22,7 @@ export class UploadService {
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
     private readonly logger: LoggerService,
+    private readonly combinedService: CombinedService,
   ) {}
 
   private listDirectoriesInFolder = async (
@@ -400,6 +402,8 @@ export class UploadService {
       if (uploadType === 'move') {
         await this.deleteImageFolder(uploadDateFolderName);
       }
+
+      this.combinedService.sendIsDownloadUploadFinished('upload');
 
       return 'Upload completed successfully';
     } catch (e) {

@@ -138,24 +138,24 @@ export class CombinedService
       }
     });
 
-    // client.on(
-    //   'isDownloadUploading',
-    //   (state: { type: string; payload: boolean }) => {
-    //     try {
-    //       if (this.wss) {
-    //         if (state.payload) {
-    //           this.isNotDownloadOrUploading = false;
-    //         } else {
-    //           this.isNotDownloadOrUploading = true;
-    //         }
-    //       }
-    //     } catch (e) {
-    //       this.logger.logic(
-    //         `[Download&Upload] 다운로드 or 업로드 도중 Core Backend로 통신 중지 실패: ${e}`,
-    //       );
-    //     }
-    //   },
-    // );
+    client.on(
+      'isDownloadUploading',
+      (state: { type: string; payload: boolean }) => {
+        try {
+          if (this.wss) {
+            if (state.payload) {
+              this.isNotDownloadOrUploading = false;
+            } else {
+              this.isNotDownloadOrUploading = true;
+            }
+          }
+        } catch (e) {
+          this.logger.logic(
+            `[Download&Upload] 다운로드 or 업로드 도중 Core Backend로 통신 중지 실패: ${e}`,
+          );
+        }
+      },
+    );
 
     client.on('viewerCheck', () => {
       try {
@@ -235,7 +235,8 @@ export class CombinedService
           // this.connectedClient가 유효한지 확인
           if (
             this.connectedClient &&
-            typeof this.connectedClient.write === 'function'
+            typeof this.connectedClient.write === 'function' &&
+            this.isNotDownloadOrUploading
           ) {
             this.connectedClient.write(serializedData);
             // this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
@@ -309,7 +310,9 @@ export class CombinedService
         });
 
         newClient.on('error', (err: any) => {
-          this.logger.error(`🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류`,);
+          this.logger.error(
+            `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류`,
+          );
           this.sendDataToWebSocketClients({ err: true });
           this.handleReconnectFailure(newClient);
         });
@@ -345,5 +348,13 @@ export class CombinedService
     } else {
       this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
     }
+  }
+
+  sendIsDownloadUploadFinished(type: 'upload' | 'download') {
+    const obj = {
+      type,
+      isFinished: true,
+    };
+    this.wss.emit('downloadUploadFinished', obj);
   }
 }
