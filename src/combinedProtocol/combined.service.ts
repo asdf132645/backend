@@ -116,7 +116,6 @@ export class CombinedService
           if (!this.notRes) {
             this.webSocketGetData(message);
           }
-          // }
         }
       } catch (e) {
         this.logger.error(
@@ -310,9 +309,7 @@ export class CombinedService
         });
 
         newClient.on('error', (err: any) => {
-          this.logger.error(
-            `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류`,
-          );
+          this.logger.error(`🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류`,);
           this.sendDataToWebSocketClients({ err: true });
           this.handleReconnectFailure(newClient);
         });
