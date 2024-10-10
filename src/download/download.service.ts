@@ -4,13 +4,12 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { DownloadDto, DownloadReturn } from './download.dto';
-import { exec, execSync, spawn, spawnSync } from 'child_process';
+import { exec, spawn } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as os from 'os';
 import { LoggerService } from '../logger.service';
-import { CombinedService } from '../combinedProtocol/combined.service';
 
 const userInfo = os.userInfo();
 
@@ -24,7 +23,6 @@ export class DownloadService {
     @InjectRepository(RuningInfoEntity)
     private readonly runningInfoRepository: Repository<RuningInfoEntity>,
     private readonly logger: LoggerService,
-    private readonly combinedService: CombinedService,
   ) {}
 
   // npm 캐시 삭제 함수
@@ -172,7 +170,6 @@ export class DownloadService {
   ): Promise<DownloadReturn> {
     const { startDate, endDate, destinationDownloadPath, originDownloadPath } =
       downloadDto;
-
     await this.ensureDirectoryExists(destinationDownloadPath);
 
     const dateFolder = path.join(
@@ -276,8 +273,6 @@ export class DownloadService {
     const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${schema} runing_info_entity --where="analyzedDttm BETWEEN '${this.formatDate(moment(startDate).toDate(), 'start')}' AND '${this.formatDate(moment(endDate).toDate(), 'end')}'" > ${backupFile}`;
 
     await this.execCommand(dumpCommand);
-
-    this.combinedService.sendIsDownloadUploadFinished('download');
 
     return { success: this.moveResults.success, total: queue.length };
   }

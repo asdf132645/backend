@@ -51,7 +51,7 @@ import { UploadModule } from './upload/upload.module';
 import { CbcModule } from './lisMakeData/cbc.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { CrcModule } from "./settings/report/crc/crc.module";
+import { CrcModule } from './settings/report/crc/crc.module';
 
 @Module({
   imports: [
