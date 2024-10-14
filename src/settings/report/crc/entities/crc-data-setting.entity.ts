@@ -8,15 +8,9 @@ export class CrcDataSettingEntity {
   @Column({ unique: true })
   code: string;
 
-  @Column()
-  crcTitle: string;
-
-  @Column()
-  crcType: string;
+  @Column('json')
+  crcContent: string[];
 
   @Column({ nullable: true })
-  crcPercentText: string;
-
-  @Column({ nullable: true })
-  crcRemark: string;
+  crcRemark: string[];
 }
