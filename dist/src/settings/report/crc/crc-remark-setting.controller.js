@@ -32,17 +32,20 @@ let CrcRemarkSettingController = class CrcRemarkSettingController {
     remove(id) {
         return this.crcRemarkSettingService.remove(+id);
     }
+    update(updateCrcSettingDtos) {
+        return this.crcRemarkSettingService.update(updateCrcSettingDtos);
+    }
 };
 exports.CrcRemarkSettingController = CrcRemarkSettingController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)('crcRemarkCreate'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [crc_remark_setting_dto_1.CreateCrcRemarkSettingDto]),
     __metadata("design:returntype", void 0)
 ], CrcRemarkSettingController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('crcRemarkFindAll'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -55,12 +58,19 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CrcRemarkSettingController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)('crcRemarkRemove'),
+    __param(0, (0, common_1.Body)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CrcRemarkSettingController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Put)('crcRemarkUpdate'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", void 0)
+], CrcRemarkSettingController.prototype, "update", null);
 exports.CrcRemarkSettingController = CrcRemarkSettingController = __decorate([
     (0, common_1.Controller)('crc-remark-setting'),
     __metadata("design:paramtypes", [crc_remark_setting_service_1.CrcRemarkSettingService])

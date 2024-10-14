@@ -17,9 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const crc_remark_setting_entity_1 = require("./entities/crc-remark-setting.entity");
+const ioredis_1 = require("@nestjs-modules/ioredis");
+const ioredis_2 = require("ioredis");
 let CrcRemarkSettingService = class CrcRemarkSettingService {
-    constructor(crcRemarkSettingRepository) {
+    constructor(crcRemarkSettingRepository, redis) {
         this.crcRemarkSettingRepository = crcRemarkSettingRepository;
+        this.redis = redis;
     }
     async create(createCrcRemarkSettingDto) {
         const crcRemarkSetting = this.crcRemarkSettingRepository.create(createCrcRemarkSettingDto);
@@ -34,11 +37,27 @@ let CrcRemarkSettingService = class CrcRemarkSettingService {
     async remove(id) {
         await this.crcRemarkSettingRepository.delete(id);
     }
+    async update(crcSettingDtos) {
+        const updatedEntities = [];
+        for (const dto of crcSettingDtos) {
+            const crcSetting = await this.crcRemarkSettingRepository.findOne({
+                where: { id: dto.id },
+            });
+            if (crcSetting) {
+                await this.crcRemarkSettingRepository.save(dto);
+                updatedEntities.push(crcSetting);
+            }
+        }
+        await this.redis.flushall();
+        return updatedEntities;
+    }
 };
 exports.CrcRemarkSettingService = CrcRemarkSettingService;
 exports.CrcRemarkSettingService = CrcRemarkSettingService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(crc_remark_setting_entity_1.CrcRemarkSettingEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, ioredis_1.InjectRedis)()),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        ioredis_2.default])
 ], CrcRemarkSettingService);
 //# sourceMappingURL=crc-remark-setting.service.js.map

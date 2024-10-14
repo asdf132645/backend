@@ -23,20 +23,12 @@ __decorate([
     __metadata("design:type", String)
 ], CrcDataSettingEntity.prototype, "code", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], CrcDataSettingEntity.prototype, "crcTitle", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], CrcDataSettingEntity.prototype, "crcType", void 0);
+    (0, typeorm_1.Column)('json'),
+    __metadata("design:type", Array)
+], CrcDataSettingEntity.prototype, "crcContent", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], CrcDataSettingEntity.prototype, "crcPercentText", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], CrcDataSettingEntity.prototype, "crcRemark", void 0);
 exports.CrcDataSettingEntity = CrcDataSettingEntity = __decorate([
     (0, typeorm_1.Entity)('crc_data_setting')

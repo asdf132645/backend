@@ -7,4 +7,5 @@ export declare class CrcRemarkSettingController {
     findAll(): Promise<import("./entities/crc-remark-setting.entity").CrcRemarkSettingEntity[]>;
     findOne(id: string): Promise<import("./entities/crc-remark-setting.entity").CrcRemarkSettingEntity>;
     remove(id: string): Promise<void>;
+    update(updateCrcSettingDtos: any[]): Promise<import("./entities/crc-remark-setting.entity").CrcRemarkSettingEntity[]>;
 }

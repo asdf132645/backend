@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from "@nestjs/common";
 import { CrcRemarkSettingService } from './crc-remark-setting.service';
 import { CreateCrcRemarkSettingDto } from './dto/crc-remark-setting.dto';
 
@@ -8,12 +8,12 @@ export class CrcRemarkSettingController {
     private readonly crcRemarkSettingService: CrcRemarkSettingService,
   ) {}
 
-  @Post()
+  @Post('crcRemarkCreate')
   create(@Body() createCrcRemarkSettingDto: CreateCrcRemarkSettingDto) {
     return this.crcRemarkSettingService.create(createCrcRemarkSettingDto);
   }
 
-  @Get()
+  @Get('crcRemarkFindAll')
   findAll() {
     return this.crcRemarkSettingService.findAll();
   }
@@ -23,8 +23,13 @@ export class CrcRemarkSettingController {
     return this.crcRemarkSettingService.findOne(+id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete('crcRemarkRemove')
+  remove(@Body('id') id: string) {
     return this.crcRemarkSettingService.remove(+id);
+  }
+
+  @Put('crcRemarkUpdate')
+  update(@Body() updateCrcSettingDtos: any[]) {
+    return this.crcRemarkSettingService.update(updateCrcSettingDtos);
   }
 }
