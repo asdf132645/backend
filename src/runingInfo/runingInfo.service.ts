@@ -17,10 +17,10 @@ import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
 } from './dto/runingInfoDtoItems';
-import * as fs from 'fs';
 import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import { exec } from 'child_process';
 
 @Injectable()
 export class RuningInfoService {
@@ -168,21 +168,22 @@ export class RuningInfoService {
   }
 
   async delete(ids: string[], rootPaths: string[]): Promise<boolean> {
+    await this.cleanBrowserCache();
+
     try {
-      console.log(ids);
       const result = await this.runingInfoEntityRepository.delete({
         id: In(ids),
       });
 
       if (result.affected > 0) {
         for (const rootPath of rootPaths) {
-          // 폴더 삭제
-          try {
-            fs.rmdirSync(rootPath, { recursive: true });
-            console.log(`Folder at ${rootPath} has been deleted successfully`);
-          } catch (error) {
-            console.error(`Failed to delete folder at ${rootPath}:`, error);
-          }
+          exec(`rmdir /s /q "${rootPath}"`, (error) => {
+            if (error) {
+              console.error(`Failed to delete folder at ${rootPath}:`, error.message);
+            } else {
+              console.log(`Folder at ${rootPath} has been deleted successfully`);
+            }
+          });
         }
       }
       return result.affected > 0; // affected가 0보다 크면 성공
@@ -655,5 +656,22 @@ export class RuningInfoService {
 
   async redisAllClear(): Promise<void> {
     this.redis.flushall();
+  }
+
+  private cleanBrowserCache() {
+    return new Promise((resolve, reject) => {
+      exec(
+        'powershell.exe -Command "Get-ChildItem \\"$env:LOCALAPPDATA\\Microsoft\\Edge\\User Data\\" -Directory | ForEach-Object { Remove-Item -Path \\"$($_.FullName)\\Cache\\Cache_Data\\f_*\\" -Recurse -ErrorAction SilentlyContinue }"',
+        (error, stdout, stderr) => {
+          if (error) {
+            return reject(error);
+          }
+          if (stderr) {
+            console.log(`browser cache clean warning: ${stderr}`);
+          }
+          resolve(stdout);
+        },
+      );
+    });
   }
 }

@@ -95,7 +95,7 @@ export class RuningInfoController {
 
   @Delete('delete')
   async deleteMultiple(@Body() req: any): Promise<{ success: boolean }> {
-    await this.redis.del(req?.dayQuery); // 해당 쿼리로 생성된 캐시 삭제
+    await this.runingInfoService.redisAllClear(); // 해당 쿼리로 생성된 캐시 삭제
 
     const result = await this.runingInfoService.delete(
       req.ids,
