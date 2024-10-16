@@ -1,6 +1,16 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CrcRemarkSettingService } from './crc-remark-setting.service';
 import { CreateCrcRemarkSettingDto } from './dto/crc-remark-setting.dto';
+import { CrcRemarkSettingEntity } from './entities/crc-remark-setting.entity';
 
 @Controller('crc-remark-setting')
 export class CrcRemarkSettingController {
@@ -31,5 +41,20 @@ export class CrcRemarkSettingController {
   @Put('crcRemarkUpdate')
   update(@Body() updateCrcSettingDtos: any[]) {
     return this.crcRemarkSettingService.update(updateCrcSettingDtos);
+  }
+
+  @Get('crcSearch')
+  async findByCodeOrRemarkAllContent(
+    @Query('code') code?: string,
+    @Query('remarkAllContent') remarkAllContent?: string,
+  ): Promise<CrcRemarkSettingEntity[]> {
+    if (!code && !remarkAllContent) {
+      console.log('At least one of code or remarkAllContent must be provided');
+    }
+
+    return this.crcRemarkSettingService.findByCodeOrRemarkAllContent(
+      code,
+      remarkAllContent,
+    );
   }
 }

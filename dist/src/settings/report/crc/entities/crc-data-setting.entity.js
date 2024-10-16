@@ -27,7 +27,7 @@ __decorate([
     __metadata("design:type", Array)
 ], CrcDataSettingEntity.prototype, "crcContent", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ type: 'json', nullable: true }),
     __metadata("design:type", Array)
 ], CrcDataSettingEntity.prototype, "crcRemark", void 0);
 exports.CrcDataSettingEntity = CrcDataSettingEntity = __decorate([
