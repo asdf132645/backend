@@ -52,16 +52,14 @@ let CrcRemarkSettingService = class CrcRemarkSettingService {
         return updatedEntities;
     }
     async findByCodeOrRemarkAllContent(code, remarkAllContent) {
-        const whereCondition = {};
+        const query = this.crcRemarkSettingRepository.createQueryBuilder('crc_remark_setting');
         if (code) {
-            whereCondition.code = code;
+            query.andWhere('crc_remark_setting.code = :code', { code });
         }
         if (remarkAllContent) {
-            whereCondition.remarkAllContent = remarkAllContent;
+            query.andWhere('crc_remark_setting.remarkAllContent LIKE :remarkAllContent', { remarkAllContent: `%${remarkAllContent}%` });
         }
-        return this.crcRemarkSettingRepository.find({
-            where: whereCondition,
-        });
+        return await query.getMany();
     }
 };
 exports.CrcRemarkSettingService = CrcRemarkSettingService;

@@ -7,10 +7,10 @@ import {
   Delete,
   Put,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { CrcRemarkSettingService } from './crc-remark-setting.service';
 import { CreateCrcRemarkSettingDto } from './dto/crc-remark-setting.dto';
-import { CrcRemarkSettingEntity } from './entities/crc-remark-setting.entity';
 
 @Controller('crc-remark-setting')
 export class CrcRemarkSettingController {
@@ -28,6 +28,20 @@ export class CrcRemarkSettingController {
     return this.crcRemarkSettingService.findAll();
   }
 
+  @Get('crcRemark')
+  find(
+    @Query('code') code?: string,
+    @Query('remarkAllContent') remarkAllContent?: string,
+  ) {
+    {
+      // 검색 서비스 호출
+      return this.crcRemarkSettingService.findByCodeOrRemarkAllContent(
+        code,
+        remarkAllContent,
+      );
+    }
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.crcRemarkSettingService.findOne(+id);
@@ -41,20 +55,5 @@ export class CrcRemarkSettingController {
   @Put('crcRemarkUpdate')
   update(@Body() updateCrcSettingDtos: any[]) {
     return this.crcRemarkSettingService.update(updateCrcSettingDtos);
-  }
-
-  @Get('crcSearch')
-  async findByCodeOrRemarkAllContent(
-    @Query('code') code?: string,
-    @Query('remarkAllContent') remarkAllContent?: string,
-  ): Promise<CrcRemarkSettingEntity[]> {
-    if (!code && !remarkAllContent) {
-      console.log('At least one of code or remarkAllContent must be provided');
-    }
-
-    return this.crcRemarkSettingService.findByCodeOrRemarkAllContent(
-      code,
-      remarkAllContent,
-    );
   }
 }

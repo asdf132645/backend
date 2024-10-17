@@ -179,9 +179,14 @@ export class RuningInfoService {
         for (const rootPath of rootPaths) {
           exec(`rmdir /s /q "${rootPath}"`, (error) => {
             if (error) {
-              console.error(`Failed to delete folder at ${rootPath}:`, error.message);
+              console.error(
+                `Failed to delete folder at ${rootPath}:`,
+                error.message,
+              );
             } else {
-              console.log(`Folder at ${rootPath} has been deleted successfully`);
+              console.log(
+                `Folder at ${rootPath} has been deleted successfully`,
+              );
             }
           });
         }

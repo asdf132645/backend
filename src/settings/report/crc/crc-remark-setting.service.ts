@@ -55,22 +55,23 @@ export class CrcRemarkSettingService {
     return updatedEntities;
   }
 
-  async findByCodeOrRemarkAllContent(
-    code?: string,
-    remarkAllContent?: string,
-  ): Promise<CrcRemarkSettingEntity[]> {
-    const whereCondition: any = {};
+  async findByCodeOrRemarkAllContent(code?: string, remarkAllContent?: string) {
+    const query =
+      this.crcRemarkSettingRepository.createQueryBuilder('crc_remark_setting');
 
+    // code가 유효한 경우에만 조건 추가
     if (code) {
-      whereCondition.code = code;
+      query.andWhere('crc_remark_setting.code = :code', { code });
     }
 
+    // remarkAllContent가 유효한 경우에만 조건 추가
     if (remarkAllContent) {
-      whereCondition.remarkAllContent = remarkAllContent;
+      query.andWhere(
+        'crc_remark_setting.remarkAllContent LIKE :remarkAllContent',
+        { remarkAllContent: `%${remarkAllContent}%` },
+      );
     }
 
-    return this.crcRemarkSettingRepository.find({
-      where: whereCondition,
-    });
+    return await query.getMany();
   }
 }
