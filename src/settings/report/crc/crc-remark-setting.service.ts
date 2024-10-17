@@ -54,4 +54,23 @@ export class CrcRemarkSettingService {
     await this.redis.flushall(); // 모든 키 삭제
     return updatedEntities;
   }
+
+  async findByCodeOrRemarkAllContent(
+    code?: string,
+    remarkAllContent?: string,
+  ): Promise<CrcRemarkSettingEntity[]> {
+    const whereCondition: any = {};
+
+    if (code) {
+      whereCondition.code = code;
+    }
+
+    if (remarkAllContent) {
+      whereCondition.remarkAllContent = remarkAllContent;
+    }
+
+    return this.crcRemarkSettingRepository.find({
+      where: whereCondition,
+    });
+  }
 }

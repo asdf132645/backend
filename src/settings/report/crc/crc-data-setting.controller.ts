@@ -26,7 +26,7 @@ export class CrcDataSettingController {
     return this.crcDataSettingService.remove(+id);
   }
 
-  @Put('crcRemarkUpdate')
+  @Put('crcDataUpdate')
   update(@Body() updateCrcSettingDtos: any[]) {
     return this.crcDataSettingService.update(updateCrcSettingDtos);
   }

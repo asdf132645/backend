@@ -11,6 +11,6 @@ export class CrcDataSettingEntity {
   @Column('json')
   crcContent: string[];
 
-  @Column({ nullable: true })
+  @Column({ type: 'json', nullable: true })
   crcRemark: string[];
 }

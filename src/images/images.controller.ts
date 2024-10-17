@@ -41,7 +41,7 @@ export class ImagesController {
       res.setHeader('Content-Type', 'image/webp');
       res.send(imageBuffer);
     } catch (error) {
-      console.error('Error processing image:', error);
+      // console.error('Error processing image:', error);
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .send('Image processing error');
@@ -65,7 +65,7 @@ export class ImagesController {
       const fileStream = fs.createReadStream(absoluteImagePath);
       fileStream.pipe(res);
     } catch (error) {
-      console.error('Error processing image:', error);
+      // console.error('Error processing image:', error);
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .send('Image processing error');

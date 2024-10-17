@@ -3,8 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CrcDataSettingEntity } from './entities/crc-data-setting.entity';
 import { CreateCrcDataSettingDto } from './dto/crc-data-setting.dto';
-import { UpdateCrcSettingDto } from './dto/crc-setting.dto';
-import { CrcRemarkSettingEntity } from './entities/crc-remark-setting.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 
