@@ -12,4 +12,5 @@ export declare class CrcRemarkSettingService {
     findOne(id: number): Promise<CrcRemarkSettingEntity>;
     remove(id: number): Promise<void>;
     update(crcSettingDtos: UpdateCrcSettingDto[]): Promise<CrcRemarkSettingEntity[]>;
+    findByCodeOrRemarkAllContent(code?: string, remarkAllContent?: string): Promise<CrcRemarkSettingEntity[]>;
 }

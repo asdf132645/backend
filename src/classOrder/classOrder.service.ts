@@ -40,9 +40,6 @@ export class ClassOrderService {
         newClassOrders.push(classOrderEntity);
       }
 
-      console.log('classIdArray', classIdArray);
-      console.log('dto.classId', dto.classId);
-
       if (!classIdArray.includes(dto.classId)) {
         const classOrderEntity = new ClassOrder();
         classOrderEntity.classId = dto.classId;
