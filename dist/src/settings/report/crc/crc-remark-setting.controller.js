@@ -35,6 +35,12 @@ let CrcRemarkSettingController = class CrcRemarkSettingController {
     update(updateCrcSettingDtos) {
         return this.crcRemarkSettingService.update(updateCrcSettingDtos);
     }
+    async findByCodeOrRemarkAllContent(code, remarkAllContent) {
+        if (!code && !remarkAllContent) {
+            console.log('At least one of code or remarkAllContent must be provided');
+        }
+        return this.crcRemarkSettingService.findByCodeOrRemarkAllContent(code, remarkAllContent);
+    }
 };
 exports.CrcRemarkSettingController = CrcRemarkSettingController;
 __decorate([
@@ -71,6 +77,14 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", void 0)
 ], CrcRemarkSettingController.prototype, "update", null);
+__decorate([
+    (0, common_1.Get)('crcSearch'),
+    __param(0, (0, common_1.Query)('code')),
+    __param(1, (0, common_1.Query)('remarkAllContent')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], CrcRemarkSettingController.prototype, "findByCodeOrRemarkAllContent", null);
 exports.CrcRemarkSettingController = CrcRemarkSettingController = __decorate([
     (0, common_1.Controller)('crc-remark-setting'),
     __metadata("design:paramtypes", [crc_remark_setting_service_1.CrcRemarkSettingService])

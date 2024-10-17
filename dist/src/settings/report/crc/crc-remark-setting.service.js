@@ -51,6 +51,18 @@ let CrcRemarkSettingService = class CrcRemarkSettingService {
         await this.redis.flushall();
         return updatedEntities;
     }
+    async findByCodeOrRemarkAllContent(code, remarkAllContent) {
+        const whereCondition = {};
+        if (code) {
+            whereCondition.code = code;
+        }
+        if (remarkAllContent) {
+            whereCondition.remarkAllContent = remarkAllContent;
+        }
+        return this.crcRemarkSettingRepository.find({
+            where: whereCondition,
+        });
+    }
 };
 exports.CrcRemarkSettingService = CrcRemarkSettingService;
 exports.CrcRemarkSettingService = CrcRemarkSettingService = __decorate([

@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser'; // body-parser import 추가
+import * as mysql from 'mysql2/promise'; // mysql2 import 추가
 
 async function bootstrap() {
   const httpApp = await NestFactory.create(AppModule, {
@@ -37,6 +38,20 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(httpApp, config);
 
   SwaggerModule.setup('api', httpApp, document);
+
+  // MySQL 연결 설정 (관리자 모드로 명령 실행)
+  const connection = await mysql.createConnection({
+    host: '127.0.0.1', // MySQL 서버 주소
+    user: 'root', // MySQL 관리자 계정
+    password: 'uimd5191!', // MySQL 관리자 비밀번호
+  });
+
+  // MySQL 명령 실행: sort_buffer_size 설정
+  await connection.query('SET GLOBAL sort_buffer_size = 4*1024*1024;');
+  console.log('MySQL sort_buffer_size 설정 완료');
+
+  // MySQL 연결 종료
+  await connection.end();
 
   await httpApp.listen(3002);
 }
