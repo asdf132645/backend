@@ -240,6 +240,7 @@ export class CombinedService
           ) {
             this.connectedClient.write(serializedData);
             this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+            this.notRes = true;
           } else {
             console.error('connectedClient가 유효하지 않습니다.');
           }
