@@ -3,4 +3,5 @@ export declare class CrcDataSettingEntity {
     code: string;
     crcContent: string[];
     crcRemark: string[];
+    crcRecommendation: string[];
 }

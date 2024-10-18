@@ -13,4 +13,7 @@ export class CrcDataSettingEntity {
 
   @Column({ type: 'json', nullable: true })
   crcRemark: string[];
+
+  @Column({ type: 'json', nullable: true })
+  crcRecommendation: string[];
 }

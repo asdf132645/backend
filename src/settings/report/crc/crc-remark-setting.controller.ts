@@ -7,7 +7,6 @@ import {
   Delete,
   Put,
   Query,
-  BadRequestException,
 } from '@nestjs/common';
 import { CrcRemarkSettingService } from './crc-remark-setting.service';
 import { CreateCrcRemarkSettingDto } from './dto/crc-remark-setting.dto';

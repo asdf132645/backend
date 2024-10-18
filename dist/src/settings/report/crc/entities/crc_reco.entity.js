@@ -9,32 +9,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CrcDataSettingEntity = void 0;
+exports.CrcRecommendationEntity = void 0;
 const typeorm_1 = require("typeorm");
-let CrcDataSettingEntity = class CrcDataSettingEntity {
+let CrcRecommendationEntity = class CrcRecommendationEntity {
 };
-exports.CrcDataSettingEntity = CrcDataSettingEntity;
+exports.CrcRecommendationEntity = CrcRecommendationEntity;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], CrcDataSettingEntity.prototype, "id", void 0);
+], CrcRecommendationEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
-], CrcDataSettingEntity.prototype, "code", void 0);
+], CrcRecommendationEntity.prototype, "code", void 0);
 __decorate([
-    (0, typeorm_1.Column)('json'),
-    __metadata("design:type", Array)
-], CrcDataSettingEntity.prototype, "crcContent", void 0);
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], CrcRecommendationEntity.prototype, "remarkContent", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'json', nullable: true }),
-    __metadata("design:type", Array)
-], CrcDataSettingEntity.prototype, "crcRemark", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'json', nullable: true }),
-    __metadata("design:type", Array)
-], CrcDataSettingEntity.prototype, "crcRecommendation", void 0);
-exports.CrcDataSettingEntity = CrcDataSettingEntity = __decorate([
-    (0, typeorm_1.Entity)('crc_data_setting')
-], CrcDataSettingEntity);
-//# sourceMappingURL=crc-data-setting.entity.js.map
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], CrcRecommendationEntity.prototype, "remarkAllContent", void 0);
+exports.CrcRecommendationEntity = CrcRecommendationEntity = __decorate([
+    (0, typeorm_1.Entity)('crc_recommendation_setting')
+], CrcRecommendationEntity);
+//# sourceMappingURL=crc_reco.entity.js.map
