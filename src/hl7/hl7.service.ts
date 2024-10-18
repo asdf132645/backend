@@ -22,7 +22,7 @@ export class HL7Service {
     hl7VersionId: string,
     wbcInfo: any[],
     result: any[],
-    customData: any[],
+    customData: any,
   ) {
     // MSH 세그먼트 생성
     const mshSegment = `MSH|^~\\&|${sendingApp}|${sendingFacility}|${receivingApp}|${receivingFacility}|${dateTime}||${messageType.join('^')}|${messageControlId}|${processingId}|${hl7VersionId}\r`;
@@ -49,36 +49,54 @@ export class HL7Service {
     }
 
     // 사용자 정의 데이터 (customData)를 Z-segment로 추가
-    customData.forEach((dataItem) => {
-      const { crcContent, crcRemark, crcRecommendation } = dataItem;
+    const { crcContent, crcRemark, crcRecommendation } = customData;
 
-      // CRC Content 필드 추가 (예: WBC, RBC 등)
-      if (crcContent) {
-        Object.keys(crcContent).forEach((key) => {
-          const items = crcContent[key];
-          items.forEach((item) => {
-            const zSegment = `ZCR|${seq++}|${key}|${item.crcTitle}|${item.crcContent}\r`;
-            segments.push(zSegment);
-          });
+    // CRC Content 필드 추가 (예: plt, rbc 등)
+    if (crcContent) {
+      // plt 항목 처리
+      if (crcContent.plt) {
+        crcContent.plt.forEach((item) => {
+          const zSegment = `ZCR|${seq++}|plt|${item.crcTitle}|${item.crcContent}\r`;
+          segments.push(zSegment);
         });
       }
 
-      // CRC Remark 필드 추가
-      if (crcRemark) {
-        crcRemark.forEach((remark) => {
+      // rbc 항목 처리
+      if (crcContent.rbc) {
+        crcContent.rbc.forEach((item) => {
+          const zSegment = `ZCR|${seq++}|rbc|${item.crcTitle}|${item.crcContent}\r`;
+          segments.push(zSegment);
+        });
+      }
+
+      // wbc 항목 처리
+      if (crcContent.wbc) {
+        crcContent.wbc.forEach((item) => {
+          const zSegment = `ZCR|${seq++}|wbc|${item.crcTitle}|${item.crcContent}\r`;
+          segments.push(zSegment);
+        });
+      }
+    }
+
+    // CRC Remark 필드 추가
+    if (crcRemark && Array.isArray(crcRemark)) {
+      crcRemark.forEach((remark) => {
+        if (remark.code && remark.remarkAllContent) {
           const zRemarkSegment = `ZRM|${seq++}|${remark.code}|${remark.remarkAllContent}\r`;
           segments.push(zRemarkSegment);
-        });
-      }
+        }
+      });
+    }
 
-      // CRC Recommendation 필드 추가
-      if (crcRecommendation) {
-        crcRecommendation.forEach((recommendation) => {
+    // CRC Recommendation 필드 추가
+    if (crcRecommendation && Array.isArray(crcRecommendation)) {
+      crcRecommendation.forEach((recommendation) => {
+        if (recommendation.code && recommendation.remarkAllContent) {
           const zRecSegment = `ZRC|${seq++}|${recommendation.code}|${recommendation.remarkAllContent}\r`;
           segments.push(zRecSegment);
-        });
-      }
-    });
+        }
+      });
+    }
 
     return segments.join('');
   }
