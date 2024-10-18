@@ -29,6 +29,27 @@ export class HL7Controller {
     return hl7Message;
   }
 
+  @Post('customMessage')
+  createCustomHL7Message(@Body() requestBody: any): string {
+    // 필요한 데이터를 requestBody에서 추출하여 generateHL7MessageWithCustomData 메서드에 전달
+    const hl7MessageCustom = this.hl7Service.generateHL7MessageWithCustomData(
+      requestBody.sendingApp,
+      requestBody.sendingFacility,
+      requestBody.receivingApp,
+      requestBody.receivingFacility,
+      requestBody.dateTime,
+      requestBody.messageType,
+      requestBody.messageControlId,
+      requestBody.processingId,
+      requestBody.hl7VersionId,
+      requestBody.wbcInfo,
+      requestBody.result,
+      requestBody.customData, // customData 필드 추가
+    );
+
+    return hl7MessageCustom;
+  }
+
   @Post('hl7Create')
   async sendHl7Message(@Body() body: { filepath: string; msg: string }) {
     const { filepath, msg } = body;
