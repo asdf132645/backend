@@ -15,6 +15,9 @@ import { CrcOptionService } from './crc-option.service';
 import { CrcRecommendationSettingController } from './crc_reco.controller';
 import { CrcRecommendationEntity } from './entities/crc_reco.entity';
 import { CrcRecommendationService } from './crc_reco.service';
+import { CrcCommentEntity } from './entities/crc-comment.entity';
+import { CrcCommentSettingController } from './crc-comment-setting.controller';
+import { CrcCommentSettingService } from './crc-comment-setting.service';
 
 @Module({
   imports: [
@@ -24,6 +27,7 @@ import { CrcRecommendationService } from './crc_reco.service';
       CrcRemarkSettingEntity,
       CrcOption,
       CrcRecommendationEntity,
+      CrcCommentEntity,
     ]),
   ],
   controllers: [
@@ -32,6 +36,7 @@ import { CrcRecommendationService } from './crc_reco.service';
     CrcRemarkSettingController,
     CrcOptionController,
     CrcRecommendationSettingController,
+    CrcCommentSettingController,
   ],
   providers: [
     CrcSettingService,
@@ -39,6 +44,7 @@ import { CrcRecommendationService } from './crc_reco.service';
     CrcRemarkSettingService,
     CrcOptionService,
     CrcRecommendationService,
+    CrcCommentSettingService,
   ],
 })
 export class CrcModule {}

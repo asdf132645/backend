@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { CrcDataSettingService } from './crc-data-setting.service';
 import { CreateCrcDataSettingDto } from './dto/crc-data-setting.dto';
 
