@@ -10,4 +10,10 @@ export class CrcOption {
 
   @Column({ type: 'boolean' })
   crcConnect: boolean;
+
+  @Column({ type: 'int' })
+  crcRemarkCount: number;
+
+  @Column({ type: 'int' })
+  crcPassWord: number;
 }
