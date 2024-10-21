@@ -113,6 +113,7 @@ export class CombinedService
               `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
             );
           }
+
           if (!this.notRes) {
             this.webSocketGetData(message);
           }
@@ -238,9 +239,9 @@ export class CombinedService
             typeof this.connectedClient.write === 'function' &&
             this.isNotDownloadOrUploading
           ) {
+            this.notRes = true;
             this.connectedClient.write(serializedData);
             this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
-            this.notRes = true;
           } else {
             console.error('connectedClient가 유효하지 않습니다.');
           }
@@ -287,6 +288,7 @@ export class CombinedService
           this.connectedClient = newClient;
           this.wss.emit('isTcpConnected', true);
           this.reconnectAttempts = 0; // 재연결 시도 횟수 초기화
+          this.notRes = false;
         });
 
         newClient.on('timeout', () => {
