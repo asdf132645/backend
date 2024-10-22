@@ -33,6 +33,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'json', nullable: true }),
     __metadata("design:type", Array)
+], CrcDataSettingEntity.prototype, "crcComment", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'json', nullable: true }),
+    __metadata("design:type", Array)
 ], CrcDataSettingEntity.prototype, "crcRecommendation", void 0);
 exports.CrcDataSettingEntity = CrcDataSettingEntity = __decorate([
     (0, typeorm_1.Entity)('crc_data_setting')
