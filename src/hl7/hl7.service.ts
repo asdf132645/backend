@@ -49,7 +49,7 @@ export class HL7Service {
     }
 
     // 사용자 정의 데이터 (customData)를 Z-segment로 추가
-    const { crcContent, crcRemark, crcRecommendation } = customData;
+    const { crcContent, crcRemark, crcComment, crcRecommendation } = customData;
 
     // CRC Content 필드 추가 (예: plt, rbc 등)
     if (crcContent) {
@@ -83,6 +83,16 @@ export class HL7Service {
       crcRemark.forEach((remark) => {
         if (remark.code && remark.remarkAllContent) {
           const zRemarkSegment = `ZRM|${seq++}|${remark.code}|${remark.remarkAllContent}\r`;
+          segments.push(zRemarkSegment);
+        }
+      });
+    }
+
+    // CRC comment 필드 추가
+    if (crcComment && Array.isArray(crcComment)) {
+      crcComment.forEach((comment) => {
+        if (comment.code && comment.remarkAllContent) {
+          const zRemarkSegment = `ZCM|${seq++}|${comment.code}|${comment.remarkAllContent}\r`;
           segments.push(zRemarkSegment);
         }
       });
