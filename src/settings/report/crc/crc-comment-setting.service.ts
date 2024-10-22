@@ -34,9 +34,7 @@ export class CrcCommentSettingService {
     await this.CrcCommentEntityRepository.delete(id);
   }
 
-  async update(
-    crcCommentSettingDto: any[],
-  ): Promise<CrcCommentEntity[]> {
+  async update(crcCommentSettingDto: any[]): Promise<CrcCommentEntity[]> {
     const updatedEntities: CrcCommentEntity[] = [];
 
     for (const dto of crcCommentSettingDto) {

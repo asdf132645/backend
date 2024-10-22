@@ -22,6 +22,7 @@ import { CrcRemarkSettingEntity } from './src/settings/report/crc/entities/crc-r
 import { CrcDataSettingEntity } from './src/settings/report/crc/entities/crc-data-setting.entity';
 import { CrcOption } from './src/settings/report/crc/entities/crc-option.entity';
 import { CrcRecommendationEntity } from './src/settings/report/crc/entities/crc_reco.entity';
+import { CrcCommentEntity } from './src/settings/report/crc/entities/crc-comment.entity';
 dotenv.config(); // dotenv 설정 추가
 
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
@@ -58,6 +59,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       CrcDataSettingEntity,
       CrcOption,
       CrcRecommendationEntity,
+      CrcCommentEntity,
     ],
     extra: {
       connectionLimit: 20, // 커넥션 풀 크기 설정

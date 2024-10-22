@@ -27,12 +27,12 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CrcOption.prototype, "crcConnect", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)({ type: 'json', nullable: true }),
+    __metadata("design:type", Array)
 ], CrcOption.prototype, "crcRemarkCount", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
 ], CrcOption.prototype, "crcPassWord", void 0);
 exports.CrcOption = CrcOption = __decorate([
     (0, typeorm_1.Entity)('crc_option')
