@@ -1,5 +1,11 @@
-import { IsArray, IsInt, IsString, ValidateNested } from "class-validator";
-import { Type } from "class-transformer";
+import {
+  IsArray,
+  IsBoolean,
+  IsInt,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateDeviceDto {
   @IsArray()
@@ -20,4 +26,7 @@ export class DeviceDto {
 
   @IsString()
   pcIp: string;
+
+  @IsBoolean()
+  autoStart: boolean;
 }
