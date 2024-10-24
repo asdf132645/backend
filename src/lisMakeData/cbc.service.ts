@@ -94,7 +94,6 @@ export class CbcService {
 
     // curl 명령어 수정: -X POST로 JSON 본문 전송
     const curlCommand = `curl -X POST -H "Content-Type: application/json" -d "${jsonBody}" "${url}"`;
-    console.log(curlCommand);
     try {
       const { stdout, stderr } = await execPromise(curlCommand);
       if (stderr) {
