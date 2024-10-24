@@ -88,11 +88,12 @@ export class CbcService {
 
     // JSON 데이터를 요청 본문에 전달
     const jsonBody = JSON.stringify(bodyParams)
-      .replace(/"/g, '\\"')
-      .replace(/\|/g, '\\\\')
-      .replace(/[^a-zA-Z0-9,.| ]/g, (match) => {
-        return `\\${match}\\`;
-      });
+      .replace(/\\/g, '\\\\') // 백슬래시 이스케이프
+      .replace(/"/g, '\\"') // 따옴표 이스케이프
+      .replace(/\$/g, '\\$') // 쉘에서 $문자를 이스케이프
+      .replace(/`/g, '\\`') // 백틱 이스케이프
+      .replace(/>/g, '\\>') // 특수 문자 이스케이프
+      .replace(/</g, '\\<'); // 특수 문자 이스케이프
 
     this.logger.cbcLis(`lis-service-executePostCurl: ${url}`);
 
