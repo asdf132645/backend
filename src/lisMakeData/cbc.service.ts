@@ -90,8 +90,6 @@ export class CbcService {
     const jsonBody = JSON.stringify(bodyParams)
       .replace(/\\/g, '\\\\') // 백슬래시 이스케이프
       .replace(/"/g, '\\"') // 따옴표 이스케이프
-      .replace(/\$/g, '\\$') // 쉘에서 $문자를 이스케이프
-      .replace(/`/g, '\\`') // 백틱 이스케이프
       .replace(/>/g, '\\>') // 특수 문자 이스케이프
       .replace(/</g, '\\<'); // 특수 문자 이스케이프
 
