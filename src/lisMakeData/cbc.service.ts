@@ -88,16 +88,13 @@ export class CbcService {
 
     // JSON 데이터를 요청 본문에 전달
     const jsonBody = JSON.stringify(bodyParams)
-      .replace(/\\/g, '\\\\') // 백슬래시 이스케이프
-      .replace(/"/g, '\\"') // 따옴표 이스케이프
-      .replace(/>/g, '\\>') // 특수 문자 이스케이프
-      .replace(/</g, '\\<'); // 특수 문자 이스케이프
+      .replace(/\|/g, '\\\\')
+      .replace(/"/g, '\\"');
 
     this.logger.cbcLis(`lis-service-executePostCurl: ${url}`);
 
     // curl 명령어 수정: -X POST로 JSON 본문 전송
-    const curlCommand = `curl -X POST -H "Content-Type: application/json" -d '${jsonBody}' "${url}"`;
-    console.log(curlCommand);
+    const curlCommand = `curl -X POST -H "Content-Type: application/json" -d "${jsonBody}" "${url}`;
     try {
       const { stdout, stderr } = await execPromise(curlCommand);
       if (stderr) {
