@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber } from 'class-validator';
 
 export class CreateCrcSettingDto {
   crcTitle: string;
@@ -6,6 +6,7 @@ export class CreateCrcSettingDto {
   crcPercentText?: string;
   morphologyType: string;
   crcContent: string;
+  crcCode: string;
 }
 export class UpdateCrcSettingDto {
   @IsNumber()
@@ -15,4 +16,5 @@ export class UpdateCrcSettingDto {
   crcPercentText?: string;
   morphologyType: string;
   crcContent: string;
+  crcCode: string;
 }
