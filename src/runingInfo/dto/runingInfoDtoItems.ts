@@ -121,6 +121,9 @@ export class RuningInfoDtoItems {
 
   @Field(() => String, { nullable: true })
   img_drive_root_path?: string;
+
+  @Field(() => String, { nullable: true })
+  hosName?: string;
 }
 
 @InputType()

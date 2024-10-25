@@ -154,4 +154,8 @@ export class RuningInfoEntity {
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
   img_drive_root_path?: string;
+
+  @Field({ nullable: true }) // nullable 옵션 추가
+  @Column({ type: 'varchar', nullable: true }) // varchar로 명시
+  hosName?: string;
 }

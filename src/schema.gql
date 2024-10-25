@@ -75,6 +75,7 @@ type RuningInfoEntity {
   cbcSex: String
   cbcAge: String
   img_drive_root_path: String
+  hosName: String
 }
 
 """

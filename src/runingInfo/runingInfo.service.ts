@@ -144,6 +144,7 @@ export class RuningInfoService {
         existingEntity.cbcPatientNm = item.cbcPatientNm;
         existingEntity.cbcSex = item.cbcSex;
         existingEntity.cbcAge = item.cbcAge;
+        existingEntity.hosName = item.hosName;
         existingEntity.tactTime = item.tactTime;
         existingEntity.maxWbcCount = item.maxWbcCount;
         existingEntity.bf_lowPowerPath = item.bf_lowPowerPath;
@@ -391,6 +392,7 @@ export class RuningInfoService {
         submitState,
         cbcSex,
         cbcAge,
+        hosName,
         analyzedDttm,
         wbcInfo,
         img_drive_root_path,
@@ -505,6 +507,7 @@ export class RuningInfoService {
           birthDay,
           cassetId,
           cbcAge,
+          hosName,
           cbcPatientNm,
           cbcPatientNo,
           cbcSex,
@@ -551,6 +554,7 @@ export class RuningInfoService {
           birthDay,
           cassetId,
           cbcAge,
+          hosName,
           cbcPatientNm,
           cbcPatientNo,
           cbcSex,
@@ -603,6 +607,7 @@ export class RuningInfoService {
         birthDay: result.birthDay,
         cassetId: result.cassetId,
         cbcAge: result.cbcAge,
+        hosName: result.hosName,
         cbcPatientNm: result.cbcPatientNm,
         cbcPatientNo: result.cbcPatientNo,
         cbcSex: result.cbcSex,
