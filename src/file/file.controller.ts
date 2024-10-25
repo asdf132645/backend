@@ -27,6 +27,25 @@ export class FileController {
     }
   }
 
+  @Get('readFileEUCKR')
+  async readFileEUCKR(
+    @Query('path') path: string,
+    @Query('filename') filename: string,
+  ): Promise<any> {
+    const fullPath = `${path}/${filename}`;
+    const result = await this.fileService.readFileEUCKR(fullPath);
+
+    if (result.success) {
+      return { success: true, data: result.data, code: HttpStatus.OK };
+    } else {
+      return {
+        success: false,
+        message: result.message,
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
   @Get('check-file-exists')
   checkFileExists(
     @Query('directoryPath') directoryPath: string,
