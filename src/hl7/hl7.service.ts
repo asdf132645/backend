@@ -30,24 +30,6 @@ export class HL7Service {
     const segments = [mshSegment];
     let seq = 1; // 결과의 시퀀스 번호
 
-    // 기본 결과(OBX) 세그먼트 생성
-    if (result) {
-      result.forEach((lisCode) => {
-        if (lisCode.LIS_CD !== '') {
-          wbcInfo.forEach((wbcItem) => {
-            if (
-              Number(wbcItem.id) === Number(lisCode.IA_CD) &&
-              (Number(wbcItem.percent) > 0 || Number(wbcItem.count))
-            ) {
-              const obxSegmentCount = `OBX|${seq++}|NM|${lisCode.LIS_CD}||${wbcItem.count}|||N|||P\r`;
-              const obxSegmentPercent = `OBX|${seq++}|NM|${lisCode.LIS_CD}%||${wbcItem.percent}|%|N|||P\r`;
-              segments.push(obxSegmentCount, obxSegmentPercent);
-            }
-          });
-        }
-      });
-    }
-
     // 사용자 정의 데이터 (customData)를 Z-segment로 추가
     const { crcContent, crcRemark, crcComment, crcRecommendation } = customData;
 
