@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 import { writeFile, mkdir, access, constants, unlink } from 'fs/promises';
 import * as path from 'path';
 import * as fss from 'fs'; // 'fs/promises' 대신 'fs'를 사용
+import * as iconv from 'iconv-lite';
 
 @Injectable()
 export class FileService {
@@ -16,22 +17,33 @@ export class FileService {
   ]; // 시도할 확장자 목록
 
   async readFile(filePath: string): Promise<any> {
+    const encodings = [
+      'utf-8',
+      'ISO-8859-1',
+      'ascii',
+      'EUC-KR',
+      'Windows-1252',
+    ];
+
     for (const extension of this.possibleExtensions) {
-      try {
-        const data = await fs.readFile(`${filePath}${extension}`, {
-          encoding: 'utf-8',
-        });
-        return { success: true, data };
-      } catch (error) {
-        // 파일을 찾을 수 없을 때의 에러는 무시하고 다음 확장자를 시도
-        if (error.code !== 'ENOENT') {
-          return {
-            success: false,
-            message: `Error reading file: ${error.message}`,
-          };
+      for (const encoding of encodings) {
+        try {
+          const buffer = await fs.readFile(`${filePath}${extension}`);
+          const data = iconv.decode(buffer, encoding);
+
+          return { success: true, data };
+        } catch (error) {
+          // 파일이 없는 경우는 무시하고, 인코딩 문제가 아닌 에러는 반환
+          if (error.code !== 'ENOENT') {
+            return {
+              success: false,
+              message: `Error reading file with encoding ${encoding}: ${error.message}`,
+            };
+          }
         }
       }
     }
+
     return {
       success: false,
       message: `File not found with any of the extensions: ${this.possibleExtensions.join(', ')}`,
