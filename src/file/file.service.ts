@@ -17,29 +17,19 @@ export class FileService {
   ]; // 시도할 확장자 목록
 
   async readFile(filePath: string): Promise<any> {
-    const encodings = [
-      'utf-8',
-      'ISO-8859-1',
-      'ascii',
-      'EUC-KR',
-      'Windows-1252',
-    ];
-
     for (const extension of this.possibleExtensions) {
-      for (const encoding of encodings) {
-        try {
-          const buffer = await fs.readFile(`${filePath}${extension}`);
-          const data = iconv.decode(buffer, encoding);
+      try {
+        // EUC-KR 인코딩으로 파일 읽기
+        const buffer = await fs.readFile(`${filePath}${extension}`);
+        const data = iconv.decode(buffer, 'EUC-KR');
 
-          return { success: true, data };
-        } catch (error) {
-          // 파일이 없는 경우는 무시하고, 인코딩 문제가 아닌 에러는 반환
-          if (error.code !== 'ENOENT') {
-            return {
-              success: false,
-              message: `Error reading file with encoding ${encoding}: ${error.message}`,
-            };
-          }
+        return { success: true, data };
+      } catch (error) {
+        if (error.code !== 'ENOENT') {
+          return {
+            success: false,
+            message: `Error reading file in EUC-KR encoding: ${error.message}`,
+          };
         }
       }
     }
