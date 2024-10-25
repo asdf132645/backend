@@ -7,9 +7,8 @@ import * as fs from 'fs';
 export class HL7Service {
   parseHL7Message(data: Buffer): any {
     const parser = new hl7.Parser();
-    return parser.parse(data.toString());
+    return parser.parse(data.toString('utf8'));
   }
-
   generateHL7MessageWithCustomData(
     sendingApp: string,
     sendingFacility: string,
