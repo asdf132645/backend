@@ -18,7 +18,9 @@ export class FileService {
   async readFile(filePath: string): Promise<any> {
     for (const extension of this.possibleExtensions) {
       try {
-        const data = await fs.readFile(`${filePath}${extension}`, 'utf8');
+        const data = await fs.readFile(`${filePath}${extension}`, {
+          encoding: 'utf-8',
+        });
         return { success: true, data };
       } catch (error) {
         // 파일을 찾을 수 없을 때의 에러는 무시하고 다음 확장자를 시도
