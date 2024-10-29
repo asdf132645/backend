@@ -154,7 +154,7 @@ export class CombinedService
 
   sendDataToWebSocketClients(data: any) {
     if (!this.wss) {
-      console.log('없다는데..?');
+      console.log('없다는데...?');
     }
 
     if (this.wss) {
