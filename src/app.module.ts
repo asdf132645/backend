@@ -52,6 +52,9 @@ import { CbcModule } from './lisMakeData/cbc.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CrcModule } from './settings/report/crc/crc.module';
+import { HttpModule } from '@nestjs/axios';
+import { SybaseController } from './sybase/sybase.controller';
+import { SybaseProxyService } from './sybase/sybase.proxy.service';
 
 @Module({
   imports: [
@@ -65,7 +68,7 @@ import { CrcModule } from './settings/report/crc/crc.module';
       playground: true, // 개발용 그래프QL 플레이그라운드 활성화
       path: 'api/graphql', // 엔드포인트 경로 지정
     }),
-
+    HttpModule,
     UserModule,
     CellImgAnalyzedModule,
     RbcDegreeModule,
@@ -105,6 +108,7 @@ import { CrcModule } from './settings/report/crc/crc.module';
     RemainingCountController,
     QualityCheckController,
     ExcelController,
+    SybaseController,
   ],
   providers: [
     LoggerService,
@@ -114,6 +118,7 @@ import { CrcModule } from './settings/report/crc/crc.module';
     RemainingCountService,
     QualityCheckService,
     ExcelService,
+    SybaseProxyService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,

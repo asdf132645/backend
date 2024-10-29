@@ -22,12 +22,19 @@ export class HL7Service {
     wbcInfo: any[],
     result: any[],
     customData: any,
+    pidData: any, // PID 데이터 매개변수 추가
   ) {
     // MSH 세그먼트 생성
     const mshSegment = `MSH|^~\\&|${sendingApp}|${sendingFacility}|${receivingApp}|${receivingFacility}|${dateTime}||${messageType.join('^')}|${messageControlId}|${processingId}|${hl7VersionId}\r`;
 
     const segments = [mshSegment];
     let seq = 1; // 결과의 시퀀스 번호
+
+    // PID 세그먼트 추가
+    if (pidData) {
+      const pidSegment = `PID|||${pidData.patientId}||${pidData.patientName}||||||||||||||||||||\r`;
+      segments.push(pidSegment);
+    }
 
     // 사용자 정의 데이터 (customData)를 Z-segment로 추가
     const { crcContent, crcRemark, crcComment, crcRecommendation } = customData;

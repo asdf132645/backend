@@ -2,8 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as bodyParser from 'body-parser'; // body-parser import 추가
-import * as mysql from 'mysql2/promise'; // mysql2 import 추가
+import * as bodyParser from 'body-parser';
+import * as mysql from 'mysql2/promise';
+import { spawn } from 'child_process';
 
 async function bootstrap() {
   const httpApp = await NestFactory.create(AppModule, {
@@ -21,7 +22,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   };
-
+  console.log(corsOptions.origin[0]);
   httpApp.enableCors(corsOptions);
 
   // 전역 프리픽스 설정
@@ -52,6 +53,23 @@ async function bootstrap() {
 
   // MySQL 연결 종료
   await connection.end();
+
+  if (corsOptions.origin[0] === 'http://192.168.0.5:8080') {
+    console.log('start');
+    const expressServerPath =
+      'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\ywmc-server';
+
+    // Express 서버 실행
+    const expressServer = spawn('npm', ['start'], {
+      cwd: expressServerPath, // 절대 경로 설정
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    expressServer.on('close', (code) => {
+      console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+    });
+  }
 
   await httpApp.listen(3002);
 }
