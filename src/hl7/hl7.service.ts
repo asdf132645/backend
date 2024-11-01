@@ -70,7 +70,7 @@ export class HL7Service {
     if (crcRemark && Array.isArray(crcRemark)) {
       crcRemark.forEach((remark) => {
         if (remark.code && remark.remarkAllContent) {
-          const zRemarkSegment = `ZRM|${seq++}|${remark.code}|${remark.remarkAllContent}\r`;
+          const zRemarkSegment = `ZRM|${seq++}|${remark.remarkAllContent}\r`;
           segments.push(zRemarkSegment);
         }
       });
@@ -80,7 +80,7 @@ export class HL7Service {
     if (crcComment && Array.isArray(crcComment)) {
       crcComment.forEach((comment) => {
         if (comment.code && comment.remarkAllContent) {
-          const zRemarkSegment = `ZCM|${seq++}|${comment.code}|${comment.remarkAllContent}\r`;
+          const zRemarkSegment = `ZCM|${seq++}|${comment.remarkAllContent}\r`;
           segments.push(zRemarkSegment);
         }
       });
@@ -90,7 +90,7 @@ export class HL7Service {
     if (crcRecommendation && Array.isArray(crcRecommendation)) {
       crcRecommendation.forEach((recommendation) => {
         if (recommendation.code && recommendation.remarkAllContent) {
-          const zRecSegment = `ZRC|${seq++}|${recommendation.code}|${recommendation.remarkAllContent}\r`;
+          const zRecSegment = `ZRC|${seq++}|${recommendation.remarkAllContent}\r`;
           segments.push(zRecSegment);
         }
       });

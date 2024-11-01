@@ -37,6 +37,7 @@ export class CrcSettingService {
         where: { id: dto.id },
       });
       if (crcSetting) {
+        console.log(crcSetting);
         await this.crcSettingRepository.save(dto);
         updatedEntities.push(crcSetting);
       }
