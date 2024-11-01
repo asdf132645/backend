@@ -22,4 +22,7 @@ export class CrcSettingEntity {
 
   @Column()
   crcCode: string;
+
+  @Column()
+  crcCodeMatching: string;
 }

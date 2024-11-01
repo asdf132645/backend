@@ -7,6 +7,7 @@ export class CreateCrcSettingDto {
   morphologyType: string;
   crcContent: string;
   crcCode: string;
+  crcCodeMatching: string;
 }
 export class UpdateCrcSettingDto {
   @IsNumber()
@@ -17,4 +18,5 @@ export class UpdateCrcSettingDto {
   morphologyType: string;
   crcContent: string;
   crcCode: string;
+  crcCodeMatching: string;
 }
