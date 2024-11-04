@@ -16,4 +16,7 @@ export class CrcOption {
 
   @Column()
   crcPassWord: string;
+
+  @Column({ type: 'boolean' })
+  lisTwoMode: boolean;
 }
