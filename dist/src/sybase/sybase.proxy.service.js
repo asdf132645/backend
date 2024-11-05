@@ -27,6 +27,11 @@ let SybaseProxyService = class SybaseProxyService {
         const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(url, data));
         return response.data;
     }
+    async saveUimdCrcData(data) {
+        const url = `http://localhost:4000/updateUimdCrcData`;
+        const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(url, data));
+        return response.data;
+    }
 };
 exports.SybaseProxyService = SybaseProxyService;
 exports.SybaseProxyService = SybaseProxyService = __decorate([

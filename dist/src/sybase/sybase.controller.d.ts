@@ -4,4 +4,5 @@ export declare class SybaseController {
     constructor(sybaseProxyService: SybaseProxyService);
     getCbcResults(smp_no: string): Promise<any>;
     saveUimdResult(data: any): Promise<any>;
+    saveUimdCrcData(data: any): Promise<any>;
 }

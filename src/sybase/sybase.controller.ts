@@ -17,4 +17,9 @@ export class SybaseController {
   async saveUimdResult(@Body() data: any): Promise<any> {
     return await this.sybaseProxyService.saveUimdResult(data);
   }
+
+  @Post('saveUimdCrcData')
+  async saveUimdCrcData(@Body() data: any): Promise<any> {
+    return await this.sybaseProxyService.saveUimdCrcData(data);
+  }
 }
