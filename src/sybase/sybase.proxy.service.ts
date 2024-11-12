@@ -20,9 +20,9 @@ export class SybaseProxyService {
     const response = await firstValueFrom(this.httpService.post(url, data));
     return response.data;
   }
-  async saveUimdCrcData(data: any): Promise<any> {
-    const url = `http://localhost:4000/updateUimdCrcData`;
-    const response = await firstValueFrom(this.httpService.post(url, data));
+  async cbcImgGet(smp_no: any): Promise<any> {
+    const url = `http://localhost:4000/cbcImgGet?smp_no=${encodeURIComponent(smp_no)}`;
+    const response = await firstValueFrom(this.httpService.get(url));
     return response.data;
   }
 }

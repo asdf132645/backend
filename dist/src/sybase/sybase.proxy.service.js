@@ -27,9 +27,9 @@ let SybaseProxyService = class SybaseProxyService {
         const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(url, data));
         return response.data;
     }
-    async saveUimdCrcData(data) {
-        const url = `http://localhost:4000/updateUimdCrcData`;
-        const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(url, data));
+    async cbcImgGet(smp_no) {
+        const url = `http://localhost:4000/cbcImgGet?smp_no=${encodeURIComponent(smp_no)}`;
+        const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get(url));
         return response.data;
     }
 };
