@@ -37,18 +37,17 @@ export class CbcCodeService {
   }
 
   private async updateItem(item: any): Promise<CbcCodeEntity> {
-    const existingBfHotKeys = await this.cbcCodeEntityRepository.findOne({
+    const existingEntity = await this.cbcCodeEntityRepository.findOne({
       where: { id: item.id },
     });
 
-    if (existingBfHotKeys) {
-      await this.cbcCodeEntityRepository.update(existingBfHotKeys.id, item);
-      return await this.cbcCodeEntityRepository.findOne({
-        where: { id: item.id },
-      });
+    if (!existingEntity) {
+      console.log(`id가 ${item.id}인 cbcCode Setting을 찾을 수 없습니다.`)
+      return null;
     }
 
-    return null;
+    await this.cbcCodeEntityRepository.update(existingEntity.id, item);
+    return await this.cbcCodeEntityRepository.findOne({ where: { id: item.id }});
   }
 
   async find(): Promise<CbcCodeEntity[]> {
