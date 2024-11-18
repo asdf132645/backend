@@ -22,4 +22,9 @@ export class SybaseController {
   async cbcImgGet(@Body() data: any): Promise<any> {
     return await this.sybaseProxyService.cbcImgGet(data);
   }
+
+  @Post('saveComment')
+  async saveComment(@Body() data: any): Promise<any> {
+    return await this.sybaseProxyService.saveComment(data);
+  }
 }

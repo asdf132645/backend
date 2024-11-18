@@ -5,4 +5,5 @@ export declare class SybaseProxyService {
     getCbcResults(smp_no: string): Promise<any>;
     saveUimdResult(data: any): Promise<any>;
     cbcImgGet(smp_no: any): Promise<any>;
+    saveComment(data: any): Promise<any>;
 }

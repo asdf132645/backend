@@ -25,4 +25,9 @@ export class SybaseProxyService {
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data;
   }
+  async saveComment(data: any): Promise<any> {
+    const url = `http://localhost:4000/save-comment`;
+    const response = await firstValueFrom(this.httpService.post(url, data));
+    return response.data;
+  }
 }
