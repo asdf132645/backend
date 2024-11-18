@@ -18,9 +18,9 @@ export class SybaseController {
     return await this.sybaseProxyService.saveUimdResult(data);
   }
 
-  @Post('cbcImgGet')
-  async cbcImgGet(@Body() data: any): Promise<any> {
-    return await this.sybaseProxyService.cbcImgGet(data);
+  @Get('cbcImgGet')
+  async cbcImgGet(@Query('smp_no') smp_no: string): Promise<any> {
+    return await this.sybaseProxyService.cbcImgGet(smp_no);
   }
 
   @Post('saveComment')

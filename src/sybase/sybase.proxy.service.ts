@@ -21,7 +21,7 @@ export class SybaseProxyService {
     return response.data;
   }
 
-  async cbcImgGet(smp_no: any): Promise<any> {
+  async cbcImgGet(smp_no: string): Promise<any> {
     const url = `http://localhost:4000/cbcImgGet?smp_no=${encodeURIComponent(smp_no)}`;
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data;

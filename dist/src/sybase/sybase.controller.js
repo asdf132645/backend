@@ -25,8 +25,8 @@ let SybaseController = class SybaseController {
     async saveUimdResult(data) {
         return await this.sybaseProxyService.saveUimdResult(data);
     }
-    async cbcImgGet(data) {
-        return await this.sybaseProxyService.cbcImgGet(data);
+    async cbcImgGet(smp_no) {
+        return await this.sybaseProxyService.cbcImgGet(smp_no);
     }
     async saveComment(data) {
         return await this.sybaseProxyService.saveComment(data);
@@ -48,10 +48,10 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SybaseController.prototype, "saveUimdResult", null);
 __decorate([
-    (0, common_1.Post)('cbcImgGet'),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Get)('cbcImgGet'),
+    __param(0, (0, common_1.Query)('smp_no')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SybaseController.prototype, "cbcImgGet", null);
 __decorate([
