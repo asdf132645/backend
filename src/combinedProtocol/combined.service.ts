@@ -255,7 +255,8 @@ export class CombinedService
           data.payload.jobCmd === 'RUNNING_COMP' ||
           data.payload.jobCmd === 'PAUSE' ||
           data.payload.jobCmd === 'RESTART' ||
-          data.payload.jobCmd === 'RECOVERY'
+          data.payload.jobCmd === 'RECOVERY' ||
+          data.payload.jobCmd === 'ERROR_CLEAR'
         ) {
           this.notRes = false;
         }
