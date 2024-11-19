@@ -59,7 +59,6 @@ async function bootstrap() {
   await connection.end();
 
   if (corsOptions.origin[0] === 'http://192.168.0.5:8080') {
-    console.log('start');
     const expressServerPath =
       'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\ywmc-server';
 
