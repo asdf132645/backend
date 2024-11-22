@@ -39,6 +39,9 @@ export class CombinedService
   private reconnectDelay: number = 1000; // 재연결 시도 지연 (밀리초 단위)
   private mainPc: boolean = true;
   private isNotDownloadOrUploading = true;
+  private tcpQueue: any[] = []; // 전송 대기열
+  private isProcessing: boolean = false; // 현재 처리 중인지 여부
+
 
   constructor(
     private readonly logger: LoggerService,
@@ -221,53 +224,50 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    if (this.connectedClient && !this.connectedClient.destroyed) {
-      try {
+    // 데이터 중복 체크
+    if (
+      this.tcpQueue.some(
+        (item) => JSON.stringify(item) === JSON.stringify(data),
+      )
+    ) {
+      this.logger.warn('⚠️ 중복 데이터로 인해 전송이 무시되었습니다.');
+      return;
+    }
+
+    // 데이터 큐에 추가
+    this.tcpQueue.push(data);
+    this.processQueue(); // 큐 처리 시작
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing || !this.tcpQueue.length) {
+      return;
+    }
+
+    this.isProcessing = true; // 처리 중 상태로 설정
+    const data = this.tcpQueue.shift(); // 큐에서 데이터 가져오기
+
+    try {
+      if (this.connectedClient && !this.connectedClient.destroyed) {
         const serializedData = JSON.stringify(data.payload);
 
-        // 데이터 전송 속도 조절을 위한 지연 추가
-        const throttleDelay = 100; // 100ms 지연
+        if (serializedData && this.isNotDownloadOrUploading) {
+          this.connectedClient.write(serializedData);
+          this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+          this.notRes = true;
 
-        setTimeout(() => {
-          if (!serializedData) {
-            return;
-          }
-
-          // this.connectedClient가 유효한지 확인
-          if (
-            this.connectedClient &&
-            typeof this.connectedClient.write === 'function' &&
-            this.isNotDownloadOrUploading
-          ) {
-            this.notRes = true;
-            this.connectedClient.write(serializedData);
-            this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
-          } else {
-            console.error('connectedClient가 유효하지 않습니다.');
-          }
-        }, throttleDelay);
-
-        if (
-          data.payload.jobCmd === 'INIT' ||
-          data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
-          data.payload.jobCmd === 'START' ||
-          data.payload.jobCmd === 'STOP' ||
-          data.payload.jobCmd === 'RUNNING_COMP' ||
-          data.payload.jobCmd === 'PAUSE' ||
-          data.payload.jobCmd === 'RESTART' ||
-          data.payload.jobCmd === 'RECOVERY' ||
-          data.payload.jobCmd === 'ERROR_CLEAR'
-        ) {
-          this.notRes = false;
+          // 데이터 전송 후 일정 시간 대기 (예: 100ms)
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-      } catch (error) {
-        this.logger.error(`🚨 데이터 직렬화 오류: ${error.message}`);
+      } else {
+        this.logger.warn('⚠️ 활성화된 코어 TCP 없음. 데이터 전송 안됨.');
+        this.notRes = false;
       }
-    } else {
-      this.notRes = false;
-      this.logger.warn(
-        '⚠️ 활성화된 코어 TCP 없음. 데이터 전송 안됨 코어 tcp 연결 확인 필요.',
-      );
+    } catch (error) {
+      this.logger.error(`🚨 TCP 데이터 전송 오류: ${error.message}`);
+    } finally {
+      this.isProcessing = false; // 처리 상태 해제
+      await this.processQueue(); // 다음 큐 처리
     }
   }
 
