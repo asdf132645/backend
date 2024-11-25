@@ -14,6 +14,7 @@ export class FileService {
     '.csv',
     '.hl7',
     '.ini',
+    '.lst2msg',
   ]; // 시도할 확장자 목록
 
   async readFile(filePath: string): Promise<any> {
@@ -94,6 +95,4 @@ export class FileService {
       await mkdir(directory, { recursive: true });
     }
   }
-
-
 }
