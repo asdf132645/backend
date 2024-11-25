@@ -61,6 +61,103 @@ export class CbcService {
     `;
   }
 
+  ywmcFakeData(): any {
+    // 가짜 XML 데이터를 생성 서울 성모 기준
+    return {
+      success: true,
+      data: {
+        data: [
+          {
+            exam_ymd_unit: '20241108',
+            slip: 'H1        ',
+            wrk_no: 394,
+            exam_cd: '8HN109G_NRBC_F       ',
+            spc: '1W        ',
+            pt_no: '7227867 ',
+            rslt_typ: 'N         ',
+            text_rslt: '++',
+            numeric_rslt: ' ',
+            unit: ' ',
+            rslt_stus: 'F',
+            ref_stus: ' ',
+            pt_nm: '��**',
+            sex: 'M',
+            age: '072218',
+          },
+          {
+            exam_ymd_unit: '20241108',
+            slip: 'H1        ',
+            wrk_no: 394,
+            exam_cd: '8HN109G_NRBC_F',
+            spc: '1W        ',
+            pt_no: '7227867 ',
+            rslt_typ: 'N         ',
+            text_rslt: ' ',
+            numeric_rslt: '7.4',
+            unit: 'g/dL',
+            rslt_stus: 'F',
+            ref_stus: ' ',
+            pt_nm: '��**                          ',
+            sex: 'M',
+            age: '072218',
+          },
+          {
+            exam_ymd_unit: '20241108',
+            slip: 'H1        ',
+            wrk_no: 394,
+            exam_cd: '8HN109G_ATYP_FRAG ',
+            spc: '1W        ',
+            pt_no: '7227867 ',
+            rslt_typ: 'N         ',
+            text_rslt: ' ',
+            numeric_rslt: '32.9',
+            unit: 'g/dL',
+            rslt_stus: 'F',
+            ref_stus: ' ',
+            pt_nm: '��**                          ',
+            sex: 'M',
+            age: '072218',
+          },
+          {
+            exam_ymd_unit: '20241108',
+            slip: 'H1        ',
+            wrk_no: 394,
+            exam_cd: '8HN109GIG_F       ',
+            spc: '1W        ',
+            pt_no: '7227867 ',
+            rslt_typ: 'N         ',
+            text_rslt: ' ',
+            numeric_rslt: '105.3',
+            unit: 'E9/L',
+            rslt_stus: 'F',
+            ref_stus: 'H',
+            pt_nm: '��**                          ',
+            sex: 'M',
+            age: '072218',
+          },
+          {
+            exam_ymd_unit: '20241108',
+            slip: 'H1        ',
+            wrk_no: 394,
+            exam_cd: '8HN109GBL_F       ',
+            spc: '1W        ',
+            pt_no: '7227867 ',
+            rslt_typ: 'N         ',
+            text_rslt: ' ',
+            numeric_rslt: '4.47',
+            unit: '%',
+            rslt_stus: 'F',
+            ref_stus: 'H',
+            pt_nm: '��**                          ',
+            sex: 'M',
+            age: '072218',
+          },
+        ],
+      },
+      code: 200,
+    };
+  }
+
   async fetchExternalData(queryParams: {
     [key: string]: string;
   }): Promise<any> {

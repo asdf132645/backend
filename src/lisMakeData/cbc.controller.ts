@@ -13,6 +13,12 @@ export class CbcController {
     res.send(xmlData);
   }
 
+  @Get('/ywmcFakeData')
+  getYwmcFakeData(@Res() res: Response): void {
+    const data = this.cbcService.ywmcFakeData();
+    res.send(data);
+  }
+
   @Get('/lisCbcMarys')
   async getData(@Query() query: { [key: string]: string }) {
     return await this.cbcService.fetchExternalData(query);
