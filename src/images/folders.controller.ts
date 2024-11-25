@@ -21,7 +21,11 @@ export class FoldersController {
     @Res() res: Response,
   ) {
     if (!folderPath) {
-      return res.status(HttpStatus.BAD_REQUEST).send('폴더 못찾음');
+      return res.status(200).send({
+        success: false,
+        code: 400,
+        message: '폴더 못찾음.',
+      });
     }
 
     try {
@@ -34,12 +38,18 @@ export class FoldersController {
         const fileStream = fs.createReadStream(fullPath);
         fileStream.pipe(res);
       } else {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('잘못된 경로입니다.');
+        return res.status(200).send({
+          success: false,
+          code: 400,
+          message: '잘못된 경로입니다.',
+        });
       }
     } catch (error) {
-      res
-        .status(HttpStatus.NOT_FOUND)
-        .send('파일 또는 폴더를 찾을 수 없습니다.');
+      return res.status(200).send({
+        success: false,
+        code: 400,
+        message: '파일 또는 폴더를 찾을 수 없습니다.',
+      });
     }
   }
 
@@ -105,6 +115,7 @@ export class FoldersController {
         .send('파일 또는 폴더를 찾을 수 없습니다.');
     }
   }
+
   @Post('check-and-move-images')
   async checkAndMoveImages(
     @Body() body: { folderPath: string; wbcInfo: any[] },
