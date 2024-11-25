@@ -425,7 +425,8 @@ export class RuningInfoService {
         submitState,
         img_drive_root_path,
         rbcInfoAfter,
-        wbcMemo
+        wbcMemo,
+        barcodeNo
       FROM 
         runing_info_entity
       WHERE 
