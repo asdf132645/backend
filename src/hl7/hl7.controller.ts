@@ -29,6 +29,25 @@ export class HL7Controller {
     return hl7Message;
   }
 
+  @Post('noFlagMessage')
+  createNoFlagHL7Message(@Body() requestBody: any): string {
+    // 필요한 데이터를 모두 requestBody로부터 추출하여 generateHL7Message 메서드에 전달합니다.
+    const hl7Message = this.hl7Service.generateHL7MessageNoAbnormalFlags(
+      requestBody.sendingApp,
+      requestBody.sendingFacility,
+      requestBody.receivingApp,
+      requestBody.receivingFacility,
+      requestBody.dateTime,
+      requestBody.messageType,
+      requestBody.messageControlId,
+      requestBody.processingId,
+      requestBody.hl7VersionId,
+      requestBody.wbcInfo,
+      requestBody.result,
+    );
+    return hl7Message;
+  }
+
   @Post('customMessage')
   createCustomHL7Message(@Body() requestBody: any): string {
     const hl7MessageCustom = this.hl7Service.generateHL7MessageWithCustomData(

@@ -139,6 +139,46 @@ export class HL7Service {
     return segments.join('');
   }
 
+  generateHL7MessageNoAbnormalFlags(
+    sendingApp: string,
+    sendingFacility: string,
+    receivingApp: string,
+    receivingFacility: string,
+    dateTime: string,
+    messageType: string[],
+    messageControlId: string,
+    processingId: string,
+    hl7VersionId: string,
+    wbcInfo: any[],
+    result: any[],
+  ): string {
+    // MSH 세그먼트 생성
+    const mshSegment = `MSH|^~\\&|${sendingApp}|${sendingFacility}|${receivingApp}|${receivingFacility}|${dateTime}||${messageType.join('^')}|${messageControlId}|${processingId}|${hl7VersionId}\n`;
+
+    const segments = [mshSegment];
+    let seq = 0;
+
+    if (result === undefined) {
+      return '';
+    }
+    result.forEach((lisCode) => {
+      if (lisCode.LIS_CD !== '') {
+        wbcInfo.forEach((wbcItem) => {
+          if (
+            Number(wbcItem.id) === Number(lisCode.IA_CD) &&
+            (Number(wbcItem.percent) > 0 || Number(wbcItem.count))
+          ) {
+            const obxSegmentCount = `OBX|${seq++}|NM|${lisCode.LIS_CD}||${wbcItem.count}||||||P\n`;
+            const obxSegmentPercent = `OBX|${seq++}|NM|${lisCode.LIS_CD}%||${wbcItem.percent}|%|||||P\n`;
+            segments.push(obxSegmentCount, obxSegmentPercent);
+          }
+        });
+      }
+    });
+
+    return segments.join('');
+  }
+
   async sendHl7Message(filepath: string, msg: any): Promise<void> {
     const directory = path.dirname(filepath);
 
