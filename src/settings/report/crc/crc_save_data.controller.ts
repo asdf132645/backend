@@ -42,7 +42,7 @@ export class CrcSaveDataController {
   }
 
   @Delete('saveDataDelete')
-  async delete(@Body() slotId: string): Promise<void> {
-    return this.crcSaveDataService.deleteBySlotId(slotId);
+  async delete(@Body() data: Partial<CrcSaveDataEntity>): Promise<void> {
+    return this.crcSaveDataService.deleteBySlotId(data.slotId);
   }
 }

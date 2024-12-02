@@ -32,8 +32,8 @@ let CrcSaveDataController = class CrcSaveDataController {
     async update(data) {
         return this.crcSaveDataService.updateBySlotId(data.slotId, data);
     }
-    async delete(slotId) {
-        return this.crcSaveDataService.deleteBySlotId(slotId);
+    async delete(data) {
+        return this.crcSaveDataService.deleteBySlotId(data.slotId);
     }
 };
 exports.CrcSaveDataController = CrcSaveDataController;
@@ -68,7 +68,7 @@ __decorate([
     (0, common_1.Delete)('saveDataDelete'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CrcSaveDataController.prototype, "delete", null);
 exports.CrcSaveDataController = CrcSaveDataController = __decorate([

@@ -7,5 +7,5 @@ export declare class CrcSaveDataController {
     findOne(slotId: string): Promise<CrcSaveDataEntity | []>;
     create(data: Partial<CrcSaveDataEntity>): Promise<CrcSaveDataEntity>;
     update(data: Partial<CrcSaveDataEntity>): Promise<CrcSaveDataEntity>;
-    delete(slotId: string): Promise<void>;
+    delete(data: Partial<CrcSaveDataEntity>): Promise<void>;
 }
