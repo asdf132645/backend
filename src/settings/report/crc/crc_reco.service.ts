@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCrcRecoDto } from './dto/crc_reco.dto';
-import { UpdateCrcSettingDto } from './dto/crc-setting.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { CrcRecommendationEntity } from './entities/crc_reco.entity';

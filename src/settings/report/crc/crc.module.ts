@@ -18,6 +18,9 @@ import { CrcRecommendationService } from './crc_reco.service';
 import { CrcCommentEntity } from './entities/crc-comment.entity';
 import { CrcCommentSettingController } from './crc-comment-setting.controller';
 import { CrcCommentSettingService } from './crc-comment-setting.service';
+import { CrcSaveDataEntity } from "./entities/crc_save_data.entity";
+import { CrcSaveDataController } from "./crc_save_data.controller";
+import { CrcSaveDataService } from "./crc_save_data.service";
 
 @Module({
   imports: [
@@ -28,6 +31,7 @@ import { CrcCommentSettingService } from './crc-comment-setting.service';
       CrcOption,
       CrcRecommendationEntity,
       CrcCommentEntity,
+      CrcSaveDataEntity,
     ]),
   ],
   controllers: [
@@ -37,6 +41,7 @@ import { CrcCommentSettingService } from './crc-comment-setting.service';
     CrcOptionController,
     CrcRecommendationSettingController,
     CrcCommentSettingController,
+    CrcSaveDataController,
   ],
   providers: [
     CrcSettingService,
@@ -45,6 +50,7 @@ import { CrcCommentSettingService } from './crc-comment-setting.service';
     CrcOptionService,
     CrcRecommendationService,
     CrcCommentSettingService,
+    CrcSaveDataService,
   ],
 })
 export class CrcModule {}
