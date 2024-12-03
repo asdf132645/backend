@@ -58,7 +58,7 @@ async function bootstrap() {
   // MySQL 연결 종료
   await connection.end();
 
-  if (corsOptions.origin[0] === 'http://192.168.0.5:8080') {
+  if (corsOptions.origin[0] === 'http://192.168.2.229:8080') {
     const expressServerPath =
       'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\ywmc-server';
 
