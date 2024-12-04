@@ -1,6 +1,15 @@
 // file-system.controller.ts
 
-import { Controller, Post, Body, Delete, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Delete,
+  Get,
+  Query,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { FileSystemService } from './file-system.service';
 
 @Controller('filesystem')
@@ -73,5 +82,21 @@ export class FileSystemController {
       directoryPath,
       searchString,
     );
+  }
+
+  @Get('errLogsRead')
+  getLogs(@Query('folderPath') folderPath: string): any {
+    if (!folderPath) {
+      throw new HttpException(
+        {
+          message: 'folderPath 파라미터를 제공해야 합니다.',
+          error: 'Missing Parameter',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const logs = this.fileSystemService.getLogs(folderPath);
+    return logs;
   }
 }
