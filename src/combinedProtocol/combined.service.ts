@@ -42,7 +42,6 @@ export class CombinedService
   private tcpQueue: any[] = []; // 전송 대기열
   private isProcessing: boolean = false; // 현재 처리 중인지 여부
 
-
   constructor(
     private readonly logger: LoggerService,
     private readonly runingInfoService: RuningInfoService,

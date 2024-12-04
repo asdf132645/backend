@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { DeviceEntity } from './device.entity';
-import {CreateDeviceDto, DeviceDto} from './dto/deviceDto';
+import { CreateDeviceDto, DeviceDto } from './dto/deviceDto';
 
 @Controller('device')
 export class DeviceController {
