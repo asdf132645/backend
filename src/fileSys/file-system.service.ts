@@ -99,12 +99,20 @@ export class FileSystemService {
 
   getLogs(folderPath: string): any {
     try {
-      const currentDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(currentDate.getDate() - 5);
+      const currentDate = moment(); // 현재 날짜
+      const startDate = moment().subtract(5, 'days'); // 5일 전
 
-      const logs: Set<string> = new Set();
-      const logDetails: { timestamp: string; message: string }[] = [];
+      const groupedLogs: Record<
+        string,
+        {
+          timestamp: string;
+          E_CODE: string;
+          E_NAME: string;
+          E_TYPE: string;
+          E_DESC: string;
+          E_SOLN: string;
+        }[]
+      > = {};
 
       // 폴더 확인
       if (!fs.existsSync(folderPath)) {
@@ -123,26 +131,53 @@ export class FileSystemService {
         // 파일 이름이 "YYYY_MM_DD_Error_Log.txt" 형식인지 확인
         const match = file.match(/^(\d{4})_(\d{2})_(\d{2})_Error_Log\.txt$/);
         if (match) {
-          const fileDate = new Date(`${match[1]}-${match[2]}-${match[3]}`);
-          if (fileDate >= startDate && fileDate <= currentDate) {
+          const fileDate = moment(
+            `${match[1]}-${match[2]}-${match[3]}`,
+            'YYYY-MM-DD',
+          );
+          const dateKey = fileDate.format('YYYY-MM-DD'); // 그룹화 키로 사용할 날짜
+
+          if (fileDate.isBetween(startDate, currentDate, 'day', '[]')) {
             // 파일 내용 읽기
             const filePath = path.join(folderPath, file);
             const content = fs.readFileSync(filePath, 'utf-8');
             const lines = content.split('\n');
 
+            // 날짜별 중복 제거용 Set
+            const seenMessages = new Set<string>();
+
             lines.forEach((line) => {
               const timestampMatch = line.match(
                 /^\[(\d{2}:\d{2}:\d{2}\.\d{3})\]/,
               );
-              const messageMatch = line.match(/\] \d+, .+\[(.+)\]/);
+              const dataMatch = line.match(
+                /E_TYPE\s*:\s*(\w+)\s*\|\s*E_CODE:\s*(\d+)\s*\|\s*E_NAME:\s*(\w+)\s*\|\s*E_DESC:\s*(.*?)\s*\|\s*E_SOLN:\s*(.*)/,
+              );
 
-              if (timestampMatch && messageMatch) {
-                const fullMessage = messageMatch[0];
-                if (!logs.has(fullMessage)) {
-                  logs.add(fullMessage);
-                  logDetails.push({
-                    timestamp: timestampMatch[1],
-                    message: fullMessage.trim(),
+              if (timestampMatch && dataMatch) {
+                const timestamp = timestampMatch[1].trim();
+                const [E_TYPE, E_CODE, E_NAME, E_DESC, E_SOLN] = dataMatch
+                  .slice(1)
+                  .map((v) => v.trim());
+
+                const messageKey = `${E_CODE}-${E_NAME}-${E_TYPE}`; // 중복 체크를 위한 Key
+
+                if (!seenMessages.has(messageKey)) {
+                  seenMessages.add(messageKey);
+
+                  // 그룹화된 로그 데이터 초기화
+                  if (!groupedLogs[dateKey]) {
+                    groupedLogs[dateKey] = [];
+                  }
+
+                  // 날짜별 데이터 추가
+                  groupedLogs[dateKey].push({
+                    timestamp,
+                    E_TYPE,
+                    E_CODE,
+                    E_NAME,
+                    E_DESC,
+                    E_SOLN,
                   });
                 }
               }
@@ -151,10 +186,10 @@ export class FileSystemService {
         }
       });
 
-      return logDetails;
+      return groupedLogs;
     } catch (error) {
       if (error instanceof HttpException) {
-        return error; // 이미 정의된 HttpException은 그대로 전달
+        return error;
       }
       return new HttpException(
         {
