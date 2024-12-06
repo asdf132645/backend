@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
-
+import * as os from 'os';
 import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
@@ -20,10 +20,14 @@ import {
 import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { exec } from 'child_process';
+import {exec, spawn} from 'child_process';
+
+const userInfo = os.userInfo();
 
 @Injectable()
 export class RuningInfoService {
+  private deleteCompleted = 0;
+  private readonly fileOperationPythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
   constructor(
     private readonly logger: LoggerService,
     private readonly dataSource: DataSource, // 트랜잭션을 사용 하여 비동기 작업의 타이밍 문제를 해결
@@ -171,28 +175,38 @@ export class RuningInfoService {
   async delete(ids: string[], rootPaths: string[]): Promise<boolean> {
     await this.cleanBrowserCache();
 
+    this.deleteCompleted = 0;
     try {
       const result = await this.runingInfoEntityRepository.delete({
         id: In(ids),
       });
 
-      if (result.affected > 0) {
-        for (const rootPath of rootPaths) {
-          exec(`rmdir /s /q "${rootPath}"`, (error) => {
-            if (error) {
-              console.error(
-                `Failed to delete folder at ${rootPath}:`,
-                error.message,
-              );
-            } else {
-              console.log(
-                `Folder at ${rootPath} has been deleted successfully`,
-              );
-            }
-          });
+      const promises = rootPaths.map(async (task) => await this.runPythonScript(task));
+      await Promise.all(promises);
+
+      await new Promise((resolve) => {
+        if (this.deleteCompleted === rootPaths.length) {
+          resolve(true);
         }
-      }
-      return result.affected > 0; // affected가 0보다 크면 성공
+      })
+      // if (result.affected > 0) {
+      //   for (const rootPath of rootPaths) {
+      //     exec(`rmdir /s /q "${rootPath}"`, (error) => {
+      //       if (error) {
+      //         console.error(
+      //           `Failed to delete folder at ${rootPath}:`,
+      //           error.message,
+      //         );
+      //       } else {
+      //         console.log(
+      //           `Folder at ${rootPath} has been deleted successfully`,
+      //         );
+      //       }
+      //     });
+      //   }
+      // }
+      // return result.affected > 0; // affected가 0보다 크면 성공
+      return true;
     } catch (error) {
       console.error('Error while deleting entities:', error);
       return false; // 삭제 실패
@@ -686,6 +700,37 @@ export class RuningInfoService {
           resolve(stdout);
         },
       );
+    });
+  }
+
+  private runPythonScript(task: any) {
+
+    const convertedSource = task.replaceAll('\\', '/');
+
+    return new Promise((resolve, reject) => {
+      const result = spawn(`${this.fileOperationPythonScriptPath}`, ['delete', convertedSource]);
+
+      // 표준 출력 (stdout) 로그 출력
+      result.stdout.on('data', (data) => {
+        console.log(`Output: ${data}`);
+      });
+
+      // 표준 에러 (stderr) 로그 출력
+      result.stderr.on('data', (data) => {
+        console.error(`Error: ${data}`);
+      });
+
+      // 프로세스가 완료되면 실행되는 콜백
+      result.on('close', (code) => {
+        this.deleteCompleted++;
+        console.log('Delete Success', code);
+        resolve(true);
+      });
+
+      // 프로세스 실행 에러 발생 시
+      result.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 }

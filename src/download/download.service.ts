@@ -17,7 +17,9 @@ const userInfo = os.userInfo();
 @Injectable()
 export class DownloadService {
   private moveResults = { success: 0, total: 0 };
-  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\move_files.exe`;
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
+  // private readonly fileOperationExpressServerPath = 'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\fileOperation-server';
+  private readonly fileOperationExpressServerPath = 'C:\\workspace\\fileOperation-server';
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
@@ -54,9 +56,9 @@ export class DownloadService {
 
     return new Promise((resolve, reject) => {
       const result = spawn(`${this.pythonScriptPath}`, [
+        downloadType,
         convertedSource,
         convertedDestination,
-        downloadType,
       ]);
 
       // 표준 출력 (stdout) 로그 출력
@@ -247,6 +249,24 @@ export class DownloadService {
     ).filter(Boolean);
 
     this.moveResults.success = 0;
+
+    // const fileOperationExpressServer = spawn('npm', ['start'], {
+    //   cwd: this.fileOperationExpressServerPath,
+    //   stdio: 'inherit',
+    //   shell: true,
+    // })
+    //
+    //
+    // try {
+    //   const response = await axios.post(`http://192.168.0.115:3010/file-${downloadType}`, queue);
+    //   console.log('RESPONSE', response);
+    // } catch (error) {
+    //   console.error('Express 서버 에러', error);
+    // }
+    //
+    // fileOperationExpressServer.on('close', (code) => {
+    //   console.log(`파일 작업 Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+    // });
 
     const promises = queue.map(
       async (task) => await this.runPythonScript(task, downloadType),

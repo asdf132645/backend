@@ -15,7 +15,7 @@ const userInfo = os.userInfo();
 @Injectable()
 export class UploadService {
   private moveResults = { success: 0, total: 0 };
-  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\move_files.exe`;
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
@@ -258,9 +258,9 @@ export class UploadService {
 
     return new Promise((resolve, reject) => {
       const result = spawn(`${this.pythonScriptPath}`, [
+        uploadType,
         convertedSource,
         convertedDestination,
-        uploadType,
       ]);
 
       // 표준 출력 (stdout) 로그 출력
