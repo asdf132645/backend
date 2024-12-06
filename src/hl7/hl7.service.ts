@@ -69,7 +69,7 @@ export class HL7Service {
     // CRC Remark 필드 추가
     if (crcRemark && Array.isArray(crcRemark)) {
       crcRemark.forEach((remark) => {
-        if (remark.code && remark.remarkAllContent) {
+        if (remark.remarkAllContent) {
           const zRemarkSegment = `ZRM|${seq++}|${remark.remarkAllContent}\r`;
           segments.push(zRemarkSegment);
         }
@@ -79,7 +79,7 @@ export class HL7Service {
     // CRC comment 필드 추가
     if (crcComment && Array.isArray(crcComment)) {
       crcComment.forEach((comment) => {
-        if (comment.code && comment.remarkAllContent) {
+        if (comment.remarkAllContent) {
           const zRemarkSegment = `ZCM|${seq++}|${comment.remarkAllContent}\r`;
           segments.push(zRemarkSegment);
         }
@@ -89,7 +89,7 @@ export class HL7Service {
     // CRC Recommendation 필드 추가
     if (crcRecommendation && Array.isArray(crcRecommendation)) {
       crcRecommendation.forEach((recommendation) => {
-        if (recommendation.code && recommendation.remarkAllContent) {
+        if (recommendation.remarkAllContent) {
           const zRecSegment = `ZRC|${seq++}|${recommendation.remarkAllContent}\r`;
           segments.push(zRecSegment);
         }
