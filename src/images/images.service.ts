@@ -22,7 +22,7 @@ export class ImagesService {
     try {
       fs.accessSync(absoluteImagePath, fs.constants.R_OK);
 
-      // bmp 이미지를 jpeg로 변환하여 압축
+      // bmp 이미지를 jpeg 로 변환하여 압축
       const jpegImageBuffer = await this.convertBmpToJpeg(absoluteImagePath);
 
       // 압축된 이미지를 클라이언트에게 전송
