@@ -12,7 +12,8 @@ import {
 } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
-
+import * as os from 'os';
+import * as path from 'path';
 import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
@@ -20,10 +21,15 @@ import {
 import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { exec } from 'child_process';
+import {exec, spawn} from 'child_process';
+import axios from "axios";
+
+const userInfo = os.userInfo();
 
 @Injectable()
 export class RuningInfoService {
+  // private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
+  private readonly fileOperationExpressServerPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_fileOperation_server`;
   constructor(
     private readonly logger: LoggerService,
     private readonly dataSource: DataSource, // 트랜잭션을 사용 하여 비동기 작업의 타이밍 문제를 해결
@@ -168,31 +174,29 @@ export class RuningInfoService {
     return updatedItems;
   }
 
-  async delete(ids: string[], rootPaths: string[]): Promise<boolean> {
+  async delete(ids: string[], rootPaths: string[], apiUrl: string): Promise<boolean> {
     await this.cleanBrowserCache();
 
     try {
-      const result = await this.runingInfoEntityRepository.delete({
-        id: In(ids),
-      });
+      await this.runingInfoEntityRepository.delete({ id: In(ids) });
 
-      if (result.affected > 0) {
-        for (const rootPath of rootPaths) {
+      const promises = rootPaths.map((rootPath: string) => {
+        return new Promise<boolean>((resolve, reject) => {
           exec(`rmdir /s /q "${rootPath}"`, (error) => {
             if (error) {
-              console.error(
-                `Failed to delete folder at ${rootPath}:`,
-                error.message,
-              );
+              console.error(`Failed to delete folder at ${rootPath}: ${error.message}`);
+              reject(false);
             } else {
-              console.log(
-                `Folder at ${rootPath} has been deleted successfully`,
-              );
+              console.log(`Folder at ${rootPath} has been deleted successfully`);
+              resolve(true);
             }
           });
-        }
-      }
-      return result.affected > 0; // affected가 0보다 크면 성공
+        });
+      });
+
+      await Promise.all(promises);
+      // await this.runFileExpressServer(rootPaths, apiUrl);
+      return true;
     } catch (error) {
       console.error('Error while deleting entities:', error);
       return false; // 삭제 실패
@@ -688,4 +692,26 @@ export class RuningInfoService {
       );
     });
   }
+
+
+  private async runFileExpressServer(task: any, apiUrl: string) {
+    const expressServer = spawn('npm', ['start'], {
+      cwd: this.fileOperationExpressServerPath,
+      stdio: 'inherit',
+      shell: true,
+    })
+
+    expressServer.on('close', (code) => {
+      console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+    })
+
+    try {
+      await axios.post(`${apiUrl}:3010/file-delete`, { task });
+    } catch (error) {
+      console.error('파일 삭제 중 오류 발생: ', error);
+    }
+
+    expressServer.kill();
+  }
+
 }

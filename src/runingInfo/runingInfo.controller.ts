@@ -100,6 +100,7 @@ export class RuningInfoController {
     const result = await this.runingInfoService.delete(
       req.ids,
       req.img_drive_root_path,
+      req.apiUrl,
     );
     return { success: result };
   }

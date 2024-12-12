@@ -9,6 +9,7 @@ import { LoggerService } from '../logger.service';
 import { exec, spawn } from 'child_process';
 import * as os from 'os';
 import { CombinedService } from '../combinedProtocol/combined.service';
+import axios from "axios";
 
 const userInfo = os.userInfo();
 
@@ -16,6 +17,7 @@ const userInfo = os.userInfo();
 export class UploadService {
   private moveResults = { success: 0, total: 0 };
   private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\move_files.exe`;
+  // private readonly fileOperationExpressServerPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_fileOperation_server`;
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
@@ -24,6 +26,28 @@ export class UploadService {
     private readonly logger: LoggerService,
     private readonly combinedService: CombinedService,
   ) {}
+
+  // private async runFileExpressServer(task: any, uploadType: string, apiUrl: string) {
+  //   const expressServer = spawn('npm', ['start'], {
+  //     cwd: this.fileOperationExpressServerPath,
+  //     stdio: 'inherit',
+  //     shell: true,
+  //   })
+  //
+  //   expressServer.on('close', (code) => {
+  //     console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+  //   })
+  //
+  //   console.log('apiurl', apiUrl);
+  //   try {
+  //     const response = await axios.post(`${apiUrl}:3010/file-copy-move`, { task, type: uploadType });
+  //     console.log('RESPONSE', response);
+  //   } catch (error) {
+  //     console.error('파일 복사 중 오류 발생: ', error);
+  //   }
+  //
+  //   expressServer.kill();
+  // }
 
   private listDirectoriesInFolder = async (
     folderPath: string,
@@ -252,16 +276,11 @@ export class UploadService {
   // 이미지 이동은 파이썬 실행파일을 사용
   private runPythonScript(task: any, uploadType: string) {
     const { source, destination } = task;
-
     const convertedSource = source.replaceAll('\\', '/');
     const convertedDestination = destination.replaceAll('\\', '/');
 
     return new Promise((resolve, reject) => {
-      const result = spawn(`${this.pythonScriptPath}`, [
-        convertedSource,
-        convertedDestination,
-        uploadType,
-      ]);
+      const result = spawn(`${this.pythonScriptPath}`, [convertedSource, convertedDestination, uploadType]);
 
       // 표준 출력 (stdout) 로그 출력
       result.stdout.on('data', (data) => {
@@ -292,6 +311,7 @@ export class UploadService {
     originUploadPath: string,
     destinationUploadPath: string,
     uploadType: 'copy' | 'move',
+    apiUrl: string
   ) => {
     const availableFileNames = [];
     const availableIds = [];
@@ -321,13 +341,9 @@ export class UploadService {
       return { source: sourcePath, destination: targetFolderPath, uploadType };
     });
 
-    this.moveResults.total = availableFileNames.length;
-
-    const promises = queue.map(
-      async (task) => await this.runPythonScript(task, uploadType),
-    );
-
+    const promises = queue.map(async (task) => await this.runPythonScript(task, uploadType));
     await Promise.all(promises);
+    // await this.runFileExpressServer(queue, uploadType, apiUrl);
 
     return availableIds;
   };
@@ -339,6 +355,7 @@ export class UploadService {
       projectType,
       originUploadPath,
       uploadType,
+      apiUrl,
     } = fileInfo;
 
     const databaseName =
@@ -393,6 +410,7 @@ export class UploadService {
         uploadDateFolderName,
         destinationUploadPath,
         uploadType,
+        apiUrl,
       );
 
       await this.updateImgDriveRootPath(availableIds, destinationUploadPath);
