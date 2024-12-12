@@ -45,6 +45,10 @@ export class CellImgAnalyzed {
   edgeShotType: string;
 
   @Column()
+  @ApiProperty({ example: '1', description: 'Edge Shot Count' })
+  edgeShotCount: string;
+
+  @Column()
   @ApiProperty({ example: '', description: 'IA 루트 경로' })
   iaRootPath: string;
 

@@ -5,4 +5,5 @@ export class UploadDto {
   dayQuery: any;
   uploadType: 'copy' | 'move';
   projectType: 'bm' | 'pb';
+  apiUrl: string;
 }
