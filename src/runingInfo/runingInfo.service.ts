@@ -182,7 +182,7 @@ export class RuningInfoService {
           exec(`rmdir /s /q "${rootPath}"`, (error) => {
             if (error) {
               console.error(
-                `Failed to delete folder at ${rootPath}: ${error.message}`,
+                `Fail to delete folder at ${rootPath}: ${error.message}`,
               );
               reject(false);
             } else {
