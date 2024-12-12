@@ -25,6 +25,15 @@ export class RbcInfo {
 }
 
 @ObjectType()
+export class abnormalClassInfo {
+  @Field(() => String, { nullable: true })
+  classNm?: string;
+
+  @Field(() => String, { nullable: true })
+  val?: string;
+}
+
+@ObjectType()
 export class WbcInfoAfter {
   @Field(() => String, { nullable: true }) // id는 nullable
   id?: string;

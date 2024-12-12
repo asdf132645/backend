@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import {
   RbcInfo,
-  WbcInfo,
+  abnormalClassInfo,
   WbcInfoAfter,
   WbcResponse,
 } from './types/class-info'; // 필요에 따라 import 경로 조정
@@ -158,4 +158,8 @@ export class RuningInfoEntity {
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
   hosName?: string;
+
+  @Field({ nullable: true }) // nullable 옵션 추가
+  @Column('json') // JSON 데이터 타입으로 설정
+  abnormalClassInfo?: abnormalClassInfo;
 }

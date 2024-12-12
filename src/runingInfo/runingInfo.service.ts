@@ -2,14 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Brackets,
-  In,
-  Repository,
-  EntityManager,
-  DataSource,
-  Between,
-} from 'typeorm';
+import { In, Repository, EntityManager, DataSource, Between } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
 import * as os from 'os';
@@ -21,8 +14,8 @@ import {
 import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import {exec, spawn} from 'child_process';
-import axios from "axios";
+import { exec, spawn } from 'child_process';
+import axios from 'axios';
 
 const userInfo = os.userInfo();
 
@@ -174,7 +167,11 @@ export class RuningInfoService {
     return updatedItems;
   }
 
-  async delete(ids: string[], rootPaths: string[], apiUrl: string): Promise<boolean> {
+  async delete(
+    ids: string[],
+    rootPaths: string[],
+    apiUrl: string,
+  ): Promise<boolean> {
     await this.cleanBrowserCache();
 
     try {
@@ -184,10 +181,14 @@ export class RuningInfoService {
         return new Promise<boolean>((resolve, reject) => {
           exec(`rmdir /s /q "${rootPath}"`, (error) => {
             if (error) {
-              console.error(`Failed to delete folder at ${rootPath}: ${error.message}`);
+              console.error(
+                `Failed to delete folder at ${rootPath}: ${error.message}`,
+              );
               reject(false);
             } else {
-              console.log(`Folder at ${rootPath} has been deleted successfully`);
+              console.log(
+                `Folder at ${rootPath} has been deleted successfully`,
+              );
               resolve(true);
             }
           });
@@ -657,17 +658,16 @@ export class RuningInfoService {
     });
   }
 
-
   private async runFileExpressServer(task: any, apiUrl: string) {
     const expressServer = spawn('npm', ['start'], {
       cwd: this.fileOperationExpressServerPath,
       stdio: 'inherit',
       shell: true,
-    })
+    });
 
     expressServer.on('close', (code) => {
       console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
-    })
+    });
 
     try {
       await axios.post(`${apiUrl}:3010/file-delete`, { task });
@@ -677,5 +677,4 @@ export class RuningInfoService {
 
     expressServer.kill();
   }
-
 }
