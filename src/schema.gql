@@ -14,6 +14,11 @@ type RbcInfo {
   categoryNm: String
 }
 
+type abnormalClassInfo {
+  classNm: String
+  val: String
+}
+
 type WbcInfoAfter {
   id: String
   name: String
@@ -89,6 +94,7 @@ type RuningInfoEntity {
   cbcAge: String
   img_drive_root_path: String
   hosName: String
+  abnormalClassInfo: abnormalClassInfo
 }
 
 """

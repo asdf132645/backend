@@ -2,14 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Brackets,
-  In,
-  Repository,
-  EntityManager,
-  DataSource,
-  Between,
-} from 'typeorm';
+import { In, Repository, EntityManager, DataSource, Between } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
 

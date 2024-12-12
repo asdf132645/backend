@@ -7,7 +7,12 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { RbcInfo, WbcInfo, WbcInfoAfter, WbcResponse } from "../types/class-info";
+import {
+  abnormalClassInfo,
+  RbcInfo,
+  WbcInfoAfter,
+  WbcResponse,
+} from '../types/class-info';
 
 @ObjectType()
 @InputType()
@@ -124,6 +129,9 @@ export class RuningInfoDtoItems {
 
   @Field(() => String, { nullable: true })
   hosName?: string;
+
+  @Field(() => abnormalClassInfo, { nullable: true })
+  abnormalClassInfo?: abnormalClassInfo;
 }
 
 @InputType()
