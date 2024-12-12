@@ -284,37 +284,33 @@ export class RuningInfoService {
     }
 
     if (titles && titles.length > 0) {
-      const orConditions = titles
+      const andConditions = titles
         .map((title, index) => {
           const titleParam = `title${index}`;
           return `
-            (JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
-            AND (
-              SELECT COUNT(*)
-              FROM JSON_TABLE(
-                runInfo.wbcInfoAfter,
-                '$[*]' COLUMNS(
-                  title VARCHAR(255) PATH '$.title',
-                  count INT PATH '$.count'
-                )
-              ) AS jt
-              WHERE jt.title = :${titleParam}
-                AND jt.count > 0
-            ) > 0)
-          `;
+        JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+        AND (
+          SELECT COUNT(*)
+          FROM JSON_TABLE(
+            runInfo.wbcInfoAfter,
+            '$[*]' COLUMNS(
+              title VARCHAR(255) PATH '$.title',
+              count INT PATH '$.count'
+            )
+          ) AS jt
+          WHERE jt.title = :${titleParam}
+            AND jt.count > 0
+        ) > 0
+      `;
         })
-        .join(' OR ');
+        .join(' AND ');
 
       const params = titles.reduce((acc, title, index) => {
         acc[`title${index}`] = title;
         return acc;
       }, {});
 
-      queryBuilder.andWhere(
-        new Brackets((qb) => {
-          qb.where(orConditions, params);
-        }),
-      );
+      queryBuilder.andWhere(andConditions, params);
     }
 
     // eslint-disable-next-line prefer-const
@@ -475,172 +471,125 @@ export class RuningInfoService {
     id: number,
     step: number,
     type: string,
+    nrCount?: string,
+    titles?: string[],
   ): Promise<Partial<RuningInfoEntity> | null> {
     const entityManager: EntityManager =
       this.runingInfoEntityRepository.manager;
+    const queryBuilder =
+      this.runingInfoEntityRepository.createQueryBuilder('runInfo');
 
-    // 현재 엔티티를 찾기
-    const currentEntityQuery = `
-      SELECT 
-        id
-      FROM 
-        runing_info_entity
-      WHERE 
-        id = ?`;
-
-    const currentEntityResult = await entityManager.query(currentEntityQuery, [
-      id,
-    ]);
+    // 현재 엔티티 조회
+    const currentEntityResult = await entityManager.query(
+      'SELECT id FROM runing_info_entity WHERE id = ?',
+      [id],
+    );
 
     if (currentEntityResult.length === 0) {
       return null;
     }
 
-    let newEntityQuery = '';
+    // 'up' 또는 'down' 타입에 따른 조건 설정
     if (type === 'up') {
-      // 현재 id보다 큰 id를 가진 항목 중 step번째 항목 찾기
-      newEntityQuery = `
-        SELECT 
-          id,
-          analyzedDttm,
-          barcodeNo,
-          bf_lowPowerPath,
-          birthDay,
-          cassetId,
-          cbcAge,
-          hosName,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
-          isNsNbIntegration,
-          lock_status,
-          maxWbcCount,
-          orderDttm,
-          patientId,
-          patientNm,
-          pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
-          tactTime,
-          testType,
-          traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
-        FROM 
-          runing_info_entity
-        WHERE 
-          id > ?
-        ORDER BY 
-          id ASC
-        LIMIT 1 OFFSET ?`;
+      queryBuilder.where('runInfo.id > :id', { id });
+      queryBuilder.orderBy('runInfo.id', 'ASC');
     } else if (type === 'down') {
-      // 현재 id보다 작은 id를 가진 항목 중 step번째 항목 찾기
-      newEntityQuery = `
-        SELECT 
-          id,
-          analyzedDttm,
-          barcodeNo,
-          bf_lowPowerPath,
-          birthDay,
-          cassetId,
-          cbcAge,
-          hosName,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
-          isNsNbIntegration,
-          lock_status,
-          maxWbcCount,
-          orderDttm,
-          patientId,
-          patientNm,
-          pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
-          tactTime,
-          testType,
-          traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
-        FROM 
-          runing_info_entity
-        WHERE 
-          id < ?
-        ORDER BY 
-          id DESC
-        LIMIT 1 OFFSET ?`;
+      queryBuilder.where('runInfo.id < :id', { id });
+      queryBuilder.orderBy('runInfo.id', 'DESC');
     }
 
-    const newEntityResult = await entityManager.query(newEntityQuery, [
-      id,
-      step - 1,
-    ]);
-
-    if (newEntityResult.length > 0) {
-      const result = newEntityResult[0];
-      return {
-        id: result.id,
-        analyzedDttm: result.analyzedDttm,
-        barcodeNo: result.barcodeNo,
-        bf_lowPowerPath: result.bf_lowPowerPath,
-        birthDay: result.birthDay,
-        cassetId: result.cassetId,
-        cbcAge: result.cbcAge,
-        hosName: result.hosName,
-        cbcPatientNm: result.cbcPatientNm,
-        cbcPatientNo: result.cbcPatientNo,
-        cbcSex: result.cbcSex,
-        gender: result.gender,
-        img_drive_root_path: result.img_drive_root_path,
-        isNormal: result.isNormal,
-        isNsNbIntegration: result.isNsNbIntegration,
-        lock_status: result.lock_status,
-        maxWbcCount: result.maxWbcCount,
-        orderDttm: result.orderDttm,
-        patientId: result.patientId,
-        patientNm: result.patientNm,
-        pcIp: result.pcIp,
-        rbcInfo: result.rbcInfo,
-        rbcInfoAfter: result.rbcInfoAfter,
-        rbcMemo: result.rbcMemo,
-        slotId: result.slotId,
-        slotNo: result.slotNo,
-        submitOfDate: result.submitOfDate,
-        submitState: result.submitState,
-        submitUserId: result.submitUserId,
-        tactTime: result.tactTime,
-        testType: result.testType,
-        traySlot: result.traySlot,
-        wbcCount: result.wbcCount,
-        wbcInfoAfter: result.wbcInfoAfter,
-        wbcInfo: result.wbcInfo,
-        wbcMemo: result.wbcMemo,
-      } as Partial<RuningInfoEntity>;
-    } else {
-      return null;
+    // nrCount가 있을 때 조건 추가
+    if (nrCount && nrCount !== '0' && nrCount !== '') {
+      queryBuilder.andWhere(
+        `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', 'NR', NULL, '$[*].title') IS NOT NULL
+      AND (
+        SELECT COUNT(*)
+        FROM JSON_TABLE(
+          runInfo.wbcInfoAfter,
+          '$[*]' COLUMNS(
+            title VARCHAR(255) PATH '$.title',
+            count INT PATH '$.count'
+          )
+        ) AS jt
+        WHERE jt.title = 'NR' AND jt.count = :nrCount
+      ) > 0`,
+        { nrCount: parseInt(nrCount, 10) },
+      );
     }
+
+    // titles가 있을 때 조건 추가 (AND 조건으로 수정)
+    if (titles && titles.length > 0) {
+      titles.forEach((title, index) => {
+        queryBuilder.andWhere(
+          `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL
+        AND (
+          SELECT COUNT(*)
+          FROM JSON_TABLE(
+            runInfo.wbcInfoAfter,
+            '$[*]' COLUMNS(
+              title VARCHAR(255) PATH '$.title',
+              count INT PATH '$.count'
+            )
+          ) AS jt
+          WHERE jt.title = :title${index}
+            AND jt.count > 0
+        ) > 0`,
+          { [`title${index}`]: title },
+        );
+      });
+    }
+
+    // 조건을 만족하는 항목이 있는지 확인
+    const result = await queryBuilder.getRawOne();
+
+    // 조건을 만족하는 결과가 있으면 반환
+    if (result) {
+      // result에서 runInfo_ 접두어를 제거
+      const cleanedResult: Partial<RuningInfoEntity> = {};
+      Object.keys(result).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, ''); // 'runInfo_' 접두어 제거
+        cleanedResult[cleanedKey] = result[key];
+      });
+      return cleanedResult;
+    }
+
+    // 조건을 만족하는 항목이 없으면 다음 항목을 찾아서 결과 반환
+    if (type === 'up') {
+      // 'up' 타입에서 조건을 만족하는 첫 번째 항목을 찾음
+      const nextResult = await entityManager.query(
+        'SELECT * FROM runing_info_entity WHERE id > ? ORDER BY id ASC LIMIT 1',
+        [id],
+      );
+      if (nextResult.length > 0) {
+        const cleanedNextResult = nextResult[0];
+        // result에서 runInfo_ 접두어를 제거
+        const cleanedResult: Partial<RuningInfoEntity> = {};
+        Object.keys(cleanedNextResult).forEach((key) => {
+          const cleanedKey = key.replace(/^runInfo_/, ''); // 'runInfo_' 접두어 제거
+          cleanedResult[cleanedKey] = cleanedNextResult[key];
+        });
+        return cleanedResult;
+      }
+    } else if (type === 'down') {
+      // 'down' 타입에서 조건을 만족하는 첫 번째 항목을 찾음
+      const nextResult = await entityManager.query(
+        'SELECT * FROM runing_info_entity WHERE id < ? ORDER BY id DESC LIMIT 1',
+        [id],
+      );
+      if (nextResult.length > 0) {
+        const cleanedNextResult = nextResult[0];
+        // result에서 runInfo_ 접두어를 제거
+        const cleanedResult: Partial<RuningInfoEntity> = {};
+        Object.keys(cleanedNextResult).forEach((key) => {
+          const cleanedKey = key.replace(/^runInfo_/, ''); // 'runInfo_' 접두어 제거
+          cleanedResult[cleanedKey] = cleanedNextResult[key];
+        });
+        return cleanedResult;
+      }
+    }
+
+    // 최종적으로 결과가 없으면 null 반환
+    return null;
   }
 
   async updatePcIpAndState(

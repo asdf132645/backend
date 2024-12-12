@@ -33,13 +33,21 @@ export class RuningInfoController {
     @Query('step') step: string,
     @Query('type') type: string,
     @Query('dayQuery') dayQuery: string,
+    @Query('nrCount') nrCount?: string,
+    @Query('title') titles?: string,
   ): Promise<Partial<RuningInfoEntity> | null> {
     // console.log('pageUpDown', dayQuery);
+    let titlesArray: string[] | undefined;
+    if (titles) {
+      titlesArray = titles.split(',');
+    }
     await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     return this.runingInfoService.getUpDownRunnInfo(
       Number(id),
       Number(step),
       type,
+      nrCount,
+      titlesArray,
     );
   }
 

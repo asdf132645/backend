@@ -25,7 +25,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // 에러 로깅
     console.error(`[${timestamp}] ${request.method} ${url} - ${error}`);
 
-
     // response 객체를 직접 조작하지 않고, host를 통해 가져와서 조작
     const httpResponse = host.switchToHttp().getResponse();
     httpResponse.status(status).json({
