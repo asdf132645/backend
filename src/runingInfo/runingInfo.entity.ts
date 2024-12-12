@@ -77,15 +77,15 @@ export class RuningInfoEntity {
 
   @Field(() => [String]) // 배열 타입 지정
   @Column('json') // JSON 데이터 타입으로 설정
-  bf_lowPowerPath: string[];
+  bf_lowPowerPath?: string[];
 
   @Field(() => String)
   @Column({ type: 'varchar' }) // varchar로 명시
-  cassetId: string;
+  cassetId?: string;
 
   @Field(() => String)
   @Column({ type: 'varchar' }) // varchar로 명시
-  isNormal: string;
+  isNormal?: string;
 
   @Field(() => WbcResponse, { nullable: true }) // 배열 타입 지정
   @Column('json') // JSON 데이터 타입으로 설정
@@ -99,9 +99,9 @@ export class RuningInfoEntity {
   @Column('json', { nullable: true }) // JSON으로 저장
   rbcInfo?: RbcInfo;
 
-  @Field(() => [String]) // 배열 타입 지정
+  @Field(() => RbcInfo, { nullable: true })
   @Column('json') // JSON 데이터 타입으로 설정
-  rbcInfoAfter?: string[];
+  rbcInfoAfter?: RbcInfo;
 
   @Field(() => String, { nullable: true }) // Boolean 타입으로 명시
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
@@ -117,7 +117,7 @@ export class RuningInfoEntity {
 
   @Field(() => [String]) // 배열 타입 지정
   @Column('json') // JSON 데이터 타입으로 설정
-  rbcInfoPosAfter: string[];
+  rbcInfoPosAfter?: string[];
 
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시

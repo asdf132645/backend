@@ -38,8 +38,8 @@ export class WbcInfoAfter {
   @Field(() => String, { nullable: true }) // title은 nullable
   title?: string;
 
-  @Field(() => [String], { nullable: true }) // images는 nullable 배열
-  images?: string[];
+  @Field(() => [wbcImages], { nullable: 'itemsAndList' })
+  images?: wbcImages[];
 
   @Field(() => String, { nullable: true }) // percent는 nullable
   percent?: string;
@@ -59,11 +59,33 @@ export class WbcInfo {
   @Field(() => String, { nullable: true })
   title?: string;
 
-  @Field(() => [String], { nullable: true })
-  images?: string[];
+  @Field(() => [wbcImages], { nullable: 'itemsAndList' })
+  images?: wbcImages[];
 
   @Field(() => Int, { nullable: true })
   percent?: number;
+}
+
+@ObjectType()
+export class Coordinates {
+  @Field(() => String)
+  display: string;
+}
+
+@ObjectType()
+export class wbcImages {
+  @Field(() => Coordinates)
+  coordinates?: Coordinates;
+  @Field(() => String, { nullable: true })
+  fileName?: string;
+  @Field(() => String, { nullable: true })
+  title?: string;
+  @Field(() => String, { nullable: true })
+  filter?: string;
+  @Field(() => Number, { nullable: true })
+  height?: number;
+  @Field(() => Number, { nullable: true })
+  width?: number;
 }
 
 @ObjectType()

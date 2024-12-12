@@ -288,37 +288,33 @@ export class RuningInfoService {
     }
 
     if (titles && titles.length > 0) {
-      const orConditions = titles
+      const andConditions = titles
         .map((title, index) => {
           const titleParam = `title${index}`;
           return `
-            (JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
-            AND (
-              SELECT COUNT(*)
-              FROM JSON_TABLE(
-                runInfo.wbcInfoAfter,
-                '$[*]' COLUMNS(
-                  title VARCHAR(255) PATH '$.title',
-                  count INT PATH '$.count'
-                )
-              ) AS jt
-              WHERE jt.title = :${titleParam}
-                AND jt.count > 0
-            ) > 0)
-          `;
+        JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+        AND (
+          SELECT COUNT(*)
+          FROM JSON_TABLE(
+            runInfo.wbcInfoAfter,
+            '$[*]' COLUMNS(
+              title VARCHAR(255) PATH '$.title',
+              count INT PATH '$.count'
+            )
+          ) AS jt
+          WHERE jt.title = :${titleParam}
+            AND jt.count > 0
+        ) > 0
+      `;
         })
-        .join(' OR ');
+        .join(' AND ');
 
       const params = titles.reduce((acc, title, index) => {
         acc[`title${index}`] = title;
         return acc;
       }, {});
 
-      queryBuilder.andWhere(
-        new Brackets((qb) => {
-          qb.where(orConditions, params);
-        }),
-      );
+      queryBuilder.andWhere(andConditions, params);
     }
 
     // eslint-disable-next-line prefer-const
@@ -338,6 +334,146 @@ export class RuningInfoService {
     }
 
     return { data, total };
+  }
+
+  async getUpDownRunnInfo(
+    id: number,
+    type: string,
+    nrCount?: string,
+    titles?: string[],
+    startDay?: Date,
+    endDay?: Date,
+    barcodeNo?: string,
+    testType?: string,
+  ): Promise<Partial<RuningInfoEntity> | null> {
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+    const queryBuilder =
+      this.runingInfoEntityRepository.createQueryBuilder('runInfo');
+
+    // 현재 엔티티 존재 여부 확인
+    const currentEntityResult = await entityManager.query(
+      'SELECT id FROM runing_info_entity WHERE id = ?',
+      [id],
+    );
+
+    if (currentEntityResult.length === 0) {
+      return null;
+    }
+
+    // 날짜 조건 포맷팅
+    const startFormatted = startDay
+      ? `${startDay.getFullYear()}${(startDay.getMonth() + 1).toString().padStart(2, '0')}${startDay.getDate().toString().padStart(2, '0')}000000000`
+      : undefined;
+    const endFormatted = endDay
+      ? `${endDay.getFullYear()}${(endDay.getMonth() + 1).toString().padStart(2, '0')}${endDay.getDate().toString().padStart(2, '0')}235959999`
+      : undefined;
+
+    if (startFormatted) {
+      queryBuilder.andWhere('runInfo.analyzedDttm >= :startDay', {
+        startDay: startFormatted,
+      });
+    }
+    if (endFormatted) {
+      queryBuilder.andWhere('runInfo.analyzedDttm <= :endDay', {
+        endDay: endFormatted,
+      });
+    }
+
+    // 바코드 번호 조건
+    if (barcodeNo) {
+      queryBuilder.andWhere('runInfo.barcodeNo LIKE :barcodeNo', {
+        barcodeNo: `%${barcodeNo}%`,
+      });
+    }
+
+    // 테스트 타입 조건
+    if (testType) {
+      queryBuilder.andWhere('runInfo.testType = :testType', { testType });
+    }
+
+    // 타입에 따른 조건 설정
+    if (type === 'up') {
+      queryBuilder
+        .andWhere('runInfo.id > :id', { id })
+        .orderBy('runInfo.id', 'ASC');
+    } else if (type === 'down') {
+      queryBuilder
+        .andWhere('runInfo.id < :id', { id })
+        .orderBy('runInfo.id', 'DESC');
+    }
+
+    // NR 조건 추가
+    if (nrCount && nrCount !== '0') {
+      queryBuilder.andWhere(
+        `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', 'NR', NULL, '$[*].title') IS NOT NULL
+       AND (
+         SELECT COUNT(*)
+         FROM JSON_TABLE(
+           runInfo.wbcInfoAfter,
+           '$[*]' COLUMNS(
+             title VARCHAR(255) PATH '$.title',
+             count INT PATH '$.count'
+           )
+         ) AS jt
+         WHERE jt.title = 'NR' AND jt.count = :nrCount
+       ) > 0`,
+        { nrCount: parseInt(nrCount, 10) },
+      );
+    }
+
+    // Titles 조건 추가 (AND 조건)
+    if (titles && titles.length > 0) {
+      titles.forEach((title, index) => {
+        queryBuilder.andWhere(
+          `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL
+         AND (
+           SELECT COUNT(*)
+           FROM JSON_TABLE(
+             runInfo.wbcInfoAfter,
+             '$[*]' COLUMNS(
+               title VARCHAR(255) PATH '$.title',
+               count INT PATH '$.count'
+             )
+           ) AS jt
+           WHERE jt.title = :title${index}
+             AND jt.count > 0
+         ) > 0`,
+          { [`title${index}`]: title },
+        );
+      });
+    }
+
+    // 쿼리 실행
+    const result = await queryBuilder.getRawOne();
+
+    if (result) {
+      // Prefix 제거 후 반환
+      const cleanedResult: Partial<RuningInfoEntity> = {};
+      Object.keys(result).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, '');
+        cleanedResult[cleanedKey] = result[key];
+      });
+      return cleanedResult;
+    }
+
+    // 조건을 만족하지 않을 경우 다음 항목 반환
+    const directionQuery =
+      type === 'up'
+        ? 'SELECT * FROM runing_info_entity WHERE id > ? ORDER BY id ASC LIMIT 1'
+        : 'SELECT * FROM runing_info_entity WHERE id < ? ORDER BY id DESC LIMIT 1';
+
+    const nextResult = await entityManager.query(directionQuery, [id]);
+    if (nextResult.length > 0) {
+      const cleanedNextResult: Partial<RuningInfoEntity> = {};
+      Object.keys(nextResult[0]).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, '');
+        cleanedNextResult[cleanedKey] = nextResult[0][key];
+      });
+      return cleanedNextResult;
+    }
+
+    return null;
   }
 
   async clearPcIpAndSetStateFalse(pcIp: string): Promise<void> {
@@ -470,178 +606,6 @@ export class RuningInfoService {
 
     if (result.length > 0) {
       return result[0] as RuningInfoEntity;
-    } else {
-      return null;
-    }
-  }
-
-  async getUpDownRunnInfo(
-    id: number,
-    step: number,
-    type: string,
-  ): Promise<Partial<RuningInfoEntity> | null> {
-    const entityManager: EntityManager =
-      this.runingInfoEntityRepository.manager;
-
-    // 현재 엔티티를 찾기
-    const currentEntityQuery = `
-      SELECT 
-        id
-      FROM 
-        runing_info_entity
-      WHERE 
-        id = ?`;
-
-    const currentEntityResult = await entityManager.query(currentEntityQuery, [
-      id,
-    ]);
-
-    if (currentEntityResult.length === 0) {
-      return null;
-    }
-
-    let newEntityQuery = '';
-    if (type === 'up') {
-      // 현재 id보다 큰 id를 가진 항목 중 step번째 항목 찾기
-      newEntityQuery = `
-        SELECT 
-          id,
-          analyzedDttm,
-          barcodeNo,
-          bf_lowPowerPath,
-          birthDay,
-          cassetId,
-          cbcAge,
-          hosName,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
-          isNsNbIntegration,
-          lock_status,
-          maxWbcCount,
-          orderDttm,
-          patientId,
-          patientNm,
-          pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
-          tactTime,
-          testType,
-          traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
-        FROM 
-          runing_info_entity
-        WHERE 
-          id > ?
-        ORDER BY 
-          id ASC
-        LIMIT 1 OFFSET ?`;
-    } else if (type === 'down') {
-      // 현재 id보다 작은 id를 가진 항목 중 step번째 항목 찾기
-      newEntityQuery = `
-        SELECT 
-          id,
-          analyzedDttm,
-          barcodeNo,
-          bf_lowPowerPath,
-          birthDay,
-          cassetId,
-          cbcAge,
-          hosName,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
-          isNsNbIntegration,
-          lock_status,
-          maxWbcCount,
-          orderDttm,
-          patientId,
-          patientNm,
-          pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
-          tactTime,
-          testType,
-          traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
-        FROM 
-          runing_info_entity
-        WHERE 
-          id < ?
-        ORDER BY 
-          id DESC
-        LIMIT 1 OFFSET ?`;
-    }
-
-    const newEntityResult = await entityManager.query(newEntityQuery, [
-      id,
-      step - 1,
-    ]);
-
-    if (newEntityResult.length > 0) {
-      const result = newEntityResult[0];
-      return {
-        id: result.id,
-        analyzedDttm: result.analyzedDttm,
-        barcodeNo: result.barcodeNo,
-        bf_lowPowerPath: result.bf_lowPowerPath,
-        birthDay: result.birthDay,
-        cassetId: result.cassetId,
-        cbcAge: result.cbcAge,
-        hosName: result.hosName,
-        cbcPatientNm: result.cbcPatientNm,
-        cbcPatientNo: result.cbcPatientNo,
-        cbcSex: result.cbcSex,
-        gender: result.gender,
-        img_drive_root_path: result.img_drive_root_path,
-        isNormal: result.isNormal,
-        isNsNbIntegration: result.isNsNbIntegration,
-        lock_status: result.lock_status,
-        maxWbcCount: result.maxWbcCount,
-        orderDttm: result.orderDttm,
-        patientId: result.patientId,
-        patientNm: result.patientNm,
-        pcIp: result.pcIp,
-        rbcInfo: result.rbcInfo,
-        rbcInfoAfter: result.rbcInfoAfter,
-        rbcMemo: result.rbcMemo,
-        slotId: result.slotId,
-        slotNo: result.slotNo,
-        submitOfDate: result.submitOfDate,
-        submitState: result.submitState,
-        submitUserId: result.submitUserId,
-        tactTime: result.tactTime,
-        testType: result.testType,
-        traySlot: result.traySlot,
-        wbcCount: result.wbcCount,
-        wbcInfoAfter: result.wbcInfoAfter,
-        wbcInfo: result.wbcInfo,
-        wbcMemo: result.wbcMemo,
-      } as Partial<RuningInfoEntity>;
     } else {
       return null;
     }
