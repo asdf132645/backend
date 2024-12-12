@@ -19,7 +19,7 @@ type WbcInfoAfter {
   name: String
   count: String
   title: String
-  images: [String!]
+  images: [wbcImages]
   percent: String
 }
 
@@ -28,8 +28,21 @@ type WbcInfo {
   name: String
   count: String
   title: String
-  images: [String!]
+  images: [wbcImages]
   percent: Int
+}
+
+type Coordinates {
+  display: String!
+}
+
+type wbcImages {
+  coordinates: Coordinates!
+  fileName: String
+  title: String
+  filter: String
+  height: Float
+  width: Float
 }
 
 type WbcResponse {
@@ -61,7 +74,7 @@ type RuningInfoEntity {
   wbcInfo: WbcResponse
   wbcInfoAfter: [WbcInfoAfter!]!
   rbcInfo: RbcInfo
-  rbcInfoAfter: [String!]!
+  rbcInfoAfter: RbcInfo
   submitState: String
   submitOfDate: DateTime
   submitUserId: String

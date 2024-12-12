@@ -68,14 +68,14 @@ export class RuningInfoDtoItems {
   @Field(() => WbcResponse, { nullable: true })
   wbcInfo?: WbcResponse;
 
-  @Field(() => [WbcInfoAfter], { nullable: true })
+  @Field(() => [WbcInfoAfter], { nullable: 'itemsAndList' })
   wbcInfoAfter?: WbcInfoAfter[];
 
   @Field(() => RbcInfo, { nullable: true })
   rbcInfo?: RbcInfo;
 
-  @Field(() => [String])
-  rbcInfoAfter: string[];
+  @Field(() => RbcInfo, { nullable: true })
+  rbcInfoAfter: RbcInfo;
 
   @Field(() => String)
   cassetId: string;

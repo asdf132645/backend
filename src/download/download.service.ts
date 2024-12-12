@@ -9,6 +9,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as os from 'os';
+import axios from "axios";
 import { LoggerService } from '../logger.service';
 import { CombinedService } from '../combinedProtocol/combined.service';
 
@@ -17,9 +18,9 @@ const userInfo = os.userInfo();
 @Injectable()
 export class DownloadService {
   private moveResults = { success: 0, total: 0 };
-  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
-  // private readonly fileOperationExpressServerPath = 'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\fileOperation-server';
-  private readonly fileOperationExpressServerPath = 'C:\\workspace\\fileOperation-server';
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\move_files.exe`;
+  // private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
+  // private readonly fileOperationExpressServerPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_fileOperation_server`;
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
@@ -47,6 +48,27 @@ export class DownloadService {
     }
   }
 
+  // private async runFileExpressServer(task: any, downloadType: string, apiUrl: string) {
+  //   const expressServer = spawn('npm', ['start'], {
+  //     cwd: this.fileOperationExpressServerPath,
+  //     stdio: 'inherit',
+  //     shell: true,
+  //   })
+  //
+  //   expressServer.on('close', (code) => {
+  //     console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+  //   })
+  //
+  //   try {
+  //     const response = await axios.post(`${apiUrl}:3010/file-copy-move`, { task, type: downloadType });
+  //     console.log('RESPONSE', response);
+  //   } catch (error) {
+  //     console.error('파일 복사 중 오류 발생: ', error);
+  //   }
+  //
+  //   expressServer.kill();
+  // }
+
   // 이미지 이동은 파이썬 실행파일을 사용
   private runPythonScript(task: any, downloadType: string) {
     const { source, destination } = task;
@@ -55,11 +77,8 @@ export class DownloadService {
     const convertedDestination = destination.replaceAll('\\', '/');
 
     return new Promise((resolve, reject) => {
-      const result = spawn(`${this.pythonScriptPath}`, [
-        downloadType,
-        convertedSource,
-        convertedDestination,
-      ]);
+      const result = spawn(`${ this.pythonScriptPath }`,
+          [ convertedSource, convertedDestination, downloadType]);
 
       // 표준 출력 (stdout) 로그 출력
       result.stdout.on('data', (data) => {
@@ -83,30 +102,6 @@ export class DownloadService {
         reject(err);
       });
     });
-  }
-
-  private countFilesInDirectory(dir) {
-    let fileCount = 0;
-
-    const stack = [dir]; // 스택을 사용하여 탐색할 디렉토리를 저장
-
-    while (stack.length > 0) {
-      const currentDir = stack.pop();
-      const items = fs.readdirSync(currentDir); // 현재 디렉토리의 내용 읽기
-
-      for (const item of items) {
-        const itemPath = path.join(currentDir, item);
-        const stats = fs.statSync(itemPath);
-
-        if (stats.isDirectory()) {
-          stack.push(itemPath); // 디렉토리인 경우 스택에 추가
-        } else {
-          fileCount++; // 파일인 경우 카운트 증가
-        }
-      }
-    }
-
-    return fileCount;
   }
 
   private execCommand(command: string): Promise<void> {
@@ -217,6 +212,7 @@ export class DownloadService {
       destinationDownloadPath,
       downloadType,
       projectType,
+      apiUrl,
     } = downloadDto;
 
     const downloadPath = `${destinationDownloadPath.split(':')[0]}:\\UIMD_${projectType.toUpperCase()}_backup`;
@@ -248,36 +244,13 @@ export class DownloadService {
       )
     ).filter(Boolean);
 
-    this.moveResults.success = 0;
-
-    // const fileOperationExpressServer = spawn('npm', ['start'], {
-    //   cwd: this.fileOperationExpressServerPath,
-    //   stdio: 'inherit',
-    //   shell: true,
-    // })
-    //
-    //
-    // try {
-    //   const response = await axios.post(`http://192.168.0.115:3010/file-${downloadType}`, queue);
-    //   console.log('RESPONSE', response);
-    // } catch (error) {
-    //   console.error('Express 서버 에러', error);
-    // }
-    //
-    // fileOperationExpressServer.on('close', (code) => {
-    //   console.log(`파일 작업 Express 서버가 종료되었습니다. 종료 코드: ${code}`);
-    // });
+    // await this.runFileExpressServer(queue, downloadType, apiUrl);
 
     const promises = queue.map(
       async (task) => await this.runPythonScript(task, downloadType),
     );
     await Promise.all(promises);
 
-    await new Promise((resolve) => {
-      if (this.moveResults.success === queue.length) {
-        resolve(null);
-      }
-    });
 
     if (downloadType === 'move') {
       await this.updateImgDriveRootPath(

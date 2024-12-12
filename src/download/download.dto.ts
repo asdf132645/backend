@@ -7,6 +7,7 @@ export class DownloadDto {
   projectType: 'bm' | 'pb';
   dayQuery: any;
   deleteFileNames: string[];
+  apiUrl: string;
 }
 
 export class DownloadReturn {

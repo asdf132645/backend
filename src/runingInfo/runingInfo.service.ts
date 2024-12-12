@@ -13,6 +13,7 @@ import {
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
 import * as os from 'os';
+import * as path from 'path';
 import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
@@ -21,13 +22,14 @@ import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import {exec, spawn} from 'child_process';
+import axios from "axios";
 
 const userInfo = os.userInfo();
 
 @Injectable()
 export class RuningInfoService {
-  private deleteCompleted = 0;
-  private readonly fileOperationPythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
+  // private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\file_operation.exe`;
+  private readonly fileOperationExpressServerPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_fileOperation_server`;
   constructor(
     private readonly logger: LoggerService,
     private readonly dataSource: DataSource, // 트랜잭션을 사용 하여 비동기 작업의 타이밍 문제를 해결
@@ -172,40 +174,28 @@ export class RuningInfoService {
     return updatedItems;
   }
 
-  async delete(ids: string[], rootPaths: string[]): Promise<boolean> {
+  async delete(ids: string[], rootPaths: string[], apiUrl: string): Promise<boolean> {
     await this.cleanBrowserCache();
 
-    this.deleteCompleted = 0;
     try {
-      const result = await this.runingInfoEntityRepository.delete({
-        id: In(ids),
+      await this.runingInfoEntityRepository.delete({ id: In(ids) });
+
+      const promises = rootPaths.map((rootPath: string) => {
+        return new Promise<boolean>((resolve, reject) => {
+          exec(`rmdir /s /q "${rootPath}"`, (error) => {
+            if (error) {
+              console.error(`Failed to delete folder at ${rootPath}: ${error.message}`);
+              reject(false);
+            } else {
+              console.log(`Folder at ${rootPath} has been deleted successfully`);
+              resolve(true);
+            }
+          });
+        });
       });
 
-      const promises = rootPaths.map(async (task) => await this.runPythonScript(task));
       await Promise.all(promises);
-
-      await new Promise((resolve) => {
-        if (this.deleteCompleted === rootPaths.length) {
-          resolve(true);
-        }
-      })
-      // if (result.affected > 0) {
-      //   for (const rootPath of rootPaths) {
-      //     exec(`rmdir /s /q "${rootPath}"`, (error) => {
-      //       if (error) {
-      //         console.error(
-      //           `Failed to delete folder at ${rootPath}:`,
-      //           error.message,
-      //         );
-      //       } else {
-      //         console.log(
-      //           `Folder at ${rootPath} has been deleted successfully`,
-      //         );
-      //       }
-      //     });
-      //   }
-      // }
-      // return result.affected > 0; // affected가 0보다 크면 성공
+      // await this.runFileExpressServer(rootPaths, apiUrl);
       return true;
     } catch (error) {
       console.error('Error while deleting entities:', error);
@@ -298,37 +288,33 @@ export class RuningInfoService {
     }
 
     if (titles && titles.length > 0) {
-      const orConditions = titles
+      const andConditions = titles
         .map((title, index) => {
           const titleParam = `title${index}`;
           return `
-            (JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
-            AND (
-              SELECT COUNT(*)
-              FROM JSON_TABLE(
-                runInfo.wbcInfoAfter,
-                '$[*]' COLUMNS(
-                  title VARCHAR(255) PATH '$.title',
-                  count INT PATH '$.count'
-                )
-              ) AS jt
-              WHERE jt.title = :${titleParam}
-                AND jt.count > 0
-            ) > 0)
-          `;
+        JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+        AND (
+          SELECT COUNT(*)
+          FROM JSON_TABLE(
+            runInfo.wbcInfoAfter,
+            '$[*]' COLUMNS(
+              title VARCHAR(255) PATH '$.title',
+              count INT PATH '$.count'
+            )
+          ) AS jt
+          WHERE jt.title = :${titleParam}
+            AND jt.count > 0
+        ) > 0
+      `;
         })
-        .join(' OR ');
+        .join(' AND ');
 
       const params = titles.reduce((acc, title, index) => {
         acc[`title${index}`] = title;
         return acc;
       }, {});
 
-      queryBuilder.andWhere(
-        new Brackets((qb) => {
-          qb.where(orConditions, params);
-        }),
-      );
+      queryBuilder.andWhere(andConditions, params);
     }
 
     // eslint-disable-next-line prefer-const
@@ -348,6 +334,146 @@ export class RuningInfoService {
     }
 
     return { data, total };
+  }
+
+  async getUpDownRunnInfo(
+    id: number,
+    type: string,
+    nrCount?: string,
+    titles?: string[],
+    startDay?: Date,
+    endDay?: Date,
+    barcodeNo?: string,
+    testType?: string,
+  ): Promise<Partial<RuningInfoEntity> | null> {
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+    const queryBuilder =
+      this.runingInfoEntityRepository.createQueryBuilder('runInfo');
+
+    // 현재 엔티티 존재 여부 확인
+    const currentEntityResult = await entityManager.query(
+      'SELECT id FROM runing_info_entity WHERE id = ?',
+      [id],
+    );
+
+    if (currentEntityResult.length === 0) {
+      return null;
+    }
+
+    // 날짜 조건 포맷팅
+    const startFormatted = startDay
+      ? `${startDay.getFullYear()}${(startDay.getMonth() + 1).toString().padStart(2, '0')}${startDay.getDate().toString().padStart(2, '0')}000000000`
+      : undefined;
+    const endFormatted = endDay
+      ? `${endDay.getFullYear()}${(endDay.getMonth() + 1).toString().padStart(2, '0')}${endDay.getDate().toString().padStart(2, '0')}235959999`
+      : undefined;
+
+    if (startFormatted) {
+      queryBuilder.andWhere('runInfo.analyzedDttm >= :startDay', {
+        startDay: startFormatted,
+      });
+    }
+    if (endFormatted) {
+      queryBuilder.andWhere('runInfo.analyzedDttm <= :endDay', {
+        endDay: endFormatted,
+      });
+    }
+
+    // 바코드 번호 조건
+    if (barcodeNo) {
+      queryBuilder.andWhere('runInfo.barcodeNo LIKE :barcodeNo', {
+        barcodeNo: `%${barcodeNo}%`,
+      });
+    }
+
+    // 테스트 타입 조건
+    if (testType) {
+      queryBuilder.andWhere('runInfo.testType = :testType', { testType });
+    }
+
+    // 타입에 따른 조건 설정
+    if (type === 'up') {
+      queryBuilder
+        .andWhere('runInfo.id > :id', { id })
+        .orderBy('runInfo.id', 'ASC');
+    } else if (type === 'down') {
+      queryBuilder
+        .andWhere('runInfo.id < :id', { id })
+        .orderBy('runInfo.id', 'DESC');
+    }
+
+    // NR 조건 추가
+    if (nrCount && nrCount !== '0') {
+      queryBuilder.andWhere(
+        `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', 'NR', NULL, '$[*].title') IS NOT NULL
+       AND (
+         SELECT COUNT(*)
+         FROM JSON_TABLE(
+           runInfo.wbcInfoAfter,
+           '$[*]' COLUMNS(
+             title VARCHAR(255) PATH '$.title',
+             count INT PATH '$.count'
+           )
+         ) AS jt
+         WHERE jt.title = 'NR' AND jt.count = :nrCount
+       ) > 0`,
+        { nrCount: parseInt(nrCount, 10) },
+      );
+    }
+
+    // Titles 조건 추가 (AND 조건)
+    if (titles && titles.length > 0) {
+      titles.forEach((title, index) => {
+        queryBuilder.andWhere(
+          `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL
+         AND (
+           SELECT COUNT(*)
+           FROM JSON_TABLE(
+             runInfo.wbcInfoAfter,
+             '$[*]' COLUMNS(
+               title VARCHAR(255) PATH '$.title',
+               count INT PATH '$.count'
+             )
+           ) AS jt
+           WHERE jt.title = :title${index}
+             AND jt.count > 0
+         ) > 0`,
+          { [`title${index}`]: title },
+        );
+      });
+    }
+
+    // 쿼리 실행
+    const result = await queryBuilder.getRawOne();
+
+    if (result) {
+      // Prefix 제거 후 반환
+      const cleanedResult: Partial<RuningInfoEntity> = {};
+      Object.keys(result).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, '');
+        cleanedResult[cleanedKey] = result[key];
+      });
+      return cleanedResult;
+    }
+
+    // 조건을 만족하지 않을 경우 다음 항목 반환
+    const directionQuery =
+      type === 'up'
+        ? 'SELECT * FROM runing_info_entity WHERE id > ? ORDER BY id ASC LIMIT 1'
+        : 'SELECT * FROM runing_info_entity WHERE id < ? ORDER BY id DESC LIMIT 1';
+
+    const nextResult = await entityManager.query(directionQuery, [id]);
+    if (nextResult.length > 0) {
+      const cleanedNextResult: Partial<RuningInfoEntity> = {};
+      Object.keys(nextResult[0]).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, '');
+        cleanedNextResult[cleanedKey] = nextResult[0][key];
+      });
+      return cleanedNextResult;
+    }
+
+    return null;
   }
 
   async clearPcIpAndSetStateFalse(pcIp: string): Promise<void> {
@@ -485,178 +611,6 @@ export class RuningInfoService {
     }
   }
 
-  async getUpDownRunnInfo(
-    id: number,
-    step: number,
-    type: string,
-  ): Promise<Partial<RuningInfoEntity> | null> {
-    const entityManager: EntityManager =
-      this.runingInfoEntityRepository.manager;
-
-    // 현재 엔티티를 찾기
-    const currentEntityQuery = `
-      SELECT 
-        id
-      FROM 
-        runing_info_entity
-      WHERE 
-        id = ?`;
-
-    const currentEntityResult = await entityManager.query(currentEntityQuery, [
-      id,
-    ]);
-
-    if (currentEntityResult.length === 0) {
-      return null;
-    }
-
-    let newEntityQuery = '';
-    if (type === 'up') {
-      // 현재 id보다 큰 id를 가진 항목 중 step번째 항목 찾기
-      newEntityQuery = `
-        SELECT 
-          id,
-          analyzedDttm,
-          barcodeNo,
-          bf_lowPowerPath,
-          birthDay,
-          cassetId,
-          cbcAge,
-          hosName,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
-          isNsNbIntegration,
-          lock_status,
-          maxWbcCount,
-          orderDttm,
-          patientId,
-          patientNm,
-          pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
-          tactTime,
-          testType,
-          traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
-        FROM 
-          runing_info_entity
-        WHERE 
-          id > ?
-        ORDER BY 
-          id ASC
-        LIMIT 1 OFFSET ?`;
-    } else if (type === 'down') {
-      // 현재 id보다 작은 id를 가진 항목 중 step번째 항목 찾기
-      newEntityQuery = `
-        SELECT 
-          id,
-          analyzedDttm,
-          barcodeNo,
-          bf_lowPowerPath,
-          birthDay,
-          cassetId,
-          cbcAge,
-          hosName,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
-          isNsNbIntegration,
-          lock_status,
-          maxWbcCount,
-          orderDttm,
-          patientId,
-          patientNm,
-          pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
-          tactTime,
-          testType,
-          traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
-        FROM 
-          runing_info_entity
-        WHERE 
-          id < ?
-        ORDER BY 
-          id DESC
-        LIMIT 1 OFFSET ?`;
-    }
-
-    const newEntityResult = await entityManager.query(newEntityQuery, [
-      id,
-      step - 1,
-    ]);
-
-    if (newEntityResult.length > 0) {
-      const result = newEntityResult[0];
-      return {
-        id: result.id,
-        analyzedDttm: result.analyzedDttm,
-        barcodeNo: result.barcodeNo,
-        bf_lowPowerPath: result.bf_lowPowerPath,
-        birthDay: result.birthDay,
-        cassetId: result.cassetId,
-        cbcAge: result.cbcAge,
-        hosName: result.hosName,
-        cbcPatientNm: result.cbcPatientNm,
-        cbcPatientNo: result.cbcPatientNo,
-        cbcSex: result.cbcSex,
-        gender: result.gender,
-        img_drive_root_path: result.img_drive_root_path,
-        isNormal: result.isNormal,
-        isNsNbIntegration: result.isNsNbIntegration,
-        lock_status: result.lock_status,
-        maxWbcCount: result.maxWbcCount,
-        orderDttm: result.orderDttm,
-        patientId: result.patientId,
-        patientNm: result.patientNm,
-        pcIp: result.pcIp,
-        rbcInfo: result.rbcInfo,
-        rbcInfoAfter: result.rbcInfoAfter,
-        rbcMemo: result.rbcMemo,
-        slotId: result.slotId,
-        slotNo: result.slotNo,
-        submitOfDate: result.submitOfDate,
-        submitState: result.submitState,
-        submitUserId: result.submitUserId,
-        tactTime: result.tactTime,
-        testType: result.testType,
-        traySlot: result.traySlot,
-        wbcCount: result.wbcCount,
-        wbcInfoAfter: result.wbcInfoAfter,
-        wbcInfo: result.wbcInfo,
-        wbcMemo: result.wbcMemo,
-      } as Partial<RuningInfoEntity>;
-    } else {
-      return null;
-    }
-  }
-
   async updatePcIpAndState(
     oldPcIp: string,
     newEntityId: number,
@@ -703,34 +657,25 @@ export class RuningInfoService {
     });
   }
 
-  private runPythonScript(task: any) {
 
-    const convertedSource = task.replaceAll('\\', '/');
+  private async runFileExpressServer(task: any, apiUrl: string) {
+    const expressServer = spawn('npm', ['start'], {
+      cwd: this.fileOperationExpressServerPath,
+      stdio: 'inherit',
+      shell: true,
+    })
 
-    return new Promise((resolve, reject) => {
-      const result = spawn(`${this.fileOperationPythonScriptPath}`, ['delete', convertedSource]);
+    expressServer.on('close', (code) => {
+      console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+    })
 
-      // 표준 출력 (stdout) 로그 출력
-      result.stdout.on('data', (data) => {
-        console.log(`Output: ${data}`);
-      });
+    try {
+      await axios.post(`${apiUrl}:3010/file-delete`, { task });
+    } catch (error) {
+      console.error('파일 삭제 중 오류 발생: ', error);
+    }
 
-      // 표준 에러 (stderr) 로그 출력
-      result.stderr.on('data', (data) => {
-        console.error(`Error: ${data}`);
-      });
-
-      // 프로세스가 완료되면 실행되는 콜백
-      result.on('close', (code) => {
-        this.deleteCompleted++;
-        console.log('Delete Success', code);
-        resolve(true);
-      });
-
-      // 프로세스 실행 에러 발생 시
-      result.on('error', (err) => {
-        reject(err);
-      });
-    });
+    expressServer.kill();
   }
+
 }
