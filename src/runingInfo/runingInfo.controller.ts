@@ -30,13 +30,17 @@ export class RuningInfoController {
   @Get('pageUpDown')
   async getPageUpDown(
     @Query('id') id: string,
-    @Query('step') step: string,
     @Query('type') type: string,
     @Query('dayQuery') dayQuery: string,
     @Query('nrCount') nrCount?: string,
     @Query('title') titles?: string,
+    @Query('startDay') startDay?: string,
+    @Query('endDay') endDay?: string,
+    @Query('barcodeNo') barcodeNo?: string,
+    @Query('testType') testType?: string,
   ): Promise<Partial<RuningInfoEntity> | null> {
-    // console.log('pageUpDown', dayQuery);
+    const startDate = startDay ? moment(startDay).toDate() : undefined;
+    const endDate = endDay ? moment(endDay).toDate() : undefined;
     let titlesArray: string[] | undefined;
     if (titles) {
       titlesArray = titles.split(',');
@@ -44,10 +48,13 @@ export class RuningInfoController {
     await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     return this.runingInfoService.getUpDownRunnInfo(
       Number(id),
-      Number(step),
       type,
       nrCount,
       titlesArray,
+      startDate,
+      endDate,
+      barcodeNo,
+      testType,
     );
   }
 

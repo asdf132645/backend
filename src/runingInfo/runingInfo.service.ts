@@ -332,6 +332,146 @@ export class RuningInfoService {
     return { data, total };
   }
 
+  async getUpDownRunnInfo(
+    id: number,
+    type: string,
+    nrCount?: string,
+    titles?: string[],
+    startDay?: Date,
+    endDay?: Date,
+    barcodeNo?: string,
+    testType?: string,
+  ): Promise<Partial<RuningInfoEntity> | null> {
+    const entityManager: EntityManager =
+      this.runingInfoEntityRepository.manager;
+    const queryBuilder =
+      this.runingInfoEntityRepository.createQueryBuilder('runInfo');
+
+    // 현재 엔티티 존재 여부 확인
+    const currentEntityResult = await entityManager.query(
+      'SELECT id FROM runing_info_entity WHERE id = ?',
+      [id],
+    );
+
+    if (currentEntityResult.length === 0) {
+      return null;
+    }
+
+    // 날짜 조건 포맷팅
+    const startFormatted = startDay
+      ? `${startDay.getFullYear()}${(startDay.getMonth() + 1).toString().padStart(2, '0')}${startDay.getDate().toString().padStart(2, '0')}000000000`
+      : undefined;
+    const endFormatted = endDay
+      ? `${endDay.getFullYear()}${(endDay.getMonth() + 1).toString().padStart(2, '0')}${endDay.getDate().toString().padStart(2, '0')}235959999`
+      : undefined;
+
+    if (startFormatted) {
+      queryBuilder.andWhere('runInfo.analyzedDttm >= :startDay', {
+        startDay: startFormatted,
+      });
+    }
+    if (endFormatted) {
+      queryBuilder.andWhere('runInfo.analyzedDttm <= :endDay', {
+        endDay: endFormatted,
+      });
+    }
+
+    // 바코드 번호 조건
+    if (barcodeNo) {
+      queryBuilder.andWhere('runInfo.barcodeNo LIKE :barcodeNo', {
+        barcodeNo: `%${barcodeNo}%`,
+      });
+    }
+
+    // 테스트 타입 조건
+    if (testType) {
+      queryBuilder.andWhere('runInfo.testType = :testType', { testType });
+    }
+
+    // 타입에 따른 조건 설정
+    if (type === 'up') {
+      queryBuilder
+        .andWhere('runInfo.id > :id', { id })
+        .orderBy('runInfo.id', 'ASC');
+    } else if (type === 'down') {
+      queryBuilder
+        .andWhere('runInfo.id < :id', { id })
+        .orderBy('runInfo.id', 'DESC');
+    }
+
+    // NR 조건 추가
+    if (nrCount && nrCount !== '0') {
+      queryBuilder.andWhere(
+        `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', 'NR', NULL, '$[*].title') IS NOT NULL
+       AND (
+         SELECT COUNT(*)
+         FROM JSON_TABLE(
+           runInfo.wbcInfoAfter,
+           '$[*]' COLUMNS(
+             title VARCHAR(255) PATH '$.title',
+             count INT PATH '$.count'
+           )
+         ) AS jt
+         WHERE jt.title = 'NR' AND jt.count = :nrCount
+       ) > 0`,
+        { nrCount: parseInt(nrCount, 10) },
+      );
+    }
+
+    // Titles 조건 추가 (AND 조건)
+    if (titles && titles.length > 0) {
+      titles.forEach((title, index) => {
+        queryBuilder.andWhere(
+          `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL
+         AND (
+           SELECT COUNT(*)
+           FROM JSON_TABLE(
+             runInfo.wbcInfoAfter,
+             '$[*]' COLUMNS(
+               title VARCHAR(255) PATH '$.title',
+               count INT PATH '$.count'
+             )
+           ) AS jt
+           WHERE jt.title = :title${index}
+             AND jt.count > 0
+         ) > 0`,
+          { [`title${index}`]: title },
+        );
+      });
+    }
+
+    // 쿼리 실행
+    const result = await queryBuilder.getRawOne();
+
+    if (result) {
+      // Prefix 제거 후 반환
+      const cleanedResult: Partial<RuningInfoEntity> = {};
+      Object.keys(result).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, '');
+        cleanedResult[cleanedKey] = result[key];
+      });
+      return cleanedResult;
+    }
+
+    // 조건을 만족하지 않을 경우 다음 항목 반환
+    const directionQuery =
+      type === 'up'
+        ? 'SELECT * FROM runing_info_entity WHERE id > ? ORDER BY id ASC LIMIT 1'
+        : 'SELECT * FROM runing_info_entity WHERE id < ? ORDER BY id DESC LIMIT 1';
+
+    const nextResult = await entityManager.query(directionQuery, [id]);
+    if (nextResult.length > 0) {
+      const cleanedNextResult: Partial<RuningInfoEntity> = {};
+      Object.keys(nextResult[0]).forEach((key) => {
+        const cleanedKey = key.replace(/^runInfo_/, '');
+        cleanedNextResult[cleanedKey] = nextResult[0][key];
+      });
+      return cleanedNextResult;
+    }
+
+    return null;
+  }
+
   async clearPcIpAndSetStateFalse(pcIp: string): Promise<void> {
     try {
       console.log(pcIp);
@@ -465,131 +605,6 @@ export class RuningInfoService {
     } else {
       return null;
     }
-  }
-
-  async getUpDownRunnInfo(
-    id: number,
-    step: number,
-    type: string,
-    nrCount?: string,
-    titles?: string[],
-  ): Promise<Partial<RuningInfoEntity> | null> {
-    const entityManager: EntityManager =
-      this.runingInfoEntityRepository.manager;
-    const queryBuilder =
-      this.runingInfoEntityRepository.createQueryBuilder('runInfo');
-
-    // 현재 엔티티 조회
-    const currentEntityResult = await entityManager.query(
-      'SELECT id FROM runing_info_entity WHERE id = ?',
-      [id],
-    );
-
-    if (currentEntityResult.length === 0) {
-      return null;
-    }
-
-    // 'up' 또는 'down' 타입에 따른 조건 설정
-    if (type === 'up') {
-      queryBuilder.where('runInfo.id > :id', { id });
-      queryBuilder.orderBy('runInfo.id', 'ASC');
-    } else if (type === 'down') {
-      queryBuilder.where('runInfo.id < :id', { id });
-      queryBuilder.orderBy('runInfo.id', 'DESC');
-    }
-
-    // nrCount가 있을 때 조건 추가
-    if (nrCount && nrCount !== '0' && nrCount !== '') {
-      queryBuilder.andWhere(
-        `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', 'NR', NULL, '$[*].title') IS NOT NULL
-      AND (
-        SELECT COUNT(*)
-        FROM JSON_TABLE(
-          runInfo.wbcInfoAfter,
-          '$[*]' COLUMNS(
-            title VARCHAR(255) PATH '$.title',
-            count INT PATH '$.count'
-          )
-        ) AS jt
-        WHERE jt.title = 'NR' AND jt.count = :nrCount
-      ) > 0`,
-        { nrCount: parseInt(nrCount, 10) },
-      );
-    }
-
-    // titles가 있을 때 조건 추가 (AND 조건으로 수정)
-    if (titles && titles.length > 0) {
-      titles.forEach((title, index) => {
-        queryBuilder.andWhere(
-          `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL
-        AND (
-          SELECT COUNT(*)
-          FROM JSON_TABLE(
-            runInfo.wbcInfoAfter,
-            '$[*]' COLUMNS(
-              title VARCHAR(255) PATH '$.title',
-              count INT PATH '$.count'
-            )
-          ) AS jt
-          WHERE jt.title = :title${index}
-            AND jt.count > 0
-        ) > 0`,
-          { [`title${index}`]: title },
-        );
-      });
-    }
-
-    // 조건을 만족하는 항목이 있는지 확인
-    const result = await queryBuilder.getRawOne();
-
-    // 조건을 만족하는 결과가 있으면 반환
-    if (result) {
-      // result에서 runInfo_ 접두어를 제거
-      const cleanedResult: Partial<RuningInfoEntity> = {};
-      Object.keys(result).forEach((key) => {
-        const cleanedKey = key.replace(/^runInfo_/, ''); // 'runInfo_' 접두어 제거
-        cleanedResult[cleanedKey] = result[key];
-      });
-      return cleanedResult;
-    }
-
-    // 조건을 만족하는 항목이 없으면 다음 항목을 찾아서 결과 반환
-    if (type === 'up') {
-      // 'up' 타입에서 조건을 만족하는 첫 번째 항목을 찾음
-      const nextResult = await entityManager.query(
-        'SELECT * FROM runing_info_entity WHERE id > ? ORDER BY id ASC LIMIT 1',
-        [id],
-      );
-      if (nextResult.length > 0) {
-        const cleanedNextResult = nextResult[0];
-        // result에서 runInfo_ 접두어를 제거
-        const cleanedResult: Partial<RuningInfoEntity> = {};
-        Object.keys(cleanedNextResult).forEach((key) => {
-          const cleanedKey = key.replace(/^runInfo_/, ''); // 'runInfo_' 접두어 제거
-          cleanedResult[cleanedKey] = cleanedNextResult[key];
-        });
-        return cleanedResult;
-      }
-    } else if (type === 'down') {
-      // 'down' 타입에서 조건을 만족하는 첫 번째 항목을 찾음
-      const nextResult = await entityManager.query(
-        'SELECT * FROM runing_info_entity WHERE id < ? ORDER BY id DESC LIMIT 1',
-        [id],
-      );
-      if (nextResult.length > 0) {
-        const cleanedNextResult = nextResult[0];
-        // result에서 runInfo_ 접두어를 제거
-        const cleanedResult: Partial<RuningInfoEntity> = {};
-        Object.keys(cleanedNextResult).forEach((key) => {
-          const cleanedKey = key.replace(/^runInfo_/, ''); // 'runInfo_' 접두어 제거
-          cleanedResult[cleanedKey] = cleanedNextResult[key];
-        });
-        return cleanedResult;
-      }
-    }
-
-    // 최종적으로 결과가 없으면 null 반환
-    return null;
   }
 
   async updatePcIpAndState(
