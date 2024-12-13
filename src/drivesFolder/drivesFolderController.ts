@@ -21,14 +21,22 @@ export class FolderController {
 
   private getWindowsDrives(): string[] {
     try {
-      // wmic 명령어를 사용하여 Windows에서 실제로 설치된 드라이브 목록 가져오기
-      const wmicOutput = execSync('wmic logicaldisk get caption').toString();
-      const driveLetters = wmicOutput
-        .split('\r\n')
-        .slice(1, -1)
-        .map((line) => line.trim());
+      // // wmic 명령어를 사용하여 Windows에서 실제로 설치된 드라이브 목록 가져오기
+      // const wmicOutput = execSync('wmic logicaldisk get caption').toString();
+      // const driveLetters = wmicOutput
+      //   .split('\r\n')
+      //   .slice(1, -1)
+      //   .map((line) => line.trim());
+      //
+      // console.log(driveLetters);
+      // return driveLetters;
+      const powershellOutput = execSync('powershell -Command "Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Root"').toString();
+      const driveLetters = powershellOutput
+          .split('\r\n')
+          .filter(line => line.trim() !== '');
 
-      return driveLetters;
+      const convertedDriveLetters = driveLetters.map((letter: string) => letter.replaceAll('\\', ''));
+      return convertedDriveLetters;
     } catch (error) {
       throw new Error(`Failed to get Windows drives: ${error.message}`);
     }
