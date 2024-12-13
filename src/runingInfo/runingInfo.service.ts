@@ -159,6 +159,7 @@ export class RuningInfoService {
         existingEntity.submitOfDate = item.submitOfDate;
         existingEntity.submitUserId = item.submitUserId;
         existingEntity.img_drive_root_path = item.img_drive_root_path;
+        existingEntity.abnormalClassInfo = item.abnormalClassInfo;
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
       }
