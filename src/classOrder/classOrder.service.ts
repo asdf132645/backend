@@ -21,40 +21,16 @@ export class ClassOrderService {
   ): Promise<ClassOrderDto[]> {
     // 새로운 주문을 저장할 배열
     const newClassOrders: ClassOrder[] = [];
+    const existingOrder = await this.classOrderRepository.find();
+    if (existingOrder.length > 0) return;
 
-    for (const dto of createDtos) {
-      // 이미 존재하는 주문인지 확인
-      const existingOrder = await this.classOrderRepository.find();
-      const classIdArray = existingOrder.map(
-        (item: ClassOrder) => item.classId,
-      );
-
-      if (existingOrder.length === 0 || !existingOrder) {
-        // 존재하지 않는 경우 새로운 주문 생성
-        const classOrderEntity = new ClassOrder();
-        classOrderEntity.classId = dto.classId;
-        classOrderEntity.abbreviation = dto.abbreviation;
-        classOrderEntity.fullNm = dto.fullNm;
-        classOrderEntity.orderIdx = dto.orderIdx;
-
-        newClassOrders.push(classOrderEntity);
-      }
-
-      if (!classIdArray.includes(dto.classId)) {
-        const classOrderEntity = new ClassOrder();
-        classOrderEntity.classId = dto.classId;
-        classOrderEntity.abbreviation = dto.abbreviation;
-        classOrderEntity.fullNm = dto.fullNm;
-        classOrderEntity.orderIdx = dto.orderIdx;
-
-        newClassOrders.push(classOrderEntity);
-      }
+    for (const item of createDtos) {
+      const classOrderEntity = this.classOrderRepository.create({ ...item });
+      const createdItem = await this.classOrderRepository.save(classOrderEntity);
+      newClassOrders.push(createdItem);
     }
 
-    // 새로운 주문을 데이터베이스에 저장
-    const savedClassOrders =
-      await this.classOrderRepository.save(newClassOrders);
-    return savedClassOrders;
+    return newClassOrders;
   }
 
   async updateClassOrders(newData: ClassOrderDto[]): Promise<ClassOrderDto[]> {
