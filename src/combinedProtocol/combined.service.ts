@@ -41,6 +41,7 @@ export class CombinedService
   private isNotDownloadOrUploading = true;
   private tcpQueue: any[] = []; // 전송 대기열
   private isProcessing: boolean = false; // 현재 처리 중인지 여부
+  private isInit = false;
 
   constructor(
     private readonly logger: LoggerService,
@@ -111,9 +112,7 @@ export class CombinedService
         if (this.wss) {
           delete message.payload?.anyWay;
           if (!client.conn.remoteAddress.includes('192.168.0.131')) {
-            this.logger.log(
-              `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
-            );
+            this.logger.log(`웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`);
           }
 
           if (!this.notRes) {
@@ -224,17 +223,21 @@ export class CombinedService
 
   sendDataToEmbeddedServer(data: any): void {
     // 데이터 중복 체크
-    if (
-      this.tcpQueue.some(
-        (item) => JSON.stringify(item) === JSON.stringify(data),
-      )
-    ) {
+    if (this.tcpQueue.some((item) => JSON.stringify(item) === JSON.stringify(data)))
+    {
       this.logger.warn('⚠️ 중복 데이터로 인해 전송이 무시되었습니다.');
       return;
     }
 
     // 데이터 큐에 추가
     this.tcpQueue.push(data);
+
+    if (!this.isInit) {
+      setInterval( async () => {
+        await this.handleJobcmd(data);
+      }, 500);
+    }
+
     this.processQueue(); // 큐 처리 시작
   }
 
@@ -253,6 +256,7 @@ export class CombinedService
         if (serializedData && this.isNotDownloadOrUploading) {
           this.connectedClient.write(serializedData);
           this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+          if (data.jobCmd === 'INIT') this.isInit = true;
           this.notRes = true;
 
           // 데이터 전송 후 일정 시간 대기 (예: 100ms)
@@ -359,5 +363,13 @@ export class CombinedService
       isFinished: true,
     };
     this.wss.emit('downloadUploadFinished', obj);
+  }
+
+  private handleJobcmd = async (tcpData: any) => {
+    if (tcpData.jobCmd === 'INIT') {
+      // INIT 외의 것들은 삭제
+      this.tcpQueue = [];
+      this.tcpQueue.push(tcpData);
+    }
   }
 }
