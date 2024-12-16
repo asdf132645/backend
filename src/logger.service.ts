@@ -5,7 +5,7 @@ import * as moment from 'moment';
 
 @Injectable()
 export class LoggerService extends Logger {
-  private readonly baseLogDir = 'C:\\UIMD_Data\\UI_Log\\BACKEND_LOG';
+  private readonly baseLogDir = 'D:\\UIMD_Data\\UI_Log\\BACKEND_LOG';
   private lastMessages = {
     log: null,
     error: null,

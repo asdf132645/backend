@@ -146,7 +146,6 @@ export class ImagesController {
     const destinationFoldersArray = destinationFolders
       ? destinationFolders.split(',')
       : [];
-    console.log(imageNames);
     const imageNamesArray = imageNames ? imageNames.split(',') : [];
 
     // 매개변수 길이가 일치하는지 확인
