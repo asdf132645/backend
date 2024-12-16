@@ -11,7 +11,7 @@ export class RunningInfoResolver {
     @Args('id', { type: () => Int }) id: number, // GraphQL의 Int로 명시
   ): Promise<RuningInfoEntity> {
     const runningInfo = await this.runningInfoService.getRunningInfoById(id);
-
+    console.log(runningInfo);
     if (runningInfo) {
       return runningInfo;
     }
