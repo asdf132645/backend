@@ -10,7 +10,8 @@ export class CellImgAnalyzedDto {
   diffPltPositionMargin: string;
   stitchCount: string;
   edgeShotType: string;
-  edgeShotCount: string;
+  edgeShotLPCount: string;
+  edgeShotHPCount: string;
   iaRootPath: string;
   isNsNbIntegration: boolean;
   isAlarm: boolean;
