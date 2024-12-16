@@ -41,7 +41,24 @@ export class CombinedService
   private isNotDownloadOrUploading = true;
   private tcpQueue: any[] = []; // 전송 대기열
   private isProcessing: boolean = false; // 현재 처리 중인지 여부
-  private isInit = false;
+  private runningJobCmd = {
+    START: false,
+    INIT: false,
+    RESTART: false,
+    STOP: false,
+    END: false,
+    PAUSE: false,
+    RUNNING_COMP: false,
+    RECOVERY: false,
+    SETTINGS: false,
+    OIL_PRIME: false,
+    GRIPPER_OPEN: false,
+    CAMERA_RESET: false,
+    clientExit: false,
+    SEARCH_CARD_COUNT: false,
+    ERROR_CLEAR: false,
+  }
+  private isTCPError = false;
 
   constructor(
     private readonly logger: LoggerService,
@@ -140,6 +157,11 @@ export class CombinedService
       }
     });
 
+    client.on('isTCPError', (state: any) => {
+      const localTCPError = (state.message || state.message === 'true') ? true : false;
+      this.isTCPError = localTCPError;
+    })
+
     client.on(
       'isDownloadUploading',
       (state: { type: string; payload: boolean }) => {
@@ -232,7 +254,7 @@ export class CombinedService
     // 데이터 큐에 추가
     this.tcpQueue.push(data);
 
-    if (!this.isInit) {
+    if (!this.isTCPError) {
       setInterval( async () => {
         await this.handleJobcmd(data);
       }, 500);
@@ -256,7 +278,10 @@ export class CombinedService
         if (serializedData && this.isNotDownloadOrUploading) {
           this.connectedClient.write(serializedData);
           this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
-          if (data.jobCmd === 'INIT') this.isInit = true;
+
+          if (!['SYSINFO', 'RUNNING_INFO'].includes(data.jobCmd)) {
+            this.runningJobCmd[data.jobCmd] = true;
+          }
           this.notRes = true;
 
           // 데이터 전송 후 일정 시간 대기 (예: 100ms)
@@ -366,8 +391,7 @@ export class CombinedService
   }
 
   private handleJobcmd = async (tcpData: any) => {
-    if (tcpData.jobCmd === 'INIT') {
-      // INIT 외의 것들은 삭제
+    if (!['SYSINFO', 'RUNNING_INFO'].includes(tcpData.jobCmd) && this.runningJobCmd[tcpData.jobCmd] === false) {
       this.tcpQueue = [];
       this.tcpQueue.push(tcpData);
     }
