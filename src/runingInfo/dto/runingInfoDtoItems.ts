@@ -9,6 +9,7 @@ import { Type } from 'class-transformer';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
   abnormalClassInfo,
+  RbcAfterClassInfos,
   RbcInfo,
   WbcInfoAfter,
   WbcResponse,
@@ -79,8 +80,8 @@ export class RuningInfoDtoItems {
   @Field(() => RbcInfo, { nullable: true })
   rbcInfo?: RbcInfo;
 
-  @Field(() => RbcInfo, { nullable: true })
-  rbcInfoAfter: RbcInfo;
+  @Field(() => [RbcAfterClassInfos], { nullable: true })
+  rbcInfoAfter: RbcAfterClassInfos[];
 
   @Field(() => String)
   cassetId: string;

@@ -3,18 +3,39 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class ClassInfo {
   @Field(() => String, { nullable: true })
-  classId: string;
+  classId?: string;
 
   @Field(() => String, { nullable: true })
-  classNm: string;
+  classNm?: string;
 
   @Field(() => String, { nullable: true })
-  degree: string;
+  degree?: string;
+
+  @Field(() => String, { nullable: true })
+  originalDegree?: string;
 }
 
 @ObjectType()
-export class RbcInfo {
-  @Field(() => [ClassInfo], { nullable: true }) // ClassInfo 객체 배열
+export class RbcAfterClassInfoObj {
+  @Field(() => String, { nullable: true })
+  classId?: string;
+
+  @Field(() => String, { nullable: true })
+  classNm?: string;
+
+  @Field(() => String, { nullable: true })
+  degree?: string;
+
+  @Field(() => Number, { nullable: true })
+  originalDegree?: number;
+
+  @Field(() => String, { nullable: true })
+  percent?: string;
+}
+
+@ObjectType()
+export class RbcClassInfo {
+  @Field(() => [ClassInfo], { nullable: 'itemsAndList' })
   classInfo?: ClassInfo[];
 
   @Field(() => String, { nullable: true })
@@ -22,6 +43,33 @@ export class RbcInfo {
 
   @Field(() => String, { nullable: true })
   categoryNm?: string;
+}
+
+@ObjectType()
+export class RbcAfterClassInfos {
+  @Field(() => [RbcAfterClassInfoObj], { nullable: 'itemsAndList' })
+  classInfo?: RbcAfterClassInfoObj[];
+
+  @Field(() => String, { nullable: true })
+  categoryId?: string;
+
+  @Field(() => String, { nullable: true })
+  categoryNm?: string;
+}
+
+@ObjectType()
+export class RbcInfo {
+  @Field(() => [RbcClassInfo], { nullable: 'itemsAndList' })
+  rbcClass?: RbcClassInfo[];
+
+  @Field(() => String, { nullable: true })
+  malariaCount: string;
+
+  @Field(() => String, { nullable: true })
+  maxRbcCount: string;
+
+  @Field(() => String, { nullable: true })
+  pltCount: string;
 }
 
 @ObjectType()
@@ -77,13 +125,13 @@ export class WbcInfo {
 
 @ObjectType()
 export class Coordinates {
-  @Field(() => String)
-  display: string;
+  @Field(() => String, { nullable: true })
+  display?: string;
 }
 
 @ObjectType()
 export class wbcImages {
-  @Field(() => Coordinates)
+  @Field(() => Coordinates, { nullable: true })
   coordinates?: Coordinates;
   @Field(() => String, { nullable: true })
   fileName?: string;

@@ -6,12 +6,34 @@ type ClassInfo {
   classId: String
   classNm: String
   degree: String
+  originalDegree: String
+}
+
+type RbcAfterClassInfoObj {
+  classId: String
+  classNm: String
+  degree: String
+  originalDegree: Float
+  percent: String
+}
+
+type RbcClassInfo {
+  classInfo: [ClassInfo]
+  categoryId: String
+  categoryNm: String
+}
+
+type RbcAfterClassInfos {
+  classInfo: [RbcAfterClassInfoObj]
+  categoryId: String
+  categoryNm: String
 }
 
 type RbcInfo {
-  classInfo: [ClassInfo!]
-  categoryId: String
-  categoryNm: String
+  rbcClass: [RbcClassInfo]
+  malariaCount: String
+  maxRbcCount: String
+  pltCount: String
 }
 
 type abnormalClassInfo {
@@ -38,11 +60,11 @@ type WbcInfo {
 }
 
 type Coordinates {
-  display: String!
+  display: String
 }
 
 type wbcImages {
-  coordinates: Coordinates!
+  coordinates: Coordinates
   fileName: String
   title: String
   filter: String
@@ -79,7 +101,7 @@ type RuningInfoEntity {
   wbcInfo: WbcResponse
   wbcInfoAfter: [WbcInfoAfter!]!
   rbcInfo: RbcInfo
-  rbcInfoAfter: RbcInfo
+  rbcInfoAfter: [RbcAfterClassInfos!]
   submitState: String
   submitOfDate: DateTime
   submitUserId: String

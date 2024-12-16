@@ -5,6 +5,7 @@ import {
   abnormalClassInfo,
   WbcInfoAfter,
   WbcResponse,
+  RbcAfterClassInfos,
 } from './types/class-info'; // 필요에 따라 import 경로 조정
 
 @ObjectType() // GraphQL ObjectType으로 설정
@@ -99,9 +100,9 @@ export class RuningInfoEntity {
   @Column('json', { nullable: true }) // JSON으로 저장
   rbcInfo?: RbcInfo;
 
-  @Field(() => RbcInfo, { nullable: true })
-  @Column('json') // JSON 데이터 타입으로 설정
-  rbcInfoAfter?: RbcInfo;
+  @Field(() => [RbcAfterClassInfos], { nullable: true })
+  @Column('json', { nullable: true }) // JSON 데이터 타입으로 설정
+  rbcInfoAfter?: RbcAfterClassInfos[];
 
   @Field(() => String, { nullable: true }) // Boolean 타입으로 명시
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
