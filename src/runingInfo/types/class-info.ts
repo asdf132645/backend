@@ -147,8 +147,8 @@ export class wbcImages {
 
 @ObjectType()
 export class WbcResponse {
-  @Field(() => [WbcInfo], { nullable: true }) // WbcInfo 객체 배열
-  wbcInfo?: WbcInfo[];
+  @Field(() => [[WbcInfo]], { nullable: true }) // WbcInfo 객체 배열
+  wbcInfo?: [WbcInfo[]];
 
   @Field(() => String, { nullable: true }) // totalCount
   totalCount?: string;
