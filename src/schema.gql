@@ -73,7 +73,7 @@ type wbcImages {
 }
 
 type WbcResponse {
-  wbcInfo: [WbcInfo!]
+  wbcInfo: [[WbcInfo!]!]
   totalCount: String
   maxWbcCount: String
 }
