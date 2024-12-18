@@ -11,10 +11,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   private connectToRedis() {
-      if (this.client && this.client.status === 'ready') {
-          console.log('이미 Redis 서버에 연결되어 있습니다.')
-          return;
-      }
+    if (this.client && this.client.status === 'ready') {
+      console.log('이미 Redis 서버에 연결되어 있습니다.');
+      return;
+    }
     this.client = new Redis({
       host: '127.0.0.1',
       port: 6379,
