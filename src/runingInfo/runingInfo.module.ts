@@ -6,6 +6,7 @@ import { RuningInfoController } from './runingInfo.controller';
 import { LoggerService } from '../logger.service';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { RunningInfoResolver } from './runningInfo.resolver';
+import {RedisService} from "../redis/redis.service";
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { RunningInfoResolver } from './runningInfo.resolver';
       url: 'redis://localhost:6379', // Redis 연결 URL
     } as RedisModuleOptions),
   ],
-  providers: [RuningInfoService, RunningInfoResolver, LoggerService],
+  providers: [RedisService, RuningInfoService, RunningInfoResolver, LoggerService],
   exports: [RuningInfoService, RunningInfoResolver],
   controllers: [RuningInfoController],
 })
