@@ -13,13 +13,11 @@ export class NormalRangeController {
   }
 
   @Put('update')
-  async update(
-    @Body() updateDto: NormalRangeDto,
-  ): Promise<NormalRange[]> {
+  async update(@Body() updateDto: NormalRangeDto): Promise<NormalRange[]> {
     return this.normalRangeService.update(updateDto);
   }
 
-  @Get('get')
+  @Get('normalRangeGet')
   async find(): Promise<NormalRange[]> {
     return this.normalRangeService.find();
   }

@@ -17,7 +17,6 @@ export class RunningInfoResolver {
   ): Promise<RuningInfoEntity> {
     await this.redis.flushall(); // 모든 키 삭제
     const runningInfo = await this.runningInfoService.getRunningInfoById(id);
-    console.log(runningInfo);
     if (runningInfo) {
       return runningInfo;
     }

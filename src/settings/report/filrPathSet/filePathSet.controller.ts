@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
 import { FilePathSetService } from './filePathSet.service';
 import { FilePathSetEntity } from './filePathSetEntity';
 import { CreateFilePathSetDto } from './dto/filePathSetDto';
@@ -7,17 +7,21 @@ import { CreateFilePathSetDto } from './dto/filePathSetDto';
 export class FilePathSetController {
   constructor(private readonly filePathSetService: FilePathSetService) {}
 
-  @Post('create')
-  async create(@Body() createDto: CreateFilePathSetDto): Promise<FilePathSetEntity> {
+  @Post('filePathSetCreate')
+  async create(
+    @Body() createDto: CreateFilePathSetDto,
+  ): Promise<FilePathSetEntity> {
     return this.filePathSetService.create(createDto);
   }
 
-  @Put('update')
-  async update(@Body() updateDto: CreateFilePathSetDto): Promise<FilePathSetEntity[]> {
+  @Put('filePathSetUpdate')
+  async update(
+    @Body() updateDto: CreateFilePathSetDto,
+  ): Promise<FilePathSetEntity[]> {
     return this.filePathSetService.update(updateDto);
   }
 
-  @Get('get')
+  @Get('filePathSetGet')
   async get(): Promise<FilePathSetEntity[]> {
     return this.filePathSetService.find();
   }

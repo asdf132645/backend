@@ -7,17 +7,17 @@ import { CreateCbcCodeDto } from './dto/cbcCodeDto';
 export class CbcCodeController {
   constructor(private readonly cbcCodeService: CbcCodeService) {}
 
-  @Post('create')
+  @Post('cbcCodeCreate')
   async create(@Body() createDto: CreateCbcCodeDto): Promise<CbcCodeEntity> {
     return this.cbcCodeService.create(createDto);
   }
 
-  @Put('update')
+  @Put('cbcCodeUpdate')
   async update(@Body() updateDto: CreateCbcCodeDto): Promise<CbcCodeEntity[]> {
     return this.cbcCodeService.update(updateDto);
   }
 
-  @Get('get')
+  @Get('cbcCodeGet')
   async get(): Promise<CbcCodeEntity[]> {
     return this.cbcCodeService.find();
   }

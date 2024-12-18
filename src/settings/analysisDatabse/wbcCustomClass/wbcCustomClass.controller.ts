@@ -11,17 +11,17 @@ import {
 export class WbcCustomClassController {
   constructor(private readonly wbcCustomClassService: WbcCustomClassService) {}
 
-  @Post('create')
+  @Post('wbcCustomClassCreate')
   create(@Body() createDto: CreateWbcCustomClassDto) {
     return this.wbcCustomClassService.create(createDto);
   }
 
-  @Put('update')
+  @Put('wbcCustomClassUpdate')
   update(@Body() updateDto: UpdateWbcCustomClassDto) {
     return this.wbcCustomClassService.update(updateDto);
   }
 
-  @Get('get')
+  @Get('wbcCustomClassGet')
   get() {
     return this.wbcCustomClassService.find();
   }

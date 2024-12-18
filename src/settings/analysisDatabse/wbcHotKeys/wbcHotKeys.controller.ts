@@ -1,5 +1,5 @@
 // src/wbc-hot-keys/wbc-hot-keys.controller.ts
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
 import { WbcHotKeysService } from './wbcHotKeys.service';
 import { WbcHotKeys } from './wbcHotKeys.entity';
 import { CreateWbcHotKeysDto } from './dto/wbcHotKeys.dto';
@@ -8,17 +8,17 @@ import { CreateWbcHotKeysDto } from './dto/wbcHotKeys.dto';
 export class WbcHotKeysController {
   constructor(private readonly wbcHotKeysService: WbcHotKeysService) {}
 
-  @Post('create')
+  @Post('wbcHotKeysCreate')
   async create(@Body() createDto: CreateWbcHotKeysDto): Promise<WbcHotKeys> {
     return this.wbcHotKeysService.create(createDto);
   }
 
-  @Put('update')
+  @Put('wbcHotKeysUpdate')
   async update(@Body() updateDto: CreateWbcHotKeysDto): Promise<WbcHotKeys[]> {
     return this.wbcHotKeysService.update(updateDto);
   }
 
-  @Get('get')
+  @Get('wbcHotKeysGet')
   async find(): Promise<WbcHotKeys[]> {
     return this.wbcHotKeysService.find();
   }

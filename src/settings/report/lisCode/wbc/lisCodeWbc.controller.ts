@@ -7,17 +7,19 @@ import { CreateLisCodeDto } from './dto/lisCodeWbcDto';
 export class LisCodeWbcController {
   constructor(private readonly lisCode: LisCodeWbcService) {}
 
-  @Post('create')
+  @Post('lisCodeCreate')
   async create(@Body() createDto: CreateLisCodeDto): Promise<LisCodeWbcEntity> {
     return this.lisCode.create(createDto);
   }
 
-  @Put('update')
-  async update(@Body() updateDto: CreateLisCodeDto): Promise<LisCodeWbcEntity[]> {
+  @Put('lisCodeUpdate')
+  async update(
+    @Body() updateDto: CreateLisCodeDto,
+  ): Promise<LisCodeWbcEntity[]> {
     return this.lisCode.update(updateDto);
   }
 
-  @Get('get')
+  @Get('lisCodeGet')
   async get(): Promise<LisCodeWbcEntity[]> {
     return this.lisCode.find();
   }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
 import { MinCountService } from './minCount.service';
 import { MinCountEntity } from './minCount.entity';
 import { CreateMinCountDto } from './dto/minCountDto';
@@ -7,17 +7,19 @@ import { CreateMinCountDto } from './dto/minCountDto';
 export class MinCountController {
   constructor(private readonly minCountService: MinCountService) {}
 
-  @Post('create')
+  @Post('minCountCreate')
   async create(@Body() createDto: CreateMinCountDto): Promise<MinCountEntity> {
     return this.minCountService.create(createDto);
   }
 
-  @Put('update')
-  async update(@Body() updateDto: CreateMinCountDto): Promise<MinCountEntity[]> {
+  @Put('minCountUpdate')
+  async update(
+    @Body() updateDto: CreateMinCountDto,
+  ): Promise<MinCountEntity[]> {
     return this.minCountService.update(updateDto);
   }
 
-  @Get('get')
+  @Get('minCountGet')
   async get(): Promise<MinCountEntity[]> {
     return this.minCountService.find();
   }
