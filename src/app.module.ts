@@ -55,7 +55,6 @@ import { CrcModule } from './settings/report/crc/crc.module';
 import { HttpModule } from '@nestjs/axios';
 import { SybaseController } from './sybase/sybase.controller';
 import { SybaseProxyService } from './sybase/sybase.proxy.service';
-import {RedisService} from "./redis/redis.service";
 
 @Module({
   imports: [
@@ -120,7 +119,6 @@ import {RedisService} from "./redis/redis.service";
     QualityCheckService,
     ExcelService,
     SybaseProxyService,
-    RedisService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,
@@ -134,6 +132,5 @@ import {RedisService} from "./redis/redis.service";
     //   useClass: CacheInterceptor,
     // },
   ],
-  exports: [RedisService],
 })
 export class AppModule {}
