@@ -8,20 +8,25 @@ import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import { RedisService } from "../redis/redis.service";
 
 @Injectable()
 export class RedisCacheInterceptor implements NestInterceptor {
-  constructor(@InjectRedis() private readonly redis: Redis) {}
+  constructor(
+      private readonly redisService: RedisService,
+  ) {}
 
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
+    const redis = this.redisService.getClient();
+
     const request = context.switchToHttp().getRequest();
     const key = this.generateCacheKey(request);
 
     // Redis에서 캐시된 데이터를 조회
-    const cachedData = await this.redis.get(key);
+    const cachedData = await redis.get(key);
     if (cachedData) {
       // 캐시된 데이터가 있으면, 해당 데이터를 반환
       return of(JSON.parse(cachedData));
@@ -31,11 +36,36 @@ export class RedisCacheInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(async (data) => {
         if (data) {
-          // 응답 데이터가 있을 때만 Redis에 캐싱
-          await this.redis.set(key, JSON.stringify(data), 'EX', 1800);
+          try {
+            // 응답 데이터가 있을 때만 Redis에 캐싱
+            await redis.set(key, JSON.stringify(data), 'EX', 1800);
+          } catch (error) {
+            if (error.message.includes('OOM')) {
+              await this.evictOldestCache(redis, key, JSON.stringify(data));
+            } else {
+              console.error(`redis 특정 캐시 삭제 오류: ${error}`);
+            }
+          }
+
         }
       }),
     );
+  }
+
+  private async evictOldestCache(redis: Redis, newKey: string, newValue: string) {
+    const keys = await redis.keys('*');
+    const keyExpirations = await Promise.all(keys.map(async (key) => {
+      const ttl = await redis.ttl(key);
+      return { key, ttl };
+    }))
+
+    const oldestKey = keyExpirations.reduce((oldest, current) => {
+      return current.ttl < oldest.ttl ? current : oldest
+    }).key;
+
+    await redis.del(oldestKey);
+
+    await redis.set(newKey, newValue, 'EX', 1800);
   }
 
   // 요청에 기반한 캐시 키 생성 로직 (필요에 따라 변경 가능)
