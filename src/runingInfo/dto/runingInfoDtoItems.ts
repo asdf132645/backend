@@ -92,8 +92,8 @@ export class RuningInfoDtoItems {
   @Field(() => String, { nullable: true })
   submitState?: string;
 
-  @Field(() => Date, { nullable: true })
-  submitOfDate?: Date;
+  @Field(() => String, { nullable: true })
+  submitOfDate?: string;
 
   @Field(() => String, { nullable: true })
   submitUserId?: string;

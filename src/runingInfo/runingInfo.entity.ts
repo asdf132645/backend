@@ -110,7 +110,7 @@ export class RuningInfoEntity {
 
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'timestamp', nullable: true }) // Date 타입은 timestamp로 설정
-  submitOfDate?: Date;
+  submitOfDate?: string;
 
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시

@@ -103,7 +103,7 @@ type RuningInfoEntity {
   rbcInfo: RbcInfo
   rbcInfoAfter: [RbcAfterClassInfos!]
   submitState: String
-  submitOfDate: DateTime
+  submitOfDate: String
   submitUserId: String
   rbcInfoPosAfter: [String!]!
   isNsNbIntegration: String
@@ -118,11 +118,6 @@ type RuningInfoEntity {
   hosName: String
   abnormalClassInfo: abnormalClassInfo
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type Query {
   getRunningInfoByIdGQL(id: Int!): RuningInfoEntity!
