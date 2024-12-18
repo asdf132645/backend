@@ -8,13 +8,11 @@ import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { RedisService } from "../redis/redis.service";
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class RedisCacheInterceptor implements NestInterceptor {
-  constructor(
-      private readonly redisService: RedisService,
-  ) {}
+  constructor(private readonly redisService: RedisService) {}
 
   async intercept(
     context: ExecutionContext,
@@ -46,21 +44,26 @@ export class RedisCacheInterceptor implements NestInterceptor {
               console.error(`redis 특정 캐시 삭제 오류: ${error}`);
             }
           }
-
         }
       }),
     );
   }
 
-  private async evictOldestCache(redis: Redis, newKey: string, newValue: string) {
+  private async evictOldestCache(
+    redis: Redis,
+    newKey: string,
+    newValue: string,
+  ) {
     const keys = await redis.keys('*');
-    const keyExpirations = await Promise.all(keys.map(async (key) => {
-      const ttl = await redis.ttl(key);
-      return { key, ttl };
-    }))
+    const keyExpirations = await Promise.all(
+      keys.map(async (key) => {
+        const ttl = await redis.ttl(key);
+        return { key, ttl };
+      }),
+    );
 
     const oldestKey = keyExpirations.reduce((oldest, current) => {
-      return current.ttl < oldest.ttl ? current : oldest
+      return current.ttl < oldest.ttl ? current : oldest;
     }).key;
 
     await redis.del(oldestKey);
