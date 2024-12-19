@@ -1,3 +1,4 @@
+import { RbcAfterClassInfos, WbcInfoAfter, WbcResponse } from "../types/class-info";
 export declare class UpdateRuningInfoDtoItems {
     id: number;
     lock_status?: boolean;
@@ -32,9 +33,9 @@ export declare class UpdateRuningInfoDtoItems {
     cbcAge?: string;
     img_drive_root_path?: string;
     hosName?: string;
-    abnormalClassInfo?: string;
-    wbcInfo?: string;
-    wbcInfoAfter?: string;
+    abnormalClassInfo?: any;
+    wbcInfo?: WbcResponse;
+    wbcInfoAfter?: WbcInfoAfter[];
     rbcInfo?: string;
-    rbcInfoAfter?: string;
+    rbcInfoAfter: RbcAfterClassInfos[];
 }

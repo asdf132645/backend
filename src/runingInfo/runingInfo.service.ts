@@ -137,6 +137,8 @@ export class RuningInfoService {
     return updatedItems;
   }
 
+
+
   async delete(
     ids: string[],
     rootPaths: string[],

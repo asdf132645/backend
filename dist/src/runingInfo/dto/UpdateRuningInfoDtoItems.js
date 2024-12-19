@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateRuningInfoDtoItems = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const class_info_1 = require("../types/class-info");
+const graphql_type_json_1 = require("graphql-type-json");
 let UpdateRuningInfoDtoItems = class UpdateRuningInfoDtoItems {
 };
 exports.UpdateRuningInfoDtoItems = UpdateRuningInfoDtoItems;
@@ -182,18 +184,18 @@ __decorate([
 ], UpdateRuningInfoDtoItems.prototype, "hosName", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    __metadata("design:type", Object)
 ], UpdateRuningInfoDtoItems.prototype, "abnormalClassInfo", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    __metadata("design:type", class_info_1.WbcResponse)
 ], UpdateRuningInfoDtoItems.prototype, "wbcInfo", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    __metadata("design:type", Array)
 ], UpdateRuningInfoDtoItems.prototype, "wbcInfoAfter", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
@@ -202,8 +204,8 @@ __decorate([
 ], UpdateRuningInfoDtoItems.prototype, "rbcInfo", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    __metadata("design:type", Array)
 ], UpdateRuningInfoDtoItems.prototype, "rbcInfoAfter", void 0);
 exports.UpdateRuningInfoDtoItems = UpdateRuningInfoDtoItems = __decorate([
     (0, graphql_1.InputType)()

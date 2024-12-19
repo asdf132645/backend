@@ -154,16 +154,16 @@ export class CreateRuningInfoDto {
 
 @InputType()
 export class UpdateRuningInfoDto {
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @IsInt()
-  userId: number;
+  userId?: number;
 
-  @Field(() => String)
-  dayQuery: string;
+  @Field(() => String, { nullable: true })
+  dayQuery?: string;
 
   @IsArray()
-  @Field(() => [UpdateRuningInfoDtoItems]) // 업데이트 전용 InputType을 사용
+  @Field(() => [UpdateRuningInfoDtoItems], { nullable: 'itemsAndList' }) // 업데이트 전용 InputType을 사용
   @ValidateNested({ each: true })
   @Type(() => UpdateRuningInfoDtoItems)
-  runingInfoDtoItems: UpdateRuningInfoDtoItems[];
+  runingInfoDtoItems?: UpdateRuningInfoDtoItems[];
 }

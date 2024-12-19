@@ -128,9 +128,9 @@ type Mutation {
 }
 
 input UpdateRuningInfoDto {
-  userId: Int!
-  dayQuery: String!
-  runingInfoDtoItems: [UpdateRuningInfoDtoItems!]!
+  userId: Int
+  dayQuery: String
+  runingInfoDtoItems: [UpdateRuningInfoDtoItems]
 }
 
 input UpdateRuningInfoDtoItems {
@@ -167,9 +167,14 @@ input UpdateRuningInfoDtoItems {
   cbcAge: String
   img_drive_root_path: String
   hosName: String
-  abnormalClassInfo: String
-  wbcInfo: String
-  wbcInfoAfter: String
+  abnormalClassInfo: JSON
+  wbcInfo: JSON
+  wbcInfoAfter: JSON
   rbcInfo: String
-  rbcInfoAfter: String
+  rbcInfoAfter: JSON
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON

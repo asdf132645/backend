@@ -1,5 +1,7 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsInt, IsOptional } from 'class-validator';
+import { RbcAfterClassInfos, WbcInfoAfter, WbcResponse } from "../types/class-info";
+import GraphQLJSON from 'graphql-type-json';
 
 @InputType()
 export class UpdateRuningInfoDtoItems {
@@ -136,22 +138,22 @@ export class UpdateRuningInfoDtoItems {
   hosName?: string;
 
   @IsOptional()
-  @Field(() => String, { nullable: true })
-  abnormalClassInfo?: string;
+  @Field(() => GraphQLJSON, { nullable: true }) // JSON 타입으로 정의
+  abnormalClassInfo?: any; // 실제 JSON 객체로 다루기
 
   @IsOptional()
-  @Field(() => String, { nullable: true })
-  wbcInfo?: string; // JSON 데이터는 String으로 처리 (GraphQL 제한 고려)
+  @Field(() => GraphQLJSON, { nullable: true })
+  wbcInfo?: WbcResponse; // JSON 데이터는 String으로 처리 (GraphQL 제한 고려)
 
   @IsOptional()
-  @Field(() => String, { nullable: true })
-  wbcInfoAfter?: string; // JSON 데이터는 String으로 처리
+  @Field(() => GraphQLJSON, { nullable: true })
+  wbcInfoAfter?: WbcInfoAfter[];
 
   @IsOptional()
   @Field(() => String, { nullable: true })
   rbcInfo?: string; // JSON 데이터는 String으로 처리
 
   @IsOptional()
-  @Field(() => String, { nullable: true })
-  rbcInfoAfter?: string; // JSON 데이터는 String으로 처리
+  @Field(() => GraphQLJSON, { nullable: true })
+  rbcInfoAfter: RbcAfterClassInfos[];
 }

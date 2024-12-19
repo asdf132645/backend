@@ -55,6 +55,7 @@ import { CrcModule } from './settings/report/crc/crc.module';
 import { HttpModule } from '@nestjs/axios';
 import { SybaseController } from './sybase/sybase.controller';
 import { SybaseProxyService } from './sybase/sybase.proxy.service';
+import GraphQLJSON from 'graphql-type-json';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { SybaseProxyService } from './sybase/sybase.proxy.service';
       autoSchemaFile: 'src/schema.gql',
       playground: true, // 개발용 그래프QL 플레이그라운드 활성화
       path: 'api/graphql', // 엔드포인트 경로 지정
+      resolvers: { JSON: GraphQLJSON }, // JSON 타입 추가
     }),
     HttpModule,
     UserModule,
