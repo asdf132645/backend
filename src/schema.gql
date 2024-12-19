@@ -56,7 +56,7 @@ type WbcInfo {
   count: String
   title: String
   images: [wbcImages]
-  percent: Int
+  percent: String
 }
 
 type Coordinates {
@@ -121,4 +121,55 @@ type RuningInfoEntity {
 
 type Query {
   getRunningInfoByIdGQL(id: Int!): RuningInfoEntity!
+}
+
+type Mutation {
+  updateRunningInfoGQL(updateDto: UpdateRuningInfoDto!): [RuningInfoEntity!]!
+}
+
+input UpdateRuningInfoDto {
+  userId: Int!
+  dayQuery: String!
+  runingInfoDtoItems: [UpdateRuningInfoDtoItems!]!
+}
+
+input UpdateRuningInfoDtoItems {
+  id: Int!
+  lock_status: Boolean
+  traySlot: String
+  slotNo: String
+  barcodeNo: String
+  patientId: String
+  patientNm: String
+  gender: String
+  birthDay: String
+  wbcCount: String
+  slotId: String
+  orderDttm: String
+  testType: String
+  analyzedDttm: String
+  tactTime: String
+  maxWbcCount: String
+  bf_lowPowerPath: [String!]
+  cassetId: String
+  isNormal: String
+  submitState: String
+  submitOfDate: String
+  submitUserId: String
+  rbcInfoPosAfter: [String!]
+  isNsNbIntegration: String
+  wbcMemo: String
+  rbcMemo: String
+  pcIp: String
+  cbcPatientNo: String
+  cbcPatientNm: String
+  cbcSex: String
+  cbcAge: String
+  img_drive_root_path: String
+  hosName: String
+  abnormalClassInfo: String
+  wbcInfo: String
+  wbcInfoAfter: String
+  rbcInfo: String
+  rbcInfoAfter: String
 }

@@ -128,38 +128,7 @@ export class RuningInfoService {
       });
 
       if (existingEntity) {
-        // 엔터티의 속성 업데이트
-        existingEntity.slotNo = item.slotNo;
-        existingEntity.barcodeNo = item.barcodeNo;
-        existingEntity.patientId = item.patientId;
-        existingEntity.patientNm = item.patientNm;
-        existingEntity.gender = item.gender;
-        existingEntity.birthDay = item.birthDay;
-        existingEntity.wbcCount = item.wbcCount;
-        existingEntity.slotId = item.slotId;
-        existingEntity.orderDttm = item.orderDttm;
-        existingEntity.testType = item.testType;
-        existingEntity.cbcPatientNo = item.cbcPatientNo;
-        existingEntity.cbcPatientNm = item.cbcPatientNm;
-        existingEntity.cbcSex = item.cbcSex;
-        existingEntity.cbcAge = item.cbcAge;
-        existingEntity.hosName = item.hosName;
-        existingEntity.tactTime = item.tactTime;
-        existingEntity.maxWbcCount = item.maxWbcCount;
-        existingEntity.bf_lowPowerPath = item.bf_lowPowerPath;
-        existingEntity.cassetId = item.cassetId;
-        existingEntity.isNormal = item.isNormal;
-        existingEntity.wbcMemo = item.wbcMemo;
-        existingEntity.rbcMemo = item.rbcMemo;
-        existingEntity.lock_status = item.lock_status;
-        existingEntity.pcIp = item.pcIp;
-        existingEntity.rbcInfoAfter = item.rbcInfoAfter;
-        existingEntity.wbcInfoAfter = item.wbcInfoAfter;
-        existingEntity.submitState = item.submitState;
-        existingEntity.submitOfDate = item.submitOfDate;
-        existingEntity.submitUserId = item.submitUserId;
-        existingEntity.img_drive_root_path = item.img_drive_root_path;
-        existingEntity.abnormalClassInfo = item.abnormalClassInfo;
+        Object.assign(existingEntity, item);
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
       }
@@ -167,6 +136,7 @@ export class RuningInfoService {
 
     return updatedItems;
   }
+
 
   async delete(
     ids: string[],

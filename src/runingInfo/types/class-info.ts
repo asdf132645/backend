@@ -119,8 +119,8 @@ export class WbcInfo {
   @Field(() => [wbcImages], { nullable: 'itemsAndList' })
   images?: wbcImages[];
 
-  @Field(() => Int, { nullable: true })
-  percent?: number;
+  @Field(() => String, { nullable: true })
+  percent?: string;
 }
 
 @ObjectType()

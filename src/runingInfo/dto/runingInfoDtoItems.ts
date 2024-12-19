@@ -14,6 +14,7 @@ import {
   WbcInfoAfter,
   WbcResponse,
 } from '../types/class-info';
+import { UpdateRuningInfoDtoItems } from './UpdateRuningInfoDtoItems';
 
 @ObjectType()
 @InputType()
@@ -161,8 +162,8 @@ export class UpdateRuningInfoDto {
   dayQuery: string;
 
   @IsArray()
-  @Field(() => [RuningInfoDtoItems])
+  @Field(() => [UpdateRuningInfoDtoItems]) // 업데이트 전용 InputType을 사용
   @ValidateNested({ each: true })
-  @Type(() => RuningInfoDtoItems)
-  runingInfoDtoItems: RuningInfoDtoItems[];
+  @Type(() => UpdateRuningInfoDtoItems)
+  runingInfoDtoItems: UpdateRuningInfoDtoItems[];
 }

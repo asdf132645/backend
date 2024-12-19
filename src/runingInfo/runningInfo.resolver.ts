@@ -1,8 +1,9 @@
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
 import { RuningInfoService } from './runingInfo.service';
 import { RuningInfoEntity } from './runingInfo.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import { UpdateRuningInfoDto } from './dto/runingInfoDtoItems';
 
 @Resolver(() => RuningInfoEntity)
 export class RunningInfoResolver {
@@ -22,5 +23,13 @@ export class RunningInfoResolver {
     }
 
     return null; // 데이터가 없는 경우 null 반환
+  }
+
+  @Mutation(() => [RuningInfoEntity])
+  async updateRunningInfoGQL(
+    @Args('updateDto', { type: () => UpdateRuningInfoDto })
+    updateDto: UpdateRuningInfoDto,
+  ): Promise<RuningInfoEntity[]> {
+    return await this.runningInfoService.update(updateDto);
   }
 }
