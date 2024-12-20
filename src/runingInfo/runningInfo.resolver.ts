@@ -30,6 +30,7 @@ export class RunningInfoResolver {
     @Args('updateDto', { type: () => UpdateRuningInfoDto })
     updateDto: UpdateRuningInfoDto,
   ): Promise<RuningInfoEntity[]> {
+    await this.redis.flushall(); // 모든 키 삭제
     return await this.runningInfoService.update(updateDto);
   }
 }

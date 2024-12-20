@@ -1,6 +1,10 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsInt, IsOptional } from 'class-validator';
-import { RbcAfterClassInfos, WbcInfoAfter, WbcResponse } from "../types/class-info";
+import {
+  RbcAfterClassInfos,
+  WbcInfoAfter,
+  WbcResponse,
+} from '../types/class-info';
 import GraphQLJSON from 'graphql-type-json';
 
 @InputType()

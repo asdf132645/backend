@@ -1,4 +1,4 @@
-import { RbcAfterClassInfos, WbcInfoAfter, WbcResponse } from "../types/class-info";
+import { RbcAfterClassInfos, WbcInfoAfter, WbcResponse } from '../types/class-info';
 export declare class UpdateRuningInfoDtoItems {
     id: number;
     lock_status?: boolean;
