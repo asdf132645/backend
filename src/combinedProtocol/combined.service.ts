@@ -57,7 +57,7 @@ export class CombinedService
     clientExit: false,
     SEARCH_CARD_COUNT: false,
     ERROR_CLEAR: false,
-  }
+  };
   private isTCPError = false;
 
   constructor(
@@ -129,7 +129,9 @@ export class CombinedService
         if (this.wss) {
           delete message.payload?.anyWay;
           if (!client.conn.remoteAddress.includes('192.168.0.131')) {
-            this.logger.log(`웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`);
+            this.logger.log(
+              `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
+            );
           }
 
           if (!this.notRes) {
@@ -158,9 +160,10 @@ export class CombinedService
     });
 
     client.on('isTCPError', (state: any) => {
-      const localTCPError = (state.message || state.message === 'true') ? true : false;
+      const localTCPError =
+        state.message || state.message === 'true' ? true : false;
       this.isTCPError = localTCPError;
-    })
+    });
 
     client.on(
       'isDownloadUploading',
@@ -245,8 +248,11 @@ export class CombinedService
 
   sendDataToEmbeddedServer(data: any): void {
     // 데이터 중복 체크
-    if (this.tcpQueue.some((item) => JSON.stringify(item) === JSON.stringify(data)))
-    {
+    if (
+      this.tcpQueue.some(
+        (item) => JSON.stringify(item) === JSON.stringify(data),
+      )
+    ) {
       this.logger.warn('⚠️ 중복 데이터로 인해 전송이 무시되었습니다.');
       return;
     }
@@ -255,7 +261,7 @@ export class CombinedService
     this.tcpQueue.push(data);
 
     if (!this.isTCPError) {
-      setInterval( async () => {
+      setInterval(async () => {
         await this.handleJobcmd(data);
       }, 500);
     }
@@ -391,9 +397,12 @@ export class CombinedService
   }
 
   private handleJobcmd = async (tcpData: any) => {
-    if (!['SYSINFO', 'RUNNING_INFO'].includes(tcpData.jobCmd) && this.runningJobCmd[tcpData.jobCmd] === false) {
+    if (
+      !['SYSINFO', 'RUNNING_INFO'].includes(tcpData.jobCmd) &&
+      this.runningJobCmd[tcpData.jobCmd] === false
+    ) {
       this.tcpQueue = [];
       this.tcpQueue.push(tcpData);
     }
-  }
+  };
 }
