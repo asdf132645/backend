@@ -17,6 +17,7 @@ export class CellImgAnalyzedDto {
   isAlarm: boolean;
   alarmCount: string;
   keepPage: boolean;
+  lisUploadCheckAll: boolean;
   backupPath: string;
   backupStartDate: Date;
   backupEndDate: Date;

@@ -6,7 +6,6 @@ import { In, Repository, EntityManager, DataSource, Between } from 'typeorm';
 import { RuningInfoEntity } from './runingInfo.entity';
 import * as moment from 'moment';
 import * as os from 'os';
-import * as path from 'path';
 import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
@@ -137,13 +136,7 @@ export class RuningInfoService {
     return updatedItems;
   }
 
-
-
-  async delete(
-    ids: string[],
-    rootPaths: string[],
-    apiUrl: string,
-  ): Promise<boolean> {
+  async delete(ids: string[], rootPaths: string[]): Promise<boolean> {
     await this.cleanBrowserCache();
 
     try {
@@ -510,7 +503,8 @@ export class RuningInfoService {
         wbcInfo,
         img_drive_root_path,
         rbcInfoAfter,
-        wbcMemo
+        wbcMemo,
+        isAllClassesChecked
       FROM 
         runing_info_entity
       WHERE 
@@ -539,7 +533,8 @@ export class RuningInfoService {
         img_drive_root_path,
         rbcInfoAfter,
         wbcMemo,
-        barcodeNo
+        barcodeNo,
+        isAllClassesChecked
       FROM 
         runing_info_entity
       WHERE 
@@ -569,7 +564,8 @@ export class RuningInfoService {
         testType,
         img_drive_root_path,
         rbcInfoAfter,
-        wbcMemo
+        wbcMemo,
+        isAllClassesChecked
       FROM 
         runing_info_entity
       WHERE 

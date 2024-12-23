@@ -163,4 +163,8 @@ export class RuningInfoEntity {
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column('json') // JSON 데이터 타입으로 설정
   abnormalClassInfo?: abnormalClassInfo;
+
+  @Field(() => Boolean, { nullable: true })
+  @Column({ type: 'boolean', nullable: true })
+  isAllClassesChecked?: boolean;
 }

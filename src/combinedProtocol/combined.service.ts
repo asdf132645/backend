@@ -42,23 +42,67 @@ export class CombinedService
   private tcpQueue: any[] = []; // 전송 대기열
   private isProcessing: boolean = false; // 현재 처리 중인지 여부
   private runningJobCmd = {
-    START: false,
-    INIT: false,
-    RESTART: false,
-    STOP: false,
-    END: false,
-    PAUSE: false,
-    RUNNING_COMP: false,
-    RECOVERY: false,
-    SETTINGS: false,
-    OIL_PRIME: false,
-    GRIPPER_OPEN: false,
-    CAMERA_RESET: false,
-    clientExit: false,
-    SEARCH_CARD_COUNT: false,
-    ERROR_CLEAR: false,
-  }
-  private isTCPError = false;
+    START: {
+      status: false,
+      data: '',
+    },
+    INIT: {
+      status: false,
+      data: '',
+    },
+    RESTART: {
+      status: false,
+      data: '',
+    },
+    STOP: {
+      status: false,
+      data: '',
+    },
+    END: {
+      status: false,
+      data: '',
+    },
+    PAUSE: {
+      status: false,
+      data: '',
+    },
+    RUNNING_COMP: {
+      status: false,
+      data: '',
+    },
+    RECOVERY: {
+      status: false,
+      data: '',
+    },
+    SETTINGS: {
+      status: false,
+      data: '',
+    },
+    OIL_PRIME: {
+      status: false,
+      data: '',
+    },
+    GRIPPER_OPEN: {
+      status: false,
+      data: '',
+    },
+    CAMERA_RESET: {
+      status: false,
+      data: '',
+    },
+    clientExit: {
+      status: false,
+      data: '',
+    },
+    SEARCH_CARD_COUNT: {
+      status: false,
+      data: '',
+    },
+    ERROR_CLEAR: {
+      status: false,
+      data: '',
+    },
+  };
 
   constructor(
     private readonly logger: LoggerService,
@@ -129,7 +173,9 @@ export class CombinedService
         if (this.wss) {
           delete message.payload?.anyWay;
           if (!client.conn.remoteAddress.includes('192.168.0.131')) {
-            this.logger.log(`웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`);
+            this.logger.log(
+              `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
+            );
           }
 
           if (!this.notRes) {
@@ -156,11 +202,6 @@ export class CombinedService
         );
       }
     });
-
-    client.on('isTCPError', (state: any) => {
-      const localTCPError = (state.message || state.message === 'true') ? true : false;
-      this.isTCPError = localTCPError;
-    })
 
     client.on(
       'isDownloadUploading',
@@ -210,6 +251,15 @@ export class CombinedService
   }
 
   webSocketGetData(message: any): void {
+    // 진입점
+    // message
+    // 들어와서 check
+    // sysinfo, runninginfo 아니네? -> 응답이 안오면 다시 쏴야 함
+    // 해당되는 boolean
+    // queue 배열
+    // message --> 변수로 확인
+    // FE도 들어왔는지 확인 -> 담아놓고 boolean false -> 응답 오면 넘어가고 응답이 안오면 true로 바꾸고 다시 check
+    // message
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
@@ -230,6 +280,8 @@ export class CombinedService
       if (data?.err) {
         jsonData = `{ "bufferData": 'err' }`;
       } else {
+        this.reSendProcessQueue(data);
+
         jsonData = data;
       }
       this.wss.emit('chat', jsonData);
@@ -245,8 +297,11 @@ export class CombinedService
 
   sendDataToEmbeddedServer(data: any): void {
     // 데이터 중복 체크
-    if (this.tcpQueue.some((item) => JSON.stringify(item) === JSON.stringify(data)))
-    {
+    if (
+      this.tcpQueue.some(
+        (item) => JSON.stringify(item) === JSON.stringify(data),
+      )
+    ) {
       this.logger.warn('⚠️ 중복 데이터로 인해 전송이 무시되었습니다.');
       return;
     }
@@ -254,10 +309,9 @@ export class CombinedService
     // 데이터 큐에 추가
     this.tcpQueue.push(data);
 
-    if (!this.isTCPError) {
-      setInterval( async () => {
-        await this.handleJobcmd(data);
-      }, 500);
+    // 0.5초 이내에 안오면 쏘는 걸로 -->
+    if (!['SYSINFO', 'RUNNING_INFO'].includes(data.payload.jobCmd)) {
+      this.handleJobcmd(data);
     }
 
     this.processQueue(); // 큐 처리 시작
@@ -278,10 +332,6 @@ export class CombinedService
         if (serializedData && this.isNotDownloadOrUploading) {
           this.connectedClient.write(serializedData);
           this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
-
-          if (!['SYSINFO', 'RUNNING_INFO'].includes(data.jobCmd)) {
-            this.runningJobCmd[data.jobCmd] = true;
-          }
           this.notRes = true;
 
           // 데이터 전송 후 일정 시간 대기 (예: 100ms)
@@ -391,9 +441,37 @@ export class CombinedService
   }
 
   private handleJobcmd = async (tcpData: any) => {
-    if (!['SYSINFO', 'RUNNING_INFO'].includes(tcpData.jobCmd) && this.runningJobCmd[tcpData.jobCmd] === false) {
+    if (!this.runningJobCmd[tcpData.payload.jobCmd].status) {
+      this.runningJobCmd[tcpData.payload.jobCmd].status = true;
+      this.runningJobCmd[tcpData.payload.jobCmd].data = tcpData;
       this.tcpQueue = [];
       this.tcpQueue.push(tcpData);
     }
-  }
+  };
+
+  private getNotRunningJob = () => {
+    return Object.entries(this.runningJobCmd)
+      .filter(([_, value]) => value.status)
+      .reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {});
+  };
+
+  private reSendProcessQueue = (data: any) => {
+    if (
+      !['SYSINFO', 'RUNNING_INFO'].includes(JSON.parse(data).jobCmd) &&
+      this.runningJobCmd[JSON.parse(data).jobCmd].status
+    ) {
+      this.runningJobCmd[JSON.parse(data).jobCmd].status = false;
+      this.runningJobCmd[JSON.parse(data).jobCmd].data = '';
+    }
+
+    // 현재 응답을 받지 못한 SYSINFO, RUNNING_INFO를 제외한 JOBCMD가 있다면 재전송
+    const isNotReceivingJob: any = this.getNotRunningJob();
+    if (isNotReceivingJob && Object.keys(isNotReceivingJob).length > 0) {
+      this.tcpQueue = [];
+      this.tcpQueue.push(isNotReceivingJob.data);
+    }
+  };
 }
