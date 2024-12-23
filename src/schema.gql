@@ -117,6 +117,7 @@ type RuningInfoEntity {
   img_drive_root_path: String
   hosName: String
   abnormalClassInfo: abnormalClassInfo
+  isAllClassesChecked: Boolean
 }
 
 type Query {
@@ -168,6 +169,7 @@ input UpdateRuningInfoDtoItems {
   img_drive_root_path: String
   hosName: String
   abnormalClassInfo: JSON
+  isAllClassesChecked: Boolean
   wbcInfo: JSON
   wbcInfoAfter: JSON
   rbcInfo: String

@@ -73,6 +73,10 @@ export class CellImgAnalyzed {
   keepPage: boolean;
 
   @Column()
+  @ApiProperty({ example: false, description: 'LIS Upload 버튼 모든 세포 확인 후 활성화 여부' })
+  lisUploadCheckAll: boolean;
+
+  @Column()
   @ApiProperty({ example: '', description: '백업 경로' })
   backupPath: string;
 

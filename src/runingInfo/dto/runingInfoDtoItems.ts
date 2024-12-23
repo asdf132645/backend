@@ -134,6 +134,9 @@ export class RuningInfoDtoItems {
 
   @Field(() => abnormalClassInfo, { nullable: true })
   abnormalClassInfo?: abnormalClassInfo;
+
+  @Field(() => Boolean, { nullable: true })
+  isAllClassesChecked?: boolean;
 }
 
 @InputType()

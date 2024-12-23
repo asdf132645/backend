@@ -146,6 +146,10 @@ export class UpdateRuningInfoDtoItems {
   abnormalClassInfo?: any; // 실제 JSON 객체로 다루기
 
   @IsOptional()
+  @Field(() => Boolean, { nullable: true })
+  isAllClassesChecked?: boolean;
+
+  @IsOptional()
   @Field(() => GraphQLJSON, { nullable: true })
   wbcInfo?: WbcResponse; // JSON 데이터는 String으로 처리 (GraphQL 제한 고려)
 
