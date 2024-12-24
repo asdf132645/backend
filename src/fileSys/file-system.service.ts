@@ -143,8 +143,11 @@ export class FileSystemService {
             const content = fs.readFileSync(filePath, 'utf-8');
             const lines = content.split('\n');
 
-            // 날짜별 중복 제거용 Set
-            const seenMessages = new Set<string>();
+            // 날짜별 중복 제거용 Map (최신 로그만 남기기 위한 방법)
+            const seenMessages = new Map<
+              string,
+              { timestamp: string; log: any }
+            >();
 
             lines.forEach((line) => {
               const timestampMatch = line.match(
@@ -162,25 +165,46 @@ export class FileSystemService {
 
                 const messageKey = `${E_CODE}-${E_NAME}-${E_TYPE}`; // 중복 체크를 위한 Key
 
-                if (!seenMessages.has(messageKey)) {
-                  seenMessages.add(messageKey);
+                // 중복 메시지에서 최신 로그만 남기기
+                if (seenMessages.has(messageKey)) {
+                  const existingLog = seenMessages.get(messageKey)!;
+                  const existingTimestamp = existingLog.timestamp;
 
-                  // 그룹화된 로그 데이터 초기화
-                  if (!groupedLogs[dateKey]) {
-                    groupedLogs[dateKey] = [];
+                  // 기존 로그보다 최신 로그가 있으면 업데이트
+                  if (
+                    moment(timestamp, 'HH:mm:ss.SSS').isAfter(
+                      moment(existingTimestamp, 'HH:mm:ss.SSS'),
+                    )
+                  ) {
+                    seenMessages.set(messageKey, {
+                      timestamp,
+                      log: {
+                        timestamp,
+                        E_TYPE,
+                        E_CODE,
+                        E_NAME,
+                        E_DESC,
+                        E_SOLN,
+                      },
+                    });
                   }
-
-                  // 날짜별 데이터 추가
-                  groupedLogs[dateKey].push({
+                } else {
+                  seenMessages.set(messageKey, {
                     timestamp,
-                    E_TYPE,
-                    E_CODE,
-                    E_NAME,
-                    E_DESC,
-                    E_SOLN,
+                    log: { timestamp, E_TYPE, E_CODE, E_NAME, E_DESC, E_SOLN },
                   });
                 }
               }
+            });
+
+            // 날짜별 로그 추가 (최신 로그만 남기기)
+            seenMessages.forEach((value) => {
+              const log = value.log;
+              // groupedLogs에 해당 날짜가 없다면 새로 생성
+              if (!groupedLogs[dateKey]) {
+                groupedLogs[dateKey] = [];
+              }
+              groupedLogs[dateKey].push(log);
             });
           }
         }

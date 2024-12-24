@@ -48,6 +48,32 @@ export class ImagesController {
     }
   }
 
+  @Get('imgQualityCdn')
+  async getImageQuality(
+    @Query('folder') folder: string,
+    @Query('imageName') imageName: string,
+    @Query('quality') quality: string,
+    @Res() res: Response,
+  ) {
+    if (!folder || !imageName) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
+    }
+    const absoluteImagePath = path.join(folder, imageName);
+
+    try {
+      const imageBuffer = await sharp(absoluteImagePath)
+        .toFormat('webp')
+        .webp({ quality: Number(quality) }) // WebP 포맷으로 설정
+        .toBuffer();
+      res.setHeader('Content-Type', 'image/webp');
+      res.send(imageBuffer);
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Image processing error');
+    }
+  }
+
   @Get('print')
   async getPrintImage(
     @Query('folder') folder: string,
