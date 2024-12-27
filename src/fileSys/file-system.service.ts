@@ -97,6 +97,8 @@ export class FileSystemService {
     }
   }
 
+  function;
+
   getLogs(folderPath: string): any {
     try {
       const currentDate = moment(); // 현재 날짜
@@ -166,16 +168,32 @@ export class FileSystemService {
                 const messageKey = `${E_CODE}-${E_NAME}-${E_TYPE}`; // 중복 체크를 위한 Key
 
                 // 중복 메시지에서 최신 로그만 남기기
-                if (seenMessages.has(messageKey)) {
-                  const existingLog = seenMessages.get(messageKey)!;
-                  const existingTimestamp = existingLog.timestamp;
+                if (
+                  !currentDate.isSame(fileDate, 'day') // 오늘 날짜가 아닌 경우 중복 제거
+                ) {
+                  if (seenMessages.has(messageKey)) {
+                    const existingLog = seenMessages.get(messageKey)!;
+                    const existingTimestamp = existingLog.timestamp;
 
-                  // 기존 로그보다 최신 로그가 있으면 업데이트
-                  if (
-                    moment(timestamp, 'HH:mm:ss.SSS').isAfter(
-                      moment(existingTimestamp, 'HH:mm:ss.SSS'),
-                    )
-                  ) {
+                    // 기존 로그보다 최신 로그가 있으면 업데이트
+                    if (
+                      moment(timestamp, 'HH:mm:ss.SSS').isAfter(
+                        moment(existingTimestamp, 'HH:mm:ss.SSS'),
+                      )
+                    ) {
+                      seenMessages.set(messageKey, {
+                        timestamp,
+                        log: {
+                          timestamp,
+                          E_TYPE,
+                          E_CODE,
+                          E_NAME,
+                          E_DESC,
+                          E_SOLN,
+                        },
+                      });
+                    }
+                  } else {
                     seenMessages.set(messageKey, {
                       timestamp,
                       log: {
@@ -189,23 +207,32 @@ export class FileSystemService {
                     });
                   }
                 } else {
-                  seenMessages.set(messageKey, {
+                  // 오늘 날짜는 중복 제거 없이 모두 추가
+                  if (!groupedLogs[dateKey]) {
+                    groupedLogs[dateKey] = [];
+                  }
+                  groupedLogs[dateKey].push({
                     timestamp,
-                    log: { timestamp, E_TYPE, E_CODE, E_NAME, E_DESC, E_SOLN },
+                    E_TYPE,
+                    E_CODE,
+                    E_NAME,
+                    E_DESC,
+                    E_SOLN,
                   });
                 }
               }
             });
 
             // 날짜별 로그 추가 (최신 로그만 남기기)
-            seenMessages.forEach((value) => {
-              const log = value.log;
-              // groupedLogs에 해당 날짜가 없다면 새로 생성
-              if (!groupedLogs[dateKey]) {
-                groupedLogs[dateKey] = [];
-              }
-              groupedLogs[dateKey].push(log);
-            });
+            if (!currentDate.isSame(fileDate, 'day')) {
+              seenMessages.forEach((value) => {
+                const log = value.log;
+                if (!groupedLogs[dateKey]) {
+                  groupedLogs[dateKey] = [];
+                }
+                groupedLogs[dateKey].push(log);
+              });
+            }
           }
         }
       });
