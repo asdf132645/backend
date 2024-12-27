@@ -33,23 +33,23 @@ export class RuningInfoDtoItems {
   @Field(() => String)
   slotNo: string;
 
-  @Field(() => String)
-  barcodeNo: string;
+  @Field(() => String, { nullable: true })
+  barcodeNo?: string;
 
-  @Field(() => String)
-  patientId: string;
+  @Field(() => String, { nullable: true })
+  patientId?: string;
 
-  @Field(() => String)
-  patientNm: string;
+  @Field(() => String, { nullable: true })
+  patientNm?: string;
 
-  @Field(() => String)
-  gender: string;
+  @Field(() => String, { nullable: true })
+  gender?: string;
 
-  @Field(() => String)
-  birthDay: string;
+  @Field(() => String, { nullable: true })
+  birthDay?: string;
 
-  @Field(() => String)
-  wbcCount: string;
+  @Field(() => String, { nullable: true })
+  wbcCount?: string;
 
   @Field(() => String)
   slotId: string;
@@ -66,13 +66,13 @@ export class RuningInfoDtoItems {
   @Field(() => String)
   tactTime: string;
 
-  @Field(() => String)
-  maxWbcCount: string;
+  @Field(() => String, { nullable: true })
+  maxWbcCount?: string;
 
-  @Field(() => [String])
-  bf_lowPowerPath: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' })
+  bf_lowPowerPath?: string[];
 
-  @Field(() => WbcResponse, { nullable: true })
+  @Field(() => WbcResponse, { nullable: 'itemsAndList' })
   wbcInfo?: WbcResponse;
 
   @Field(() => [WbcInfoAfter], { nullable: 'itemsAndList' })
@@ -87,8 +87,8 @@ export class RuningInfoDtoItems {
   @Field(() => String)
   cassetId: string;
 
-  @Field(() => String)
-  isNormal: string;
+  @Field(() => String, { nullable: true })
+  isNormal?: string;
 
   @Field(() => String, { nullable: true })
   submitState?: string;
@@ -111,8 +111,8 @@ export class RuningInfoDtoItems {
   @Field(() => String, { nullable: true })
   rbcMemo?: string;
 
-  @Field(() => String)
-  pcIp: string;
+  @Field(() => String, { nullable: true })
+  pcIp?: string;
 
   @Field(() => String, { nullable: true })
   cbcPatientNo?: string;

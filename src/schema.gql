@@ -83,21 +83,21 @@ type RuningInfoEntity {
   lock_status: Boolean
   traySlot: String
   slotNo: String!
-  barcodeNo: String!
-  patientId: String!
-  patientNm: String!
-  gender: String!
-  birthDay: String!
-  wbcCount: String!
+  barcodeNo: String
+  patientId: String
+  patientNm: String
+  gender: String
+  birthDay: String
+  wbcCount: String
   slotId: String!
   orderDttm: String!
   testType: String!
-  analyzedDttm: String!
-  tactTime: String!
-  maxWbcCount: String!
-  bf_lowPowerPath: [String!]!
-  cassetId: String!
-  isNormal: String!
+  analyzedDttm: String
+  tactTime: String
+  maxWbcCount: String
+  bf_lowPowerPath: [String!]
+  cassetId: String
+  isNormal: String
   wbcInfo: WbcResponse
   wbcInfoAfter: [WbcInfoAfter!]!
   rbcInfo: RbcInfo

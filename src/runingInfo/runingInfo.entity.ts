@@ -28,29 +28,29 @@ export class RuningInfoEntity {
   @Column({ type: 'varchar' }) // varchar로 명시
   slotNo: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  barcodeNo: string;
+  barcodeNo?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  patientId: string;
+  patientId?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  patientNm: string;
+  patientNm?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  gender: string;
+  gender?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  birthDay: string;
+  birthDay?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  wbcCount: string;
+  wbcCount?: string;
 
   @Field(() => String)
   @Column({ type: 'varchar' }) // varchar로 명시
@@ -64,27 +64,27 @@ export class RuningInfoEntity {
   @Column({ type: 'varchar' }) // varchar로 명시
   testType: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  analyzedDttm: string;
+  analyzedDttm?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  tactTime: string;
+  tactTime?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  maxWbcCount: string;
+  maxWbcCount?: string;
 
-  @Field(() => [String]) // 배열 타입 지정
+  @Field(() => [String], { nullable: true }) // 배열 타입 지정
   @Column('json') // JSON 데이터 타입으로 설정
   bf_lowPowerPath?: string[];
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
   cassetId?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
   isNormal?: string;
 
