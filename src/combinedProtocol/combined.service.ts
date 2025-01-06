@@ -178,6 +178,11 @@ export class CombinedService
             );
           }
 
+          if (!['SYSINFO', 'RUNNING_INFO'].includes(message.payload.jobCmd)) {
+            this.handleJobcmd(message);
+            this.notRes = false;
+          }
+
           if (!this.notRes) {
             this.webSocketGetData(message);
           }
@@ -251,15 +256,6 @@ export class CombinedService
   }
 
   webSocketGetData(message: any): void {
-    // 진입점
-    // message
-    // 들어와서 check
-    // sysinfo, runninginfo 아니네? -> 응답이 안오면 다시 쏴야 함
-    // 해당되는 boolean
-    // queue 배열
-    // message --> 변수로 확인
-    // FE도 들어왔는지 확인 -> 담아놓고 boolean false -> 응답 오면 넘어가고 응답이 안오면 true로 바꾸고 다시 check
-    // message
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
@@ -295,7 +291,7 @@ export class CombinedService
     }
   }
 
-  sendDataToEmbeddedServer(data: any): void {
+  async sendDataToEmbeddedServer(data: any): Promise<void> {
     // 데이터 중복 체크
     if (
       this.tcpQueue.some(
@@ -309,12 +305,7 @@ export class CombinedService
     // 데이터 큐에 추가
     this.tcpQueue.push(data);
 
-    // 0.5초 이내에 안오면 쏘는 걸로 -->
-    if (!['SYSINFO', 'RUNNING_INFO'].includes(data.payload.jobCmd)) {
-      this.handleJobcmd(data);
-    }
-
-    this.processQueue(); // 큐 처리 시작
+    await this.processQueue(); // 큐 처리 시작
   }
 
   private async processQueue(): Promise<void> {
