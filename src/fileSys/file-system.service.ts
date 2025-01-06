@@ -97,8 +97,6 @@ export class FileSystemService {
     }
   }
 
-  function;
-
   getLogs(folderPath: string): any {
     try {
       const currentDate = moment(); // 현재 날짜
@@ -130,22 +128,23 @@ export class FileSystemService {
       // 폴더의 모든 파일 확인
       const files = fs.readdirSync(folderPath);
       files.forEach((file) => {
-        // 파일 이름이 "YYYY_MM_DD_Error_Log.txt" 형식인지 확인
         const match = file.match(/^(\d{4})_(\d{2})_(\d{2})_Error_Log\.txt$/);
         if (match) {
           const fileDate = moment(
             `${match[1]}-${match[2]}-${match[3]}`,
             'YYYY-MM-DD',
           );
-          const dateKey = fileDate.format('YYYY-MM-DD'); // 그룹화 키로 사용할 날짜
+          const dateKey = fileDate.format('YYYY-MM-DD');
 
           if (fileDate.isBetween(startDate, currentDate, 'day', '[]')) {
-            // 파일 내용 읽기
+            console.log(dateKey);
+
             const filePath = path.join(folderPath, file);
+            console.log('filePath', filePath);
+
             const content = fs.readFileSync(filePath, 'utf-8');
             const lines = content.split('\n');
 
-            // 날짜별 중복 제거용 Map (최신 로그만 남기기 위한 방법)
             const seenMessages = new Map<
               string,
               { timestamp: string; log: any }
@@ -165,35 +164,17 @@ export class FileSystemService {
                   .slice(1)
                   .map((v) => v.trim());
 
-                const messageKey = `${E_CODE}-${E_NAME}-${E_TYPE}`; // 중복 체크를 위한 Key
+                const messageKey = `${E_CODE}-${E_NAME}-${E_TYPE}`;
 
-                // 중복 메시지에서 최신 로그만 남기기
-                if (
-                  !currentDate.isSame(fileDate, 'day') // 오늘 날짜가 아닌 경우 중복 제거
-                ) {
-                  if (seenMessages.has(messageKey)) {
-                    const existingLog = seenMessages.get(messageKey)!;
-                    const existingTimestamp = existingLog.timestamp;
+                if (seenMessages.has(messageKey)) {
+                  const existingLog = seenMessages.get(messageKey)!;
+                  const existingTimestamp = existingLog.timestamp;
 
-                    // 기존 로그보다 최신 로그가 있으면 업데이트
-                    if (
-                      moment(timestamp, 'HH:mm:ss.SSS').isAfter(
-                        moment(existingTimestamp, 'HH:mm:ss.SSS'),
-                      )
-                    ) {
-                      seenMessages.set(messageKey, {
-                        timestamp,
-                        log: {
-                          timestamp,
-                          E_TYPE,
-                          E_CODE,
-                          E_NAME,
-                          E_DESC,
-                          E_SOLN,
-                        },
-                      });
-                    }
-                  } else {
+                  if (
+                    moment(timestamp, 'HH:mm:ss.SSS').isAfter(
+                      moment(existingTimestamp, 'HH:mm:ss.SSS'),
+                    )
+                  ) {
                     seenMessages.set(messageKey, {
                       timestamp,
                       log: {
@@ -207,32 +188,22 @@ export class FileSystemService {
                     });
                   }
                 } else {
-                  // 오늘 날짜는 중복 제거 없이 모두 추가
-                  if (!groupedLogs[dateKey]) {
-                    groupedLogs[dateKey] = [];
-                  }
-                  groupedLogs[dateKey].push({
+                  seenMessages.set(messageKey, {
                     timestamp,
-                    E_TYPE,
-                    E_CODE,
-                    E_NAME,
-                    E_DESC,
-                    E_SOLN,
+                    log: { timestamp, E_TYPE, E_CODE, E_NAME, E_DESC, E_SOLN },
                   });
                 }
               }
             });
 
-            // 날짜별 로그 추가 (최신 로그만 남기기)
-            if (!currentDate.isSame(fileDate, 'day')) {
-              seenMessages.forEach((value) => {
-                const log = value.log;
-                if (!groupedLogs[dateKey]) {
-                  groupedLogs[dateKey] = [];
-                }
-                groupedLogs[dateKey].push(log);
-              });
+            if (!groupedLogs[dateKey]) {
+              groupedLogs[dateKey] = [];
             }
+
+            // seenMessages의 로그를 groupedLogs에 추가
+            seenMessages.forEach((value) => {
+              groupedLogs[dateKey].push(value.log);
+            });
           }
         }
       });
