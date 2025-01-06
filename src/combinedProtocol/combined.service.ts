@@ -41,68 +41,6 @@ export class CombinedService
   private isNotDownloadOrUploading = true;
   private tcpQueue: any[] = []; // 전송 대기열
   private isProcessing: boolean = false; // 현재 처리 중인지 여부
-  private runningJobCmd = {
-    START: {
-      status: false,
-      data: '',
-    },
-    INIT: {
-      status: false,
-      data: '',
-    },
-    RESTART: {
-      status: false,
-      data: '',
-    },
-    STOP: {
-      status: false,
-      data: '',
-    },
-    END: {
-      status: false,
-      data: '',
-    },
-    PAUSE: {
-      status: false,
-      data: '',
-    },
-    RUNNING_COMP: {
-      status: false,
-      data: '',
-    },
-    RECOVERY: {
-      status: false,
-      data: '',
-    },
-    SETTINGS: {
-      status: false,
-      data: '',
-    },
-    OIL_PRIME: {
-      status: false,
-      data: '',
-    },
-    GRIPPER_OPEN: {
-      status: false,
-      data: '',
-    },
-    CAMERA_RESET: {
-      status: false,
-      data: '',
-    },
-    clientExit: {
-      status: false,
-      data: '',
-    },
-    SEARCH_CARD_COUNT: {
-      status: false,
-      data: '',
-    },
-    ERROR_CLEAR: {
-      status: false,
-      data: '',
-    },
-  };
 
   constructor(
     private readonly logger: LoggerService,
@@ -179,7 +117,6 @@ export class CombinedService
           }
 
           if (!['SYSINFO', 'RUNNING_INFO'].includes(message.payload.jobCmd)) {
-            this.handleJobcmd(message);
             this.notRes = false;
           }
 
@@ -276,8 +213,6 @@ export class CombinedService
       if (data?.err) {
         jsonData = `{ "bufferData": 'err' }`;
       } else {
-        this.reSendProcessQueue(data);
-
         jsonData = data;
       }
       this.wss.emit('chat', jsonData);
@@ -430,39 +365,4 @@ export class CombinedService
     };
     this.wss.emit('downloadUploadFinished', obj);
   }
-
-  private handleJobcmd = async (tcpData: any) => {
-    if (!this.runningJobCmd[tcpData.payload.jobCmd].status) {
-      this.runningJobCmd[tcpData.payload.jobCmd].status = true;
-      this.runningJobCmd[tcpData.payload.jobCmd].data = tcpData;
-      this.tcpQueue = [];
-      this.tcpQueue.push(tcpData);
-    }
-  };
-
-  private getNotRunningJob = () => {
-    return Object.entries(this.runningJobCmd)
-      .filter(([_, value]) => value.status)
-      .reduce((acc, [key, value]) => {
-        acc[key] = value;
-        return acc;
-      }, {});
-  };
-
-  private reSendProcessQueue = (data: any) => {
-    if (
-      !['SYSINFO', 'RUNNING_INFO'].includes(JSON.parse(data).jobCmd) &&
-      this.runningJobCmd[JSON.parse(data).jobCmd].status
-    ) {
-      this.runningJobCmd[JSON.parse(data).jobCmd].status = false;
-      this.runningJobCmd[JSON.parse(data).jobCmd].data = '';
-    }
-
-    // 현재 응답을 받지 못한 SYSINFO, RUNNING_INFO를 제외한 JOBCMD가 있다면 재전송
-    const isNotReceivingJob: any = this.getNotRunningJob();
-    if (isNotReceivingJob && Object.keys(isNotReceivingJob).length > 0) {
-      this.tcpQueue = [];
-      this.tcpQueue.push(isNotReceivingJob.data);
-    }
-  };
 }
