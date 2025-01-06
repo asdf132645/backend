@@ -100,7 +100,7 @@ export class FileSystemService {
   getLogs(folderPath: string): any {
     try {
       const currentDate = moment(); // 현재 날짜
-      const startDate = moment().subtract(5, 'days'); // 5일 전
+      const startDate = moment().subtract(1, 'days'); // 24시간 전
 
       const groupedLogs: Record<
         string,
@@ -137,72 +137,47 @@ export class FileSystemService {
           const dateKey = fileDate.format('YYYY-MM-DD');
 
           if (fileDate.isBetween(startDate, currentDate, 'day', '[]')) {
-            console.log(dateKey);
-
             const filePath = path.join(folderPath, file);
-            console.log('filePath', filePath);
-
             const content = fs.readFileSync(filePath, 'utf-8');
             const lines = content.split('\n');
 
-            const seenMessages = new Map<
-              string,
-              { timestamp: string; log: any }
-            >();
-
-            lines.forEach((line) => {
-              const timestampMatch = line.match(
-                /^\[(\d{2}:\d{2}:\d{2}\.\d{3})\]/,
-              );
-              const dataMatch = line.match(
-                /E_TYPE\s*:\s*(\w+)\s*\|\s*E_CODE:\s*(\d+)\s*\|\s*E_NAME:\s*(\w+)\s*\|\s*E_DESC:\s*(.*?)\s*\|\s*E_SOLN:\s*(.*)/,
-              );
-
-              if (timestampMatch && dataMatch) {
-                const timestamp = timestampMatch[1].trim();
-                const [E_TYPE, E_CODE, E_NAME, E_DESC, E_SOLN] = dataMatch
-                  .slice(1)
-                  .map((v) => v.trim());
-
-                const messageKey = `${E_CODE}-${E_NAME}-${E_TYPE}`;
-
-                if (seenMessages.has(messageKey)) {
-                  const existingLog = seenMessages.get(messageKey)!;
-                  const existingTimestamp = existingLog.timestamp;
-
-                  if (
-                    moment(timestamp, 'HH:mm:ss.SSS').isAfter(
-                      moment(existingTimestamp, 'HH:mm:ss.SSS'),
-                    )
-                  ) {
-                    seenMessages.set(messageKey, {
-                      timestamp,
-                      log: {
-                        timestamp,
-                        E_TYPE,
-                        E_CODE,
-                        E_NAME,
-                        E_DESC,
-                        E_SOLN,
-                      },
-                    });
-                  }
-                } else {
-                  seenMessages.set(messageKey, {
-                    timestamp,
-                    log: { timestamp, E_TYPE, E_CODE, E_NAME, E_DESC, E_SOLN },
-                  });
-                }
-              }
-            });
+            // 로그 순서를 역순으로 처리
+            lines.reverse();
 
             if (!groupedLogs[dateKey]) {
               groupedLogs[dateKey] = [];
             }
 
-            // seenMessages의 로그를 groupedLogs에 추가
-            seenMessages.forEach((value) => {
-              groupedLogs[dateKey].push(value.log);
+            // 로그를 한 줄씩 처리
+            lines.forEach((line) => {
+              const timestampMatch = line.match(
+                /^\[(\d{2}:\d{2}:\d{2}\.\d{3})\]/,
+              );
+              if (timestampMatch) {
+                const timestamp = timestampMatch[1].trim();
+
+                // 각 항목을 문자열에서 추출
+                const E_TYPE = line.match(/E_TYPE\s*:\s*(\w+)/)?.[1] || '';
+                const E_CODE = line.match(/E_CODE\s*:\s*(\d+)/)?.[1] || '';
+                const E_NAME =
+                  line.match(/E_NAME\s*:\s*([\w\s_]+)/)?.[1].trim() || '';
+                const E_DESC =
+                  line
+                    .match(/E_DESC\s*:\s*(.*?)(?=\s*\|\s*E_SOLN)/)?.[1]
+                    .trim() || '';
+                const E_SOLN =
+                  line.match(/E_SOLN\s*:\s*(.*)/)?.[1].trim() || '';
+
+                // 로그를 groupedLogs에 추가
+                groupedLogs[dateKey].push({
+                  timestamp,
+                  E_TYPE,
+                  E_CODE,
+                  E_NAME,
+                  E_DESC,
+                  E_SOLN,
+                });
+              }
             });
           }
         }
