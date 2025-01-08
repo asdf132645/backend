@@ -32,6 +32,19 @@ export class RedisCacheInterceptor implements NestInterceptor {
       tap(async (data) => {
         if (data) {
           await this.redis.set(key, JSON.stringify(data), 'EX', 1800);
+          // try {
+          //   await this.redis.set(key, JSON.stringify(data), 'EX', 1800);
+          // } catch (error) {
+          //   if (error.message.includes('OOM')) {
+          //     await this.evictOldestCache(
+          //       this.redis,
+          //       key,
+          //       JSON.stringify(data),
+          //     );
+          //   } else {
+          //     console.error(`redis 특정 캐시 삭제 오류: ${error}`);
+          //   }
+          // }
         }
       }),
     );
@@ -84,5 +97,27 @@ export class RedisCacheInterceptor implements NestInterceptor {
       returnKey = `${method}:${url}?${new URLSearchParams(query).toString()}`;
     }
     return returnKey;
+  }
+
+  private async evictOldestCache(
+    redis: Redis,
+    newKey: string,
+    newValue: string,
+  ) {
+    const keys = await redis.keys('*');
+    const keyExpirations = await Promise.all(
+      keys.map(async (key) => {
+        const ttl = await redis.ttl(key);
+        return { key, ttl };
+      }),
+    );
+
+    const oldestKey = keyExpirations.reduce((oldest, current) => {
+      return current.ttl < oldest.ttl ? current : oldest;
+    }).key;
+
+    await redis.del(oldestKey);
+
+    await redis.set(newKey, newValue, 'EX', 1800);
   }
 }
