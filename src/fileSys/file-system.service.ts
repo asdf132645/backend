@@ -100,7 +100,7 @@ export class FileSystemService {
   getLogs(folderPath: string): any {
     try {
       const currentDate = moment(); // 현재 날짜
-      const startDate = moment().subtract(1, 'days'); // 24시간 전
+      const startDate = moment().startOf('day'); // 오늘 0시부터
 
       const groupedLogs: Record<
         string,
