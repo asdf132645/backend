@@ -172,7 +172,7 @@ input UpdateRuningInfoDtoItems {
   isAllClassesChecked: Boolean
   wbcInfo: JSON
   wbcInfoAfter: JSON
-  rbcInfo: String
+  rbcInfo: JSON
   rbcInfoAfter: JSON
 }
 
