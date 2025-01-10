@@ -73,7 +73,10 @@ export class CellImgAnalyzed {
   keepPage: boolean;
 
   @Column()
-  @ApiProperty({ example: false, description: 'LIS Upload 버튼 모든 세포 확인 후 활성화 여부' })
+  @ApiProperty({
+    example: false,
+    description: 'LIS Upload 버튼 모든 세포 확인 후 활성화 여부',
+  })
   lisUploadCheckAll: boolean;
 
   @Column()
@@ -95,4 +98,12 @@ export class CellImgAnalyzed {
   @Column({ type: 'date' })
   @ApiProperty({ example: '0000-00-00', description: '자동 저장 시작 날짜' })
   autoBackUpStartDate: Date;
+
+  @Column()
+  @ApiProperty({ example: true, description: '프리셋 선택 여부' })
+  presetChecked: boolean;
+
+  @Column()
+  @ApiProperty({ example: '1', description: '프리셋 이름' })
+  presetNm: string;
 }

@@ -25,10 +25,29 @@ export class CellImgAnalyzedService {
     try {
       const queryBuilder =
         this.cellImgAnalyzedRepository.createQueryBuilder('cellImgAnalyzed');
-      return await queryBuilder.getOne();
+
+      const entities = await queryBuilder.getMany();
+      const presetCheckedEntity = entities.filter((item) => item.presetChecked);
+
+      if (presetCheckedEntity.length > 0) {
+        return presetCheckedEntity[0];
+      } else {
+        return entities[0];
+      }
     } catch (error) {
       console.error('Error:', error);
-      throw error;
+      return undefined;
+    }
+  }
+
+  async findAll(): Promise<CellImgAnalyzed[] | undefined> {
+    try {
+      const queryBuilder =
+        this.cellImgAnalyzedRepository.createQueryBuilder('cellImgAnalyzed');
+      return await queryBuilder.getMany();
+    } catch (error) {
+      console.error('Error:', error);
+      return undefined;
     }
   }
 
@@ -50,7 +69,17 @@ export class CellImgAnalyzedService {
     return await this.cellImgAnalyzedRepository.save(existingEntity);
   }
 
-  private async findById(id: any): Promise<CellImgAnalyzed> {
+  async delete(id: string): Promise<boolean> {
+    try {
+      await this.cellImgAnalyzedRepository.delete(id);
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  async findById(id: any): Promise<CellImgAnalyzed> {
     const entity = await this.cellImgAnalyzedRepository.findOne({
       where: { id },
     });

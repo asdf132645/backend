@@ -1,4 +1,7 @@
 // create-cellImg.dto.ts
+import { Column } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
+
 export class CellImgAnalyzedDto {
   id?: number;
   analysisType: string;
@@ -23,4 +26,6 @@ export class CellImgAnalyzedDto {
   backupEndDate: Date;
   autoBackUpMonth: string;
   autoBackUpStartDate: Date;
+  presetChecked: boolean;
+  presetNm: string;
 }
