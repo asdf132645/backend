@@ -100,7 +100,8 @@ export class FileSystemService {
   getLogs(folderPath: string): any {
     try {
       const currentDate = moment(); // 현재 날짜
-      const startDate = moment().startOf('day'); // 오늘 0시부터
+      const yesterdayDate = moment().subtract(1, 'day').startOf('day'); // 어제 0시부터
+      const todayStartDate = moment().startOf('day'); // 오늘 0시부터
 
       const groupedLogs: Record<
         string,
@@ -136,7 +137,11 @@ export class FileSystemService {
           );
           const dateKey = fileDate.format('YYYY-MM-DD');
 
-          if (fileDate.isBetween(startDate, currentDate, 'day', '[]')) {
+          // 파일 날짜가 어제와 오늘 사이인지 확인
+          if (
+            fileDate.isBetween(yesterdayDate, currentDate, 'day', '[]') &&
+            (fileDate.isSame(yesterdayDate, 'day') || fileDate.isSame(todayStartDate, 'day'))
+          ) {
             const filePath = path.join(folderPath, file);
             const content = fs.readFileSync(filePath, 'utf-8');
             const lines = content.split('\n');
@@ -183,7 +188,19 @@ export class FileSystemService {
         }
       });
 
-      return groupedLogs;
+      // 오늘 날짜를 가장 위에 배치
+      const sortedLogs = Object.keys(groupedLogs)
+        .sort((a, b) => {
+          if (a === todayStartDate.format('YYYY-MM-DD')) return -1;
+          if (b === todayStartDate.format('YYYY-MM-DD')) return 1;
+          return moment(b).isBefore(moment(a)) ? -1 : 1;
+        })
+        .reduce((acc, key) => {
+          acc[key] = groupedLogs[key];
+          return acc;
+        }, {});
+
+      return sortedLogs;
     } catch (error) {
       if (error instanceof HttpException) {
         return error;
