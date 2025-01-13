@@ -99,4 +99,14 @@ export class FileSystemController {
     const logs = this.fileSystemService.getLogs(folderPath);
     return logs;
   }
+
+  @Get('readAllErrorLogs')
+  getAllErrorLogs(@Query('folderPath') folderPath: string): any {
+    if (!folderPath) {
+      console.error('folderPath parameter is missing');
+    }
+
+    const logs = this.fileSystemService.getAllErrorLogs(folderPath);
+    return logs;
+  }
 }
