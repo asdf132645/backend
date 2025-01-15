@@ -21,7 +21,7 @@ async function bootstrap() {
   const corsOptions: CorsOptions = {
     origin: [
       'http://192.168.0.131:8080',
-      'http://192.168.0.115:8080',
+      'http://192.168.0.101:8080',
       'http://127.0.0.1:8080',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -55,7 +55,7 @@ async function bootstrap() {
   await checkAndStartRedis();
 
   // MySQL 명령 실행: sort_buffer_size 설정
-  await connection.query('SET GLOBAL sort_buffer_size = 100*1024*1024;');
+  await connection.query('SET GLOBAL sort_buffer_size = 50*1024*1024;');
   console.log('MySQL sort_buffer_size 설정 완료');
 
   // MySQL 연결 종료
