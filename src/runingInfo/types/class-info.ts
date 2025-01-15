@@ -13,6 +13,21 @@ export class ClassInfo {
 
   @Field(() => String, { nullable: true })
   originalDegree?: string;
+
+  @Field(() => [RBCDegreeByImageInfoObj], { nullable: true })
+  rbcImageDegreeInfo?: RBCDegreeByImageInfoObj[];
+}
+
+@ObjectType()
+export class RBCDegreeByImageInfoObj {
+  @Field(() => Number, { nullable: true })
+  imageNo?: number;
+
+  @Field(() => String, { nullable: true })
+  degree?: string;
+
+  @Field(() => String, { nullable: true })
+  originalDegree?: string;
 }
 
 @ObjectType()
