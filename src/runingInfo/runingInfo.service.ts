@@ -185,6 +185,7 @@ export class RuningInfoService {
     const queryBuilder =
       this.runingInfoEntityRepository.createQueryBuilder('runInfo');
 
+    // Formatting start and end dates
     const startFormatted = startDay
       ? `${startDay.getFullYear()}${(startDay.getMonth() + 1).toString().padStart(2, '0')}${startDay.getDate().toString().padStart(2, '0')}000000000`
       : undefined;
@@ -206,6 +207,7 @@ export class RuningInfoService {
       );
     }
 
+    // Adding an index-compatible sorting mechanism
     queryBuilder.orderBy('runInfo.analyzedDttm', 'DESC');
 
     if (barcodeNo) {
@@ -230,62 +232,40 @@ export class RuningInfoService {
       queryBuilder.andWhere('runInfo.testType = :testType', { testType });
     }
 
+    // Optimizing JSON-based filtering
     if (nrCount !== '0' && nrCount !== '') {
       const query = `
-    JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :titlePath, NULL, '$[*].title') IS NOT NULL
-    AND (
-      SELECT COUNT(*)
-      FROM JSON_TABLE(
-        runInfo.wbcInfoAfter,
-        '$[*]' COLUMNS(
-          title VARCHAR(255) PATH '$.title',
-          count INT PATH '$.count'
-        )
-      ) AS jt
-      WHERE jt.title = :titleParam
-        AND jt.count = :nrCount
-    ) > 0
-  `;
+        JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :titlePath, NULL, '$[*].title') IS NOT NULL
+        AND JSON_EXTRACT(runInfo.wbcInfoAfter, '$[0].count') = :nrCount
+      `;
       queryBuilder.andWhere(query, {
         titlePath: 'NR',
-        titleParam: 'NR',
         nrCount: parseInt(nrCount, 10),
       });
     }
 
     if (titles && titles.length > 0) {
-      const andConditions = titles
-        .map((title, index) => {
-          const titleParam = `title${index}`;
-          return `
-        JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
-        AND (
-          SELECT COUNT(*)
-          FROM JSON_TABLE(
-            runInfo.wbcInfoAfter,
-            '$[*]' COLUMNS(
-              title VARCHAR(255) PATH '$.title',
-              count INT PATH '$.count'
-            )
-          ) AS jt
-          WHERE jt.title = :${titleParam}
-            AND jt.count > 0
-        ) > 0
-      `;
-        })
-        .join(' AND ');
+      const orConditions = titles
+        .map(
+          (title, index) =>
+            `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL`,
+        )
+        .join(' OR ');
 
       const params = titles.reduce((acc, title, index) => {
         acc[`title${index}`] = title;
         return acc;
       }, {});
 
-      queryBuilder.andWhere(andConditions, params);
+      queryBuilder.andWhere(`(${orConditions})`, params);
     }
 
-    // eslint-disable-next-line prefer-const
-    let [data, total] = await queryBuilder.getManyAndCount();
+    // Execute paginated query
+    queryBuilder.skip((page - 1) * pageSize).take(pageSize);
 
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    // Sorting by wbcCount if needed
     if (wbcCountOrder) {
       data.sort((a, b) => {
         const aCount = Number(a.wbcCount);
@@ -294,9 +274,6 @@ export class RuningInfoService {
           ? aCount - bCount
           : bCount - aCount;
       });
-    }
-    if (pageSize && page) {
-      data = data.slice((page - 1) * pageSize, page * pageSize);
     }
 
     return { data, total };
