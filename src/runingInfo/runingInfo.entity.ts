@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Unique, Index } from "typeorm";
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import {
   RbcInfo,
@@ -14,6 +14,7 @@ import {
 export class RuningInfoEntity {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
+  @Index('IDX_analyzedDttm_testType', ['analyzedDttm', 'testType']) // 복합 인덱스
   id!: number;
 
   @Field(() => Boolean, { nullable: true }) // Boolean 타입으로 명시
@@ -30,10 +31,12 @@ export class RuningInfoEntity {
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
+  @Index() // 단일 인덱스
   barcodeNo?: string;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
+  @Index()
   patientId?: string;
 
   @Field(() => String, { nullable: true })
@@ -62,10 +65,12 @@ export class RuningInfoEntity {
 
   @Field(() => String)
   @Column({ type: 'varchar' }) // varchar로 명시
+  @Index()
   testType: string;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
+  @Index()
   analyzedDttm?: string;
 
   @Field(() => String, { nullable: true })
