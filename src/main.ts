@@ -55,7 +55,7 @@ async function bootstrap() {
   await checkAndStartRedis();
 
   // MySQL 명령 실행: sort_buffer_size 설정
-  await connection.query('SET GLOBAL sort_buffer_size = 50*1024*1024;');
+  await connection.query('SET GLOBAL sort_buffer_size = 100*1024*1024;');
   console.log('MySQL sort_buffer_size 설정 완료');
 
   // MySQL 연결 종료
