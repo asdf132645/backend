@@ -16,8 +16,11 @@ export class FilePathSetService {
     const { filePathSetItems } = createDto as CreateFilePathSetDto;
     const createdItems: FilePathSetEntity[] = [];
     for (const item of filePathSetItems) {
-      const imagePrintEntity = this.filePathSetEntityRepository.create({ ...item });
-      const createdItem = await this.filePathSetEntityRepository.save(imagePrintEntity);
+      const imagePrintEntity = this.filePathSetEntityRepository.create({
+        ...item,
+      });
+      const createdItem =
+        await this.filePathSetEntityRepository.save(imagePrintEntity);
       createdItems.push(createdItem);
     }
 
