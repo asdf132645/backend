@@ -49,6 +49,7 @@
     "graphql": "^16.10.0",
     "graphql-type-json": "^0.3.2",
     "html-pdf": "^3.0.1",
+    "html-to-rtf": "^2.1.0",
     "imagemin-cli": "^7.0.0",
     "ioredis": "^5.4.1",
     "jimp": "^0.22.12",
