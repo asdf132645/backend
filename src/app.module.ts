@@ -53,8 +53,11 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CrcModule } from './settings/report/crc/crc.module';
 import { HttpModule } from '@nestjs/axios';
+import { RTFModule } from './rtf/rtf.module';
 import { SybaseController } from './sybase/sybase.controller';
 import { SybaseProxyService } from './sybase/sybase.proxy.service';
+import { OracleController } from './oracle/oracle.controller';
+import { OracleProxyService } from './oracle/oracle.proxy.service';
 import GraphQLJSON from 'graphql-type-json';
 
 @Module({
@@ -99,6 +102,7 @@ import GraphQLJSON from 'graphql-type-json';
     UploadModule,
     CbcModule,
     CrcModule,
+    RTFModule,
   ],
   controllers: [
     AppController,
@@ -111,6 +115,7 @@ import GraphQLJSON from 'graphql-type-json';
     QualityCheckController,
     ExcelController,
     SybaseController,
+    OracleController,
   ],
   providers: [
     LoggerService,
@@ -121,6 +126,7 @@ import GraphQLJSON from 'graphql-type-json';
     QualityCheckService,
     ExcelService,
     SybaseProxyService,
+    OracleProxyService,
     {
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,

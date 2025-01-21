@@ -64,7 +64,6 @@ export class UserService {
     });
 
     if (!user) {
-      console.log('User not found');
       return false;
     }
 
