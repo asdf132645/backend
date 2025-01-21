@@ -3,10 +3,9 @@ import * as htmlToRtf from 'html-to-rtf';
 
 @Injectable()
 export class RTFService {
-  convertHTMLToRTF(data: { data: HTMLElement }): any {
+  convertHTMLToRTF(data: any): any {
     try {
-      const rtfContent = htmlToRtf.convertHtmlToRtf(data);
-      return rtfContent;
+      return htmlToRtf.convertHtmlToRtf(data);
     } catch (error) {
       console.error('RTF 변환 오류', error);
       return;

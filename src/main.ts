@@ -61,9 +61,26 @@ async function bootstrap() {
   // MySQL 연결 종료
   await connection.end();
 
-  if (corsOptions.origin[0] === 'http://192.168.2.229:8080') {
+  const lisMiddleWareIP = corsOptions.origin[0];
+  if (lisMiddleWareIP === 'http://192.168.2.229:8080') {
     const expressServerPath =
       'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\ywmc-server';
+
+    // Express 서버 실행
+    const expressServer = spawn('npm', ['start'], {
+      cwd: expressServerPath, // 절대 경로 설정
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    expressServer.on('close', (code) => {
+      console.log(`Express 서버가 종료되었습니다. 종료 코드: ${code}`);
+    });
+  } else if (lisMiddleWareIP === 'http://192.168.0.101:8080') {
+    // 원자력 IP 넣어야 함
+    // 원자력 병원
+    const expressServerPath =
+      'C:\\Users\\user\\AppData\\Local\\Programs\\UIMD\\lisMiddleware';
 
     // Express 서버 실행
     const expressServer = spawn('npm', ['start'], {

@@ -30,7 +30,6 @@ export class BrowserService {
         if (error) {
           return reject(error);
         }
-        console.log(stdout);
         resolve();
       });
     });

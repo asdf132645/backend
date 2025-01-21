@@ -189,7 +189,6 @@ export class ImagesController {
       success: [],
       failed: [],
     };
-    console.log(imageNamesArray);
     for (let i = 0; i < imageNamesArray.length; i++) {
       const imageName = imageNamesArray[i];
       const absoluteSourcePath = path.join(sourceFoldersArray[i], imageName);
@@ -197,7 +196,7 @@ export class ImagesController {
         destinationFoldersArray[i],
         imageName,
       );
-      console.log(absoluteSourcePath);
+
       try {
         // 파일 이동
         fs.accessSync(absoluteSourcePath, fs.constants.R_OK);
