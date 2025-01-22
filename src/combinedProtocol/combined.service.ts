@@ -98,6 +98,10 @@ export class CombinedService
     this.serverIp = await isServerRunningLocally();
     this.wss.emit('multiViewer', client.conn.remoteAddress);
 
+    client.on('exit', () => {
+    //
+    });
+
     client.on('ping', () => {
       client.emit('pong');
       this.logger.ping(
