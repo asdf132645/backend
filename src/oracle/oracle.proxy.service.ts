@@ -8,7 +8,7 @@ export class OracleProxyService {
 
   // UIMD RTS 결과 전송
   async sendRTS(data: any): Promise<any> {
-    const url = `http://localhost:3050/0033-sendRTF`;
+    const url = `http://localhost:3050/sendRTF`;
     const response = await firstValueFrom(this.httpService.post(url, data));
     return response.data;
   }
