@@ -28,26 +28,25 @@ export class CbcCodeService {
   async update(updateDto: CreateCbcCodeDto): Promise<CbcCodeEntity[]> {
     const { cbcCodeItems } = updateDto;
 
-    const updatedItems: CbcCodeEntity[] = [];
-    for (const item of cbcCodeItems) {
-      const updatedItem = await this.updateItem(item);
-      updatedItems.push(updatedItem);
-    }
-    return updatedItems;
-  }
+    const existingEntities = await this.cbcCodeEntityRepository.find();
+    const existingIdSet = new Set(existingEntities.map((entity) => entity.id));
+    const incomingIdSet = new Set(cbcCodeItems.map((item) => item.id));
 
-  private async updateItem(item: any): Promise<CbcCodeEntity> {
-    const existingEntity = await this.cbcCodeEntityRepository.findOne({
-      where: { id: item.id },
+    const updateOrInsertPromises = cbcCodeItems.map(async (item) => {
+      if (existingIdSet.has(item.id)) {
+        await this.cbcCodeEntityRepository.update(item.id, item);
+      } else {
+        await this.cbcCodeEntityRepository.save(item);
+      }
     });
 
-    if (!existingEntity) {
-      console.log(`id가 ${item.id}인 cbcCode Setting을 찾을 수 없습니다.`)
-      return null;
-    }
+    const deletePromises = Array.from(existingIdSet)
+      .filter((id) => !incomingIdSet.has(id))
+      .map((id) => this.cbcCodeEntityRepository.delete(id));
 
-    await this.cbcCodeEntityRepository.update(existingEntity.id, item);
-    return await this.cbcCodeEntityRepository.findOne({ where: { id: item.id }});
+    await Promise.all([...updateOrInsertPromises, ...deletePromises]);
+
+    return await this.cbcCodeEntityRepository.find();
   }
 
   async find(): Promise<CbcCodeEntity[]> {

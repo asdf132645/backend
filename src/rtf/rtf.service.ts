@@ -5,7 +5,14 @@ import * as htmlToRtf from 'html-to-rtf';
 export class RTFService {
   convertHTMLToRTF(data: any): any {
     try {
-      return htmlToRtf.convertHtmlToRtf(data);
+      let rtf = htmlToRtf.convertHtmlToRtf(data);
+
+      if (!rtf.includes('\\ansicpg')) {
+        rtf = rtf.replace('{\\rtf1', '{\\rtf1\\ansi\\ansicpg949');
+      }
+
+      rtf = rtf.replaceAll('\\line', '\\par');
+      return rtf;
     } catch (error) {
       console.error('RTF 변환 오류', error);
       return;
