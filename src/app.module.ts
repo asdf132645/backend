@@ -59,6 +59,8 @@ import { SybaseProxyService } from './sybase/sybase.proxy.service';
 import { OracleController } from './oracle/oracle.controller';
 import { OracleProxyService } from './oracle/oracle.proxy.service';
 import GraphQLJSON from 'graphql-type-json';
+import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
+import { Redis } from 'ioredis';
 
 @Module({
   imports: [
@@ -73,6 +75,12 @@ import GraphQLJSON from 'graphql-type-json';
       path: 'api/graphql', // 엔드포인트 경로 지정
       resolvers: { JSON: GraphQLJSON }, // JSON 타입 추가
     }),
+    RedisModule.forRoot({
+      type: 'single', // Redis의 단일 서버 유형을 명시합니다
+      url: 'redis://localhost:6379', // 윈도우 기준 Redis 연결 URL
+      // host: 'redis', // Docker에서 Redis 서비스 이름
+      // port: 6379, // Redis 기본 포트
+    } as RedisModuleOptions),
     HttpModule,
     UserModule,
     CellImgAnalyzedModule,
@@ -103,6 +111,7 @@ import GraphQLJSON from 'graphql-type-json';
     CbcModule,
     CrcModule,
     RTFModule,
+    RedisModule,
   ],
   controllers: [
     AppController,

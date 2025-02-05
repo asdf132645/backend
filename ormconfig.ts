@@ -29,7 +29,7 @@ dotenv.config(); // dotenv 설정 추가
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
   const options: TypeOrmModuleOptions = {
     type: 'mysql',
-    host: '127.0.0.1',
+    host: '192.168.0.43',
     port: 3306,
     username: 'root',
     password: 'uimd5191!',

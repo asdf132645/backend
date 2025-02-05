@@ -20,8 +20,8 @@ async function bootstrap() {
   // CORS 에러 이슈로 프론트 8080 허용
   const corsOptions: CorsOptions = {
     origin: [
+      'http://192.168.0.43:8080',
       'http://192.168.0.131:8080',
-      'http://192.168.0.101:8080',
       'http://127.0.0.1:8080',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -47,12 +47,12 @@ async function bootstrap() {
 
   // MySQL 연결 설정 (관리자 모드로 명령 실행)
   const connection = await mysql.createConnection({
-    host: '127.0.0.1', // MySQL 서버 주소
+    host: '192.168.0.43', // MySQL 서버 주소
     user: 'root', // MySQL 관리자 계정
     password: 'uimd5191!', // MySQL 관리자 비밀번호
   });
 
-  await checkAndStartRedis();
+  // await checkAndStartRedis();
 
   // MySQL 명령 실행: sort_buffer_size 설정
   await connection.query('SET GLOBAL sort_buffer_size = 100*1024*1024;');
