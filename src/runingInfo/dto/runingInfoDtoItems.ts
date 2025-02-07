@@ -133,8 +133,8 @@ export class RuningInfoDtoItems {
   @Field(() => String, { nullable: true })
   hosName?: string;
 
-  @Field(() => AbnormalClassInfo, { nullable: true })
-  abnormalClassInfo?: AbnormalClassInfo;
+  @Field(() => [AbnormalClassInfo], { nullable: true })
+  abnormalClassInfo?: AbnormalClassInfo[];
 
   @Field(() => Boolean, { nullable: true })
   isAllClassesChecked?: boolean;

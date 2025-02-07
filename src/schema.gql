@@ -128,7 +128,7 @@ type RuningInfoEntity {
   cbcAge: String
   img_drive_root_path: String
   hosName: String
-  abnormalClassInfo: AbnormalClassInfo
+  abnormalClassInfo: [AbnormalClassInfo!]
   isAllClassesChecked: Boolean
   slideCondition: SlideCondition
 }
