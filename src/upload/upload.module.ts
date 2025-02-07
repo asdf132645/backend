@@ -6,15 +6,13 @@ import { UploadController } from './upload.controller';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { LoggerService } from '../logger.service';
 import { CombinedModule } from '../combinedProtocol/combined.module';
+import { redisSettings } from '../cache/cache.interceptor';
 
 @Module({
   imports: [
     CombinedModule,
     TypeOrmModule.forFeature([RuningInfoEntity]),
-    RedisModule.forRoot({
-      type: 'single',
-      url: 'redis://localhost:6379',
-    } as RedisModuleOptions),
+    RedisModule.forRoot(redisSettings as RedisModuleOptions),
   ],
   providers: [UploadService, LoggerService],
   controllers: [UploadController],

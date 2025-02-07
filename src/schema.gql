@@ -43,9 +43,14 @@ type RbcInfo {
   pltCount: String
 }
 
-type abnormalClassInfo {
+type AbnormalClassInfo {
   classNm: String
   val: String
+}
+
+type SlideCondition {
+  condition: String
+  desc: String
 }
 
 type WbcInfoAfter {
@@ -123,8 +128,9 @@ type RuningInfoEntity {
   cbcAge: String
   img_drive_root_path: String
   hosName: String
-  abnormalClassInfo: abnormalClassInfo
+  abnormalClassInfo: AbnormalClassInfo
   isAllClassesChecked: Boolean
+  slideCondition: SlideCondition
 }
 
 type Query {
@@ -177,6 +183,7 @@ input UpdateRuningInfoDtoItems {
   hosName: String
   abnormalClassInfo: JSON
   isAllClassesChecked: Boolean
+  slideCondition: JSON
   wbcInfo: JSON
   wbcInfoAfter: JSON
   rbcInfo: JSON

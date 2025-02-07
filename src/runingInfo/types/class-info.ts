@@ -88,12 +88,21 @@ export class RbcInfo {
 }
 
 @ObjectType()
-export class abnormalClassInfo {
+export class AbnormalClassInfo {
   @Field(() => String, { nullable: true })
   classNm?: string;
 
   @Field(() => String, { nullable: true })
   val?: string;
+}
+
+@ObjectType()
+export class SlideCondition {
+  @Field(() => String, { nullable: true })
+  condition?: string;
+
+  @Field(() => String, { nullable: true })
+  desc?: string;
 }
 
 @ObjectType()

@@ -6,6 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as mysql from 'mysql2/promise';
 import { spawn } from 'child_process';
 import * as redis from 'redis';
+import { redisSettings } from './cache/cache.interceptor';
 
 async function bootstrap() {
   const httpApp = await NestFactory.create(AppModule, {
@@ -98,23 +99,28 @@ async function bootstrap() {
 }
 
 const checkAndStartRedis = async () => {
-  const client = redis.createClient();
+  const client = redis.createClient(redisSettings);
+
+  const currentOS = getOS();
 
   client.on('error', async () => {
     console.log('Redis 서버가 실행 중이지 않습니다. Redis를 시작합니다.');
 
-    // Redis 서버 실행 명령 (Windows 환경)
-    const redisPath = '"C:\\Program Files\\Redis\\redis-server.exe"'; // Redis 서버 실행 파일 경로
-    const redisProcess = spawn(redisPath, [], {
-      stdio: 'inherit',
-      shell: true,
-    });
+    if (currentOS === 'Windows') {
+      const redisPath = '"C:\\Program Files\\Redis\\redis-server.exe"'; // Redis 서버 실행 파일 경로
+      const redisProcess = spawn(redisPath, [], {
+        stdio: 'inherit',
+        shell: true,
+      });
 
-    redisProcess.on('close', (code) => {
-      if (code === 0) {
-        console.log('Redis 서버가 성공적으로 시작되었습니다.');
-      }
-    });
+      redisProcess.on('close', (code) => {
+        if (code === 0) {
+          console.log('Redis 서버가 성공적으로 시작되었습니다.');
+        }
+      });
+    } else if (currentOS === 'Linux') {
+      //
+    }
   });
 
   try {
@@ -126,3 +132,12 @@ const checkAndStartRedis = async () => {
 };
 
 bootstrap();
+
+const getOS = () => {
+  const platform = process.platform;
+
+  if (platform.startsWith('win')) return 'Windows';
+  if (platform === 'linux') return 'Linux';
+
+  return 'Unknown OS';
+};

@@ -1,11 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, Index } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, Unique, Index } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import {
   RbcInfo,
-  abnormalClassInfo,
+  AbnormalClassInfo,
   WbcInfoAfter,
   WbcResponse,
   RbcAfterClassInfos,
+  SlideCondition,
 } from './types/class-info'; // 필요에 따라 import 경로 조정
 
 @ObjectType() // GraphQL ObjectType으로 설정
@@ -167,9 +168,13 @@ export class RuningInfoEntity {
 
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column('json') // JSON 데이터 타입으로 설정
-  abnormalClassInfo?: abnormalClassInfo;
+  abnormalClassInfo?: AbnormalClassInfo;
 
   @Field(() => Boolean, { nullable: true })
   @Column({ type: 'boolean', nullable: true })
   isAllClassesChecked?: boolean;
+
+  @Field({ nullable: true })
+  @Column({ type: 'json', nullable: true })
+  slideCondition?: SlideCondition;
 }

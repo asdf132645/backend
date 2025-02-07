@@ -481,7 +481,9 @@ export class RuningInfoService {
         img_drive_root_path,
         rbcInfoAfter,
         wbcMemo,
-        isAllClassesChecked
+        isAllClassesChecked,
+        abnormalClassInfo,
+        slideCondition
       FROM 
         runing_info_entity
       WHERE 
@@ -542,7 +544,9 @@ export class RuningInfoService {
         img_drive_root_path,
         rbcInfoAfter,
         wbcMemo,
-        isAllClassesChecked
+        isAllClassesChecked,
+        abnormalClassInfo,
+        slideCondition
       FROM 
         runing_info_entity
       WHERE 
