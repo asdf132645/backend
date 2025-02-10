@@ -99,7 +99,7 @@ export class CombinedService
     this.wss.emit('multiViewer', client.conn.remoteAddress);
 
     client.on('exit', () => {
-    //
+      //
     });
 
     client.on('ping', () => {
