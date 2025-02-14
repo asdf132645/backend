@@ -201,7 +201,6 @@ export class CombinedService
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
       // this.setupTcpServer('192.168.0.131', 11235);
-      this.restartWebSocket();
       this.restartTcpConnection();
     }
   }
@@ -371,35 +370,33 @@ export class CombinedService
     };
     this.wss.emit('downloadUploadFinished', obj);
   }
-  restartTcpConnection() {
+
+  private async closeTcpConnection() {
     if (this.connectedClient) {
-      this.logger.warn('⚠️ 기존 TCP 연결을 종료하고 다시 연결을 시도');
-      this.connectedClient.end(); // 안전하게 종료 요청
-      this.connectedClient.destroy(); // 강제 종료
-      this.connectedClient = null;
+      this.logger.warn('🔄 기존 TCP 연결을 안전하게 종료 중...');
+
+      return new Promise<void>((resolve) => {
+        this.connectedClient.end(() => {
+          this.logger.warn('✅ TCP 연결 종료 완료.');
+          this.connectedClient.destroy();
+          this.connectedClient = null;
+          resolve();
+        });
+      });
     }
+  }
+
+  private async restartTcpConnection() {
+    if (this.connectedClient && !this.connectedClient.destroyed) {
+      this.logger.warn('⚠️ 이미 활성화된 TCP 연결이 있음. 재연결 중단.');
+      return;
+    }
+
+    await this.closeTcpConnection();
 
     setTimeout(() => {
       this.logger.warn('🔄 TCP 서버 재연결을 시도합니다.');
       this.setupTcpServer('192.168.0.131', 11235);
-    }, 500);
-  }
-
-  restartWebSocket() {
-    this.logger.warn('⚠️ 기존 웹소켓 연결을 종료하고 다시 시작');
-
-    // 모든 클라이언트 연결 종료
-    this.clients.forEach((client) => {
-      client.disconnect(true); // 강제 종료
-    });
-
-    this.clients = []; // 클라이언트 목록 초기화
-
-    setTimeout(() => {
-      this.logger.warn('🔄 웹소켓 서버 재시작');
-      this.wss.close(() => {
-        this.afterInit(this.wss); // 웹소켓 서버 재초기화
-      });
-    }, 500); // 1초 후 재시작
+    }, 1000); // 1초 대기 후 재연결
   }
 }
