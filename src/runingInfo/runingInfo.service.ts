@@ -193,7 +193,9 @@ export class RuningInfoService {
       ? `${endDay.getFullYear()}${(endDay.getMonth() + 1).toString().padStart(2, '0')}${endDay.getDate().toString().padStart(2, '0')}235959999`
       : undefined;
 
-    if (startFormatted || endFormatted) {
+    const hasTitles = titles && titles.length > 0;
+
+    if (!hasTitles && (startFormatted || endFormatted)) {
       queryBuilder.andWhere(
         startFormatted && endFormatted
           ? 'runInfo.analyzedDttm BETWEEN :startDay AND :endDay'
@@ -244,7 +246,7 @@ export class RuningInfoService {
       });
     }
 
-    if (titles && titles.length > 0) {
+    if (hasTitles) {
       const orConditions = titles
         .map(
           (title) =>
