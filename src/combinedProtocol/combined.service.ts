@@ -99,7 +99,7 @@ export class CombinedService
     this.wss.emit('multiViewer', client.conn.remoteAddress);
 
     client.on('exit', () => {
-    //
+      //
     });
 
     client.on('ping', () => {
@@ -135,12 +135,12 @@ export class CombinedService
       }
     });
 
-    client.on('state', (state: any) => {
+    client.on('state', () => {
       // console.log('state');
       try {
         if (this.wss) {
           // console.log('state', state);
-          this.wss.emit('stateVal', state);
+          this.wss.emit('stateVal', clientIpAddress);
         }
       } catch (e) {
         this.logger.error(
