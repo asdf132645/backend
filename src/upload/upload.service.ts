@@ -9,7 +9,7 @@ import { LoggerService } from '../logger.service';
 import { exec, spawn } from 'child_process';
 import * as os from 'os';
 import { CombinedService } from '../combinedProtocol/combined.service';
-import axios from "axios";
+import axios from 'axios';
 
 const userInfo = os.userInfo();
 
@@ -161,39 +161,7 @@ export class UploadService {
     const itemsToSave = items
       .filter((item) => !existingSlotIdSet.has(item?.slotId))
       .map((item) => ({
-        slotNo: item.slotNo,
-        traySlot: item.traySlot,
-        testType: item.testType,
-        barcodeNo: item.barcodeNo,
-        patientId: item.patientId,
-        patientNm: item.patientNm,
-        gender: item.gender,
-        birthDay: item.birthDay,
-        wbcCount: item.wbcCount,
-        slotId: item.slotId,
-        orderDttm: item.orderDttm,
-        analyzedDttm: item.analyzedDttm,
-        tactTime: item.tactTime,
-        isNormal: item.isNormal,
-        cassetId: item.cassetId,
-        wbcMemo: item.wbcMemo,
-        rbcMemo: item.rbcMemo,
-        wbcInfo: item.wbcInfo,
-        wbcInfoAfter: item.wbcInfoAfter,
-        rbcInfo: item.rbcInfo,
-        rbcInfoAfter: item.rbcInfoAfter,
-        rbcInfoPosAfter: item.rbcInfoPosAfter,
-        maxWbcCount: item.maxWbcCount,
-        bf_lowPowerPath: item.bf_lowPowerPath,
-        submitState: item.submitState,
-        submitOfDate: item.submitOfDate,
-        submitUserId: item.submitUserId,
-        isNsNbIntegration: item.isNsNbIntegration,
-        pcIp: item.pcIp,
-        cbcPatientNo: item.cbcPatientNo,
-        cbcPatientNm: item.cbcPatientNm,
-        cbcSex: item.cbcSex,
-        cbcAge: item.cbcAge,
+        ...item,
         img_drive_root_path: null,
         lock_status: 0,
       }));
@@ -280,7 +248,11 @@ export class UploadService {
     const convertedDestination = destination.replaceAll('\\', '/');
 
     return new Promise((resolve, reject) => {
-      const result = spawn(`${this.pythonScriptPath}`, [convertedSource, convertedDestination, uploadType]);
+      const result = spawn(`${this.pythonScriptPath}`, [
+        convertedSource,
+        convertedDestination,
+        uploadType,
+      ]);
 
       // 표준 출력 (stdout) 로그 출력
       result.stdout.on('data', (data) => {
@@ -311,7 +283,7 @@ export class UploadService {
     originUploadPath: string,
     destinationUploadPath: string,
     uploadType: 'copy' | 'move',
-    apiUrl: string
+    apiUrl: string,
   ) => {
     const availableFileNames = [];
     const availableIds = [];
@@ -341,7 +313,9 @@ export class UploadService {
       return { source: sourcePath, destination: targetFolderPath, uploadType };
     });
 
-    const promises = queue.map(async (task) => await this.runPythonScript(task, uploadType));
+    const promises = queue.map(
+      async (task) => await this.runPythonScript(task, uploadType),
+    );
     await Promise.all(promises);
     // await this.runFileExpressServer(queue, uploadType, apiUrl);
 

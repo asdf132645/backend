@@ -9,7 +9,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as os from 'os';
-import axios from "axios";
 import { LoggerService } from '../logger.service';
 import { CombinedService } from '../combinedProtocol/combined.service';
 
@@ -77,8 +76,11 @@ export class DownloadService {
     const convertedDestination = destination.replaceAll('\\', '/');
 
     return new Promise((resolve, reject) => {
-      const result = spawn(`${ this.pythonScriptPath }`,
-          [ convertedSource, convertedDestination, downloadType]);
+      const result = spawn(`${this.pythonScriptPath}`, [
+        convertedSource,
+        convertedDestination,
+        downloadType,
+      ]);
 
       // 표준 출력 (stdout) 로그 출력
       result.stdout.on('data', (data) => {
@@ -250,7 +252,6 @@ export class DownloadService {
       async (task) => await this.runPythonScript(task, downloadType),
     );
     await Promise.all(promises);
-
 
     if (downloadType === 'move') {
       await this.updateImgDriveRootPath(

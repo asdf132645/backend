@@ -144,7 +144,7 @@ export class UpdateRuningInfoDtoItems {
 
   @IsOptional()
   @Field(() => GraphQLJSON, { nullable: true }) // JSON 타입으로 정의
-  abnormalClassInfo?: any; // 실제 JSON 객체로 다루기
+  abnormalClassInfo?: string[]; // 실제 JSON 객체로 다루기
 
   @IsOptional()
   @Field(() => Boolean, { nullable: true })

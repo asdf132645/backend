@@ -166,7 +166,7 @@ export class RuningInfoEntity {
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
   hosName?: string;
 
-  @Field(() => [AbnormalClassInfo], { nullable: true }) // nullable 옵션 추가
+  @Field(() => [AbnormalClassInfo], { nullable: 'itemsAndList' }) // nullable 옵션 추가
   @Column({ type: 'json', nullable: true }) // JSON 데이터 타입으로 설정
   abnormalClassInfo?: AbnormalClassInfo[];
 
