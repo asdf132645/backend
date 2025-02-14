@@ -247,17 +247,28 @@ export class RuningInfoService {
     if (titles && titles.length > 0) {
       const orConditions = titles
         .map(
-          (title, index) =>
-            `JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :title${index}, NULL, '$[*].title') IS NOT NULL`,
+          (title) =>
+            `(
+        JSON_SEARCH(runInfo.wbcInfoAfter, 'one', '${title}', NULL, '$[*].title') IS NOT NULL 
+         AND CAST(
+           JSON_UNQUOTE(
+               JSON_EXTRACT(
+                   runInfo.wbcInfoAfter,
+                   CONCAT('$[',
+                       REGEXP_REPLACE(
+                           JSON_UNQUOTE(JSON_SEARCH(runInfo.wbcInfoAfter, 'one', '${title}', NULL, '$[*].title')),
+                           '[^0-9]', ''
+                       ),
+                   '].count')
+               )
+         ) AS UNSIGNED
+      ) > 0
+        )`,
         )
         .join(' OR ');
 
-      const params = titles.reduce((acc, title, index) => {
-        acc[`title${index}`] = title;
-        return acc;
-      }, {});
-
-      queryBuilder.andWhere(`(${orConditions})`, params);
+      // 조건에 맞는 데이터를 필터링하는 부분
+      queryBuilder.andWhere(`(${orConditions})`);
     }
 
     // Execute paginated query
