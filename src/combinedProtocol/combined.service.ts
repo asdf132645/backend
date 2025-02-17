@@ -98,10 +98,6 @@ export class CombinedService
     this.serverIp = await isServerRunningLocally();
     this.wss.emit('multiViewer', client.conn.remoteAddress);
 
-    client.on('exit', () => {
-      //
-    });
-
     client.on('ping', () => {
       client.emit('pong');
       this.logger.ping(
@@ -136,10 +132,8 @@ export class CombinedService
     });
 
     client.on('state', (state: any) => {
-      // console.log('state');
       try {
         if (this.wss) {
-          // console.log('state', state);
           this.wss.emit('stateVal', state);
         }
       } catch (e) {
@@ -183,10 +177,6 @@ export class CombinedService
     });
 
     client.on('disconnect', async () => {
-      console.log(clientIpAddress);
-      // if (!clientIpAddress.includes('192.168.0.131')) {
-      //   await this.browserService.closeNodeProcesses();
-      // }
       await this.runingInfoService.redisAllClear();
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });
@@ -200,8 +190,7 @@ export class CombinedService
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
-      // this.setupTcpServer('192.168.0.131', 11235);
-      this.restartTcpConnection();
+      this.setupTcpServer('192.168.0.131', 11235);
     }
   }
 
@@ -303,7 +292,7 @@ export class CombinedService
 
         newClient.on('timeout', () => {
           this.logger.error('🚨 코어 TCP 웹 백엔드 연결 타임아웃');
-          this.handleReconnectFailure(newClient);
+          // this.handleReconnectFailure(newClient);
         });
 
         newClient.on('data', (chunk) => {
@@ -319,7 +308,7 @@ export class CombinedService
         newClient.on('end', () => {
           this.logger.warn('코어 TCP 클라이언트 연결 종료');
           this.sendDataToWebSocketClients({ err: true });
-          this.handleReconnectFailure(newClient);
+          // this.handleReconnectFailure(newClient);
         });
 
         newClient.on('error', (err: any) => {
@@ -327,7 +316,9 @@ export class CombinedService
             `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류 - ${err}`,
           );
           this.sendDataToWebSocketClients({ err: true });
-          this.handleReconnectFailure(newClient);
+          if (this.connectedClient && !this.connectedClient.destroyed) {
+            this.handleReconnectFailure(newClient);
+          }
         });
       } else {
         this.logger.warn(
@@ -369,34 +360,5 @@ export class CombinedService
       isFinished: true,
     };
     this.wss.emit('downloadUploadFinished', obj);
-  }
-
-  private async closeTcpConnection() {
-    if (this.connectedClient) {
-      this.logger.warn('🔄 기존 TCP 연결을 안전하게 종료 중...');
-
-      return new Promise<void>((resolve) => {
-        this.connectedClient.end(() => {
-          this.logger.warn('✅ TCP 연결 종료 완료.');
-          this.connectedClient.destroy();
-          this.connectedClient = null;
-          resolve();
-        });
-      });
-    }
-  }
-
-  private async restartTcpConnection() {
-    if (this.connectedClient && !this.connectedClient.destroyed) {
-      this.logger.warn('⚠️ 이미 활성화된 TCP 연결이 있음. 재연결 중단.');
-      return;
-    }
-
-    await this.closeTcpConnection();
-
-    setTimeout(() => {
-      this.logger.warn('🔄 TCP 서버 재연결을 시도합니다.');
-      this.setupTcpServer('192.168.0.131', 11235);
-    }, 1000); // 1초 대기 후 재연결
   }
 }
