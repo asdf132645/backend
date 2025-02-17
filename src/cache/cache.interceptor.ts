@@ -9,6 +9,11 @@ import { tap } from 'rxjs/operators';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 
+export const redisSettings = {
+  type: 'single',
+  url: 'redis://localhost:6379',
+};
+
 @Injectable()
 export class RedisCacheInterceptor implements NestInterceptor {
   constructor(@InjectRedis() private readonly redis: Redis) {}

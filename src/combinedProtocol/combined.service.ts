@@ -131,10 +131,12 @@ export class CombinedService
       }
     });
 
-    client.on('state', (state: any) => {
+    client.on('state', () => {
+      // console.log('state');
       try {
         if (this.wss) {
-          this.wss.emit('stateVal', state);
+          // console.log('state', state);
+          this.wss.emit('stateVal', clientIpAddress);
         }
       } catch (e) {
         this.logger.error(

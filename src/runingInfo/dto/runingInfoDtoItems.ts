@@ -8,9 +8,10 @@ import {
 import { Type } from 'class-transformer';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
-  abnormalClassInfo,
+  AbnormalClassInfo,
   RbcAfterClassInfos,
   RbcInfo,
+  SlideCondition,
   WbcInfoAfter,
   WbcResponse,
 } from '../types/class-info';
@@ -132,11 +133,14 @@ export class RuningInfoDtoItems {
   @Field(() => String, { nullable: true })
   hosName?: string;
 
-  @Field(() => abnormalClassInfo, { nullable: true })
-  abnormalClassInfo?: abnormalClassInfo;
+  @Field(() => [AbnormalClassInfo], { nullable: 'itemsAndList' })
+  abnormalClassInfo?: AbnormalClassInfo[];
 
   @Field(() => Boolean, { nullable: true })
   isAllClassesChecked?: boolean;
+
+  @Field(() => SlideCondition, { nullable: true })
+  slideCondition?: SlideCondition;
 }
 
 @InputType()

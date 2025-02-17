@@ -6,6 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as mysql from 'mysql2/promise';
 import { spawn } from 'child_process';
 import * as redis from 'redis';
+import { redisSettings } from './cache/cache.interceptor';
 
 async function bootstrap() {
   const httpApp = await NestFactory.create(AppModule, {
@@ -52,7 +53,7 @@ async function bootstrap() {
     password: 'uimd5191!', // MySQL 관리자 비밀번호
   });
 
-  // await checkAndStartRedis();
+  await checkAndStartRedis();
 
   // MySQL 명령 실행: sort_buffer_size 설정
   await connection.query('SET GLOBAL sort_buffer_size = 100*1024*1024;');
@@ -97,4 +98,46 @@ async function bootstrap() {
   await httpApp.listen(3002);
 }
 
+const checkAndStartRedis = async () => {
+  const client = redis.createClient(redisSettings);
+
+  const currentOS = getOS();
+
+  client.on('error', async () => {
+    console.log('Redis 서버가 실행 중이지 않습니다. Redis를 시작합니다.');
+
+    if (currentOS === 'Windows') {
+      const redisPath = '"C:\\Program Files\\Redis\\redis-server.exe"'; // Redis 서버 실행 파일 경로
+      const redisProcess = spawn(redisPath, [], {
+        stdio: 'inherit',
+        shell: true,
+      });
+
+      redisProcess.on('close', (code) => {
+        if (code === 0) {
+          console.log('Redis 서버가 성공적으로 시작되었습니다.');
+        }
+      });
+    } else if (currentOS === 'Linux') {
+      //
+    }
+  });
+
+  try {
+    await client.connect(); // Redis 서버 연결 시도
+    console.log('Redis 서버에 연결되었습니다.');
+  } catch (error) {
+    console.log('Redis 연결 실패', error);
+  }
+};
+
 bootstrap();
+
+const getOS = () => {
+  const platform = process.platform;
+
+  if (platform.startsWith('win')) return 'Windows';
+  if (platform === 'linux') return 'Linux';
+
+  return 'Unknown OS';
+};

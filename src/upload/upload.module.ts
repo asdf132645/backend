@@ -5,6 +5,7 @@ import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
 import { UploadController } from './upload.controller';
 import { LoggerService } from '../logger.service';
 import { CombinedModule } from '../combinedProtocol/combined.module';
+import { redisSettings } from '../cache/cache.interceptor';
 
 @Module({
   imports: [CombinedModule, TypeOrmModule.forFeature([RuningInfoEntity])],

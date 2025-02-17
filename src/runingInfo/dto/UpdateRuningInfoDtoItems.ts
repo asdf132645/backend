@@ -1,10 +1,11 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsInt, IsOptional } from 'class-validator';
 import {
-  RbcAfterClassInfos, RbcInfo,
+  RbcAfterClassInfos,
+  RbcInfo, SlideCondition,
   WbcInfoAfter,
-  WbcResponse
-} from "../types/class-info";
+  WbcResponse,
+} from '../types/class-info';
 import GraphQLJSON from 'graphql-type-json';
 
 @InputType()
@@ -143,11 +144,15 @@ export class UpdateRuningInfoDtoItems {
 
   @IsOptional()
   @Field(() => GraphQLJSON, { nullable: true }) // JSON 타입으로 정의
-  abnormalClassInfo?: any; // 실제 JSON 객체로 다루기
+  abnormalClassInfo?: string[]; // 실제 JSON 객체로 다루기
 
   @IsOptional()
   @Field(() => Boolean, { nullable: true })
   isAllClassesChecked?: boolean;
+
+  @IsOptional()
+  @Field(() => GraphQLJSON, { nullable: true })
+  slideCondition?: SlideCondition;
 
   @IsOptional()
   @Field(() => GraphQLJSON, { nullable: true })
