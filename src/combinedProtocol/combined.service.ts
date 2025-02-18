@@ -110,7 +110,7 @@ export class CombinedService
       try {
         if (this.wss) {
           delete message.payload?.anyWay;
-          if (!client.conn.remoteAddress.includes('192.168.0.131')) {
+          if (!client.conn.remoteAddress.includes('192.168.0.43')) {
             this.logger.log(
               `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
             );

@@ -60,6 +60,7 @@ import { OracleController } from './oracle/oracle.controller';
 import { OracleProxyService } from './oracle/oracle.proxy.service';
 import GraphQLJSON from 'graphql-type-json';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
+import { Redis } from 'ioredis';
 
 @Module({
   imports: [
@@ -110,6 +111,7 @@ import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
     CbcModule,
     CrcModule,
     RTFModule,
+    RedisModule,
   ],
   controllers: [
     AppController,

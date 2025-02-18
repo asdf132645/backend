@@ -49,7 +49,7 @@ async function bootstrap() {
 
   // MySQL 연결 설정 (관리자 모드로 명령 실행)
   const connection = await mysql.createConnection({
-    host: '127.0.0.1', // MySQL 서버 주소
+    host: '192.168.0.43', // MySQL 서버 주소
     user: 'root', // MySQL 관리자 계정
     password: 'uimd5191!', // MySQL 관리자 비밀번호
   });
