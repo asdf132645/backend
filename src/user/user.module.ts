@@ -4,14 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
-import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
-import { redisSettings } from '../cache/cache.interceptor';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    RedisModule.forRoot(redisSettings as RedisModuleOptions),
-  ],
+  imports: [TypeOrmModule.forFeature([User])],
   controllers: [UserController],
   providers: [UserService],
 })

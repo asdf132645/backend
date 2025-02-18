@@ -4,15 +4,10 @@ import { RuningInfoEntity } from './runingInfo.entity';
 import { RuningInfoService } from './runingInfo.service';
 import { RuningInfoController } from './runingInfo.controller';
 import { LoggerService } from '../logger.service';
-import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { RunningInfoResolver } from './runningInfo.resolver';
-import { redisSettings } from '../cache/cache.interceptor';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([RuningInfoEntity]),
-    RedisModule.forRoot(redisSettings as RedisModuleOptions),
-  ],
+  imports: [TypeOrmModule.forFeature([RuningInfoEntity])],
   providers: [RuningInfoService, RunningInfoResolver, LoggerService],
   exports: [RuningInfoService, RunningInfoResolver],
   controllers: [RuningInfoController],
