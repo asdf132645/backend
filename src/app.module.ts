@@ -76,7 +76,7 @@ import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
     }),
     RedisModule.forRoot({
       type: 'single', // Redis의 단일 서버 유형을 명시합니다
-      url: 'redis://localhost:6379', // 윈도우 기준 Redis 연결 URL
+      url: 'redis://192.168.0.43:6379', // 윈도우 기준 Redis 연결 URL
       // host: 'redis', // Docker에서 Redis 서비스 이름
       // port: 6379, // Redis 기본 포트
     } as RedisModuleOptions),

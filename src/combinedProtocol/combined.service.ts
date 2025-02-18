@@ -192,7 +192,7 @@ export class CombinedService
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
-      this.setupTcpServer('192.168.0.131', 11235);
+      this.setupTcpServer('192.168.0.43', 11235);
     }
   }
 
@@ -343,7 +343,7 @@ export class CombinedService
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       setTimeout(
-        () => this.setupTcpServer('192.168.0.131', 11235),
+        () => this.setupTcpServer('192.168.0.43', 11235),
         this.reconnectDelay,
       );
       // 연결 실패 후 즉시 재시도를 방지 - 끊기고 나서 바로 재연결 시도하면 여러가지 문제발생 할 수 있어서 바로 재시작 안함
