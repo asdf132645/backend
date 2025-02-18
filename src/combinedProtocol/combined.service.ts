@@ -284,24 +284,23 @@ export class CombinedService
   setupTcpServer(newAddress: string, newPort: number): void {
     const connectClient = () => {
       if (!this.connectedClient || this.connectedClient.destroyed) {
-        const newClient = new net.Socket();
+        this.connectedClient = new net.Socket();
 
-        newClient.setTimeout(10000); // 10초 동안 클라이언트 소켓이 데이터를 송수신하지 않으면 timeout 이벤트가 발생하도록 설정
+        this.connectedClient.setTimeout(10000); // 10초 동안 클라이언트 소켓이 데이터를 송수신하지 않으면 timeout 이벤트가 발생하도록 설정
 
-        newClient.connect(newPort, newAddress, () => {
+        this.connectedClient.connect(newPort, newAddress, () => {
           this.logger.warn('코어 TCP 웹 백엔드 연결 성공');
-          this.connectedClient = newClient;
           this.wss.emit('isTcpConnected', true);
           this.reconnectAttempts = 0; // 재연결 시도 횟수 초기화
           this.notRes = false;
         });
 
-        newClient.on('timeout', () => {
+        this.connectedClient.on('timeout', () => {
           this.logger.error('🚨 코어 TCP 웹 백엔드 연결 타임아웃');
-          this.handleReconnectFailure(newClient);
+          this.handleReconnectFailure(this.connectedClient);
         });
 
-        newClient.on('data', (chunk) => {
+        this.connectedClient.on('data', (chunk) => {
           this.logger.warn(`코어 TCP 서버로부터 데이터 수신 성공`); // 추가된 로깅
           if (this.wss) {
             this.sendDataToWebSocketClients(chunk);
@@ -311,18 +310,18 @@ export class CombinedService
           }
         });
 
-        newClient.on('end', () => {
+        this.connectedClient.on('end', () => {
           this.logger.warn('코어 TCP 클라이언트 연결 종료');
           this.sendDataToWebSocketClients({ err: true });
-          this.handleReconnectFailure(newClient);
+          this.handleReconnectFailure(this.connectedClient);
         });
 
-        newClient.on('error', (err: any) => {
+        this.connectedClient.on('error', (err: any) => {
           this.logger.error(
             `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류 - ${err}`,
           );
           this.sendDataToWebSocketClients({ err: true });
-          this.handleReconnectFailure(newClient);
+          this.handleReconnectFailure(this.connectedClient);
         });
       } else {
         this.logger.warn(
