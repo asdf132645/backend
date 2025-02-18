@@ -37,17 +37,19 @@ export class NormalRangeService {
 
   private async updateItem(item: any): Promise<NormalRange> {
     const existingNormalRange = await this.normalRangeRepository.findOne({
-      where: { id: item.id },
+      where: { classId: item.classId },
     });
 
     if (existingNormalRange) {
       await this.normalRangeRepository.update(existingNormalRange.id, item);
       return await this.normalRangeRepository.findOne({
-        where: { id: item.id },
+        where: { classId: item.classId },
       });
+    } else {
+      const normalRange = this.normalRangeRepository.create({ ...item });
+      const createdItem = await this.normalRangeRepository.save(normalRange);
+      return createdItem[0];
     }
-
-    return null;
   }
 
   async find(): Promise<NormalRange[]> {
