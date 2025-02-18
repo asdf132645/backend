@@ -54,7 +54,7 @@ async function bootstrap() {
     password: 'uimd5191!', // MySQL 관리자 비밀번호
   });
 
-  await checkAndStartRedis();
+  // await checkAndStartRedis();
 
   // MySQL 명령 실행: sort_buffer_size 설정
   await connection.query('SET GLOBAL sort_buffer_size = 100*1024*1024;');
