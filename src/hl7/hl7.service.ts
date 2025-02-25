@@ -9,6 +9,7 @@ export class HL7Service {
     const parser = new hl7.Parser();
     return parser.parse(data.toString('utf8'));
   }
+
   generateHL7MessageWithCustomData(
     sendingApp: string,
     sendingFacility: string,
@@ -110,14 +111,21 @@ export class HL7Service {
     processingId: string,
     hl7VersionId: string,
     wbcInfo: any[],
+    rbcInfo: any[],
     result: any[],
+    rbcFfiltering: any[],
+    pidData: any, // PID 데이터 매개변수 추가
   ): string {
     // MSH 세그먼트 생성
     const mshSegment = `MSH|^~\\&|${sendingApp}|${sendingFacility}|${receivingApp}|${receivingFacility}|${dateTime}||${messageType.join('^')}|${messageControlId}|${processingId}|${hl7VersionId}\r`;
 
     const segments = [mshSegment];
     let seq = 0;
-
+    // PID 세그먼트 추가
+    if (pidData) {
+      const pidSegment = `PID|||${pidData.patientId}||${pidData.patientName}||||||||||||||||||||\r`;
+      segments.push(pidSegment);
+    }
     if (result === undefined) {
       return '';
     }
@@ -131,6 +139,28 @@ export class HL7Service {
             const obxSegmentCount = `OBX|${seq++}|NM|${lisCode.LIS_CD}||${wbcItem.count}|||N|||P\r`;
             const obxSegmentPercent = `OBX|${seq++}|NM|${lisCode.LIS_CD}%||${wbcItem.percent}|%|N|||P\r`;
             segments.push(obxSegmentCount, obxSegmentPercent);
+          }
+        });
+      }
+    });
+
+    if (rbcFfiltering === undefined) {
+      return '';
+    }
+    rbcFfiltering.forEach((lisCode) => {
+      if (lisCode.LIS_CD !== '') {
+        rbcInfo.forEach((rbcItem) => {
+          if (rbcItem.categoryNm === lisCode.CATEGORY_NM) {
+            rbcItem.classInfo.forEach((item) => {
+              if (
+                item.classId === lisCode.IA_CLASS_CD &&
+                (Number(item.percent) > 0 || Number(item.degree) > 0)
+              ) {
+                const obxSegmentCount = `OBX|${seq++}|NM|${lisCode.LIS_CD}||${item.degree}|||N|||P\r`;
+                const obxSegmentPercent = `OBX|${seq++}|NM|${lisCode.LIS_CD}%||${item.percent}|%|N|||P\r`;
+                segments.push(obxSegmentCount, obxSegmentPercent);
+              }
+            });
           }
         });
       }

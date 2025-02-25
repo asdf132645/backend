@@ -24,7 +24,10 @@ export class HL7Controller {
       requestBody.processingId,
       requestBody.hl7VersionId,
       requestBody.wbcInfo,
+      requestBody.rbcInfo,
       requestBody.result,
+      requestBody.rbcFfiltering,
+      requestBody.pidData, // PID 데이터 추가
     );
     return hl7Message;
   }
