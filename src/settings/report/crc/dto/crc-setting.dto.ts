@@ -19,4 +19,5 @@ export class UpdateCrcSettingDto {
   crcContent: string;
   crcCode: string;
   crcCodeMatching: string;
+  cbcCode: string;
 }

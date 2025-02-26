@@ -24,6 +24,7 @@ import { CrcOption } from './src/settings/report/crc/entities/crc-option.entity'
 import { CrcRecommendationEntity } from './src/settings/report/crc/entities/crc_reco.entity';
 import { CrcCommentEntity } from './src/settings/report/crc/entities/crc-comment.entity';
 import { CrcSaveDataEntity } from './src/settings/report/crc/entities/crc_save_data.entity';
+import { AutoCbc } from "./src/settings/report/autoCbcMatching/autoCbc.entity";
 dotenv.config(); // dotenv 설정 추가
 
 export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
@@ -62,6 +63,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       CrcRecommendationEntity,
       CrcCommentEntity,
       CrcSaveDataEntity,
+      AutoCbc,
     ],
     extra: {
       connectionLimit: 20, // 커넥션 풀 크기 설정

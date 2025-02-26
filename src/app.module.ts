@@ -59,6 +59,7 @@ import { SybaseProxyService } from './sybase/sybase.proxy.service';
 import { OracleController } from './oracle/oracle.controller';
 import { OracleProxyService } from './oracle/oracle.proxy.service';
 import GraphQLJSON from 'graphql-type-json';
+import { AutoCbcModule } from './settings/report/autoCbcMatching/autoCbc.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import GraphQLJSON from 'graphql-type-json';
     CbcModule,
     CrcModule,
     RTFModule,
+    AutoCbcModule,
   ],
   controllers: [
     AppController,
